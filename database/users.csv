@@ -1,9 +1,0 @@
-id,email,password,role,created_at,assigned_location_id
-3,thavireak27@gmail.com,google,user,2025-12-20 19:07:38.331812,
-4,vireak@gmail.com,$2b$10$qS8E9YP57716o0c9QwD9JuQMz2a/QQR4rik32d8LQwSVgnNGOCBGa,user,2025-12-20 19:26:42.76743,
-2,account@gmail.com,$2b$10$NznM.op..87keL2AwtdRr.9/erdiG52b2uzz/bju.Icml8zeBSlFK,manager,2025-12-20 18:41:43.033534,
-5,local1@gmail.com,$2b$10$1JcgX6cM8NcSQXAXd5ByM.EW1QhBcaAg7mpMV6O9E1/4loVTuTaRy,store_manager,2025-12-22 14:19:03.027452,1
-6,local2@gmail.com,$2b$10$69iGfNBm3AvQv9wcjsRayuqw7LFNhyJM5qjGVKuh10JEfjUL0oBYa,store_manager,2025-12-22 14:19:17.471243,2
-9,staff1@gmail.com,$2b$10$ozpCu2U8S3O4DqwMVdbF7.lMjCVlc2R1OKdku.R62X49auSsIbI2i,staff,2025-12-22 15:09:06.902121,1
-10,staff2@gmail.com,$2b$10$T8Qg3utz1DBy6/rhZYwiPuBBpD29FvkFPVDDrUYUp4f5jtVKo1nL6,staff,2025-12-22 15:09:16.893167,2
-11,vireak2@gmail.com,$2b$10$sS1LhZMVTY.hpzmIwx9iFuN0t7gKhRRbZFXYh6U1co/vn.xg4w8AO,user,2025-12-23 11:08:33.113433,
