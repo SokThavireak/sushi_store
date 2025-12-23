@@ -1,0 +1,63 @@
+<div class="max-w-4xl mx-auto px-6 mt-32 mb-20">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">My Order History</h1>
+
+        <% if (orders.length === 0) { %>
+            <div class="bg-white p-12 rounded-xl text-center shadow-sm">
+                <p class="text-gray-500">No orders found.</p>
+                <a href="/menu" class="text-orange-600 font-bold hover:underline mt-2 block">Order something?</a>
+            </div>
+        <% } else { %>
+            <div class="space-y-6">
+                <% orders.forEach(order => { %>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
+                        
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                            <div>
+                                <span class="font-mono text-sm text-gray-400">#<%= order.id %></span>
+                                <h3 class="font-bold text-lg"><%= new Date(order.created_at).toLocaleDateString() %></h3>
+                            </div>
+                            
+                            <div>
+                                <% if(order.status === 'Cancel Requested' || order.status === 'Refund Requested') { %>
+                                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold animate-pulse">
+                                        <i class="fa-solid fa-clock-rotate-left mr-1"></i> Request Pending
+                                    </span>
+                                <% } else if(order.status === 'Completed') { %>
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Completed</span>
+                                <% } else if(order.status === 'Cancelled' || order.status === 'Refunded') { %>
+                                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold"><%= order.status %></span>
+                                <% } else { %>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold"><%= order.status %></span>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-end border-t pt-4">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase font-bold">Total</p>
+                                <p class="text-xl font-bold text-gray-900"><%= Number(order.total_price).toFixed(2) %> ֏</p>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <% if (order.status === 'Pending') { %>
+                                    <form action="/orders/request-cancel/<%= order.id %>" method="POST" onsubmit="return confirm('Request to cancel this order?');">
+                                        <button class="px-4 py-2 bg-red-50 text-red-600 text-sm font-bold rounded-lg hover:bg-red-100 transition">
+                                            Request Cancel
+                                        </button>
+                                    </form>
+                                <% } %>
+
+                                <% if (order.status === 'Completed') { %>
+                                    <form action="/orders/request-refund/<%= order.id %>" method="POST" onsubmit="return confirm('Request a refund for this order?');">
+                                        <button class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-200 transition">
+                                            Request Refund
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>

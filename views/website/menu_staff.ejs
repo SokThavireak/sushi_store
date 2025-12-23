@@ -1,0 +1,76 @@
+<div class="max-w-7xl mx-auto px-6 mt-32">
+    <div class="bg-orange-500 text-white p-4 rounded-xl mb-8 flex justify-between items-center shadow-lg">
+        <h1 class="text-2xl font-bold"> MENU</h1>
+        <div class="text-orange-100 text-sm">
+            </div>
+    </div>
+
+    <div class="mb-10 flex justify-center">
+        <div class="relative w-full max-w-4xl group">
+            <input type="text" id="staff-search" onkeyup="filterStaffMenu()" placeholder="Search Item Code or Name..." class="w-full pl-14 pr-8 py-4 rounded-lg border border-gray-200 bg-white shadow-sm text-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <div class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 text-xl"><i class="fa-solid fa-magnifying-glass"></i></div>
+        </div>
+    </div>
+
+    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+        <% categories.forEach((category) => { %>
+            <% let categoryProducts = category.name === 'Most Sales' ? products.filter(p => p.is_best_seller) : products.filter(p => p.category === category.name); %>
+            <% if (categoryProducts.length > 0) { %>
+                <section class="mb-12">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-2"><%= category.name %></h2>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <% categoryProducts.forEach(product => { %>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all overflow-hidden product-card group">
+                                <div class="h-32 w-full relative">
+                                    <img src="<%= product.image_url || 'https://via.placeholder.com/150' %>" class="w-full h-full object-cover" />
+                                    <button onclick="addToCart(<%= product.id %>)" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-all cursor-pointer">
+                                        <i class="fa-solid fa-plus text-3xl"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="p-3">
+                                    <h3 class="font-bold text-gray-800 text-sm truncate product-name"><%= product.name %></h3>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-indigo-600 font-bold text-sm"><%= product.price %> ֏</span>
+                                        <button onclick="addToCart(<%= product.id %>)" class="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100">
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </section>
+            <% } %>
+        <% }) %>
+    <% } %>
+</div>
+
+<script>
+    function filterStaffMenu() {
+        const searchInput = document.getElementById('staff-search').value.toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+            const name = card.querySelector('.product-name').innerText.toLowerCase();
+            card.style.display = name.includes(searchInput) ? '' : 'none';
+        });
+    }
+
+    async function addToCart(productId) {
+        try {
+            const res = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            const data = await res.json();
+            if(res.ok) {
+                window.location.reload(); 
+            } else {
+                alert(data.error);
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    }
+</script>

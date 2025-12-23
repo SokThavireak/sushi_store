@@ -1,0 +1,129 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="p-6 flex justify-between items-center border-b border-gray-100">
+    <h3 class="font-bold text-gray-800 text-lg">Location Management</h3>
+    <button onclick="toggleModal('add-modal')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700 transition">
+      + Add Location
+    </button>
+  </div>
+
+  <div class="p-6">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-gray-500 text-sm border-b border-gray-100">
+            <th class="p-3">Name</th>
+            <th class="p-3">Address</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700">
+          <% locations.forEach(loc => { %>
+            <tr class="border-b border-gray-50 hover:bg-gray-50 group">
+              <td class="p-3 font-bold"><%= loc.name %></td>
+              <td class="p-3 text-sm text-gray-500 max-w-xs truncate"><%= loc.address %></td>
+              <td class="p-3">
+                <% if(loc.status === 'Open') { %>
+                  <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Open</span>
+                <% } else { %>
+                  <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Closed</span>
+                <% } %>
+              </td>
+              <td class="p-3 text-right space-x-2">
+                <button onclick="openEditModal(<%= JSON.stringify(loc) %>)" class="text-blue-500 hover:text-blue-700 text-sm font-bold">Edit</button>
+                <button onclick="deleteLocation(<%= loc.id %>)" class="text-red-500 hover:text-red-700 text-sm font-bold">Delete</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="add-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+    <h3 class="text-xl font-bold mb-4">Add New Location</h3>
+    <form action="/api/locations" method="POST" class="space-y-4">
+      <input type="text" name="name" placeholder="Location Name" required class="w-full border p-2 rounded-lg">
+      <input type="text" name="address" placeholder="Full Address" required class="w-full border p-2 rounded-lg">
+      <input type="text" name="google_map_url" placeholder="Google Maps Link" class="w-full border p-2 rounded-lg">
+      <div class="grid grid-cols-2 gap-4">
+          <input type="text" name="hours_mon_fri" placeholder="Mon-Fri Hours" class="w-full border p-2 rounded-lg">
+          <input type="text" name="hours_sat_sun" placeholder="Sat-Sun Hours" class="w-full border p-2 rounded-lg">
+      </div>
+      <select name="status" class="w-full border p-2 rounded-lg">
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+      </select>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" onclick="toggleModal('add-modal')" class="px-4 py-2 text-gray-500">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="edit-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+    <h3 class="text-xl font-bold mb-4">Edit Location</h3>
+    <div class="space-y-4">
+      <input type="hidden" id="edit-id">
+      <input type="text" id="edit-name" class="w-full border p-2 rounded-lg">
+      <input type="text" id="edit-address" class="w-full border p-2 rounded-lg">
+      <input type="text" id="edit-google_map_url" class="w-full border p-2 rounded-lg">
+      <div class="grid grid-cols-2 gap-4">
+          <input type="text" id="edit-hours_mon_fri" class="w-full border p-2 rounded-lg">
+          <input type="text" id="edit-hours_sat_sun" class="w-full border p-2 rounded-lg">
+      </div>
+      <select id="edit-status" class="w-full border p-2 rounded-lg">
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+      </select>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" onclick="toggleModal('edit-modal')" class="px-4 py-2 text-gray-500">Cancel</button>
+        <button onclick="submitEdit()" class="px-4 py-2 bg-green-600 text-white rounded-lg font-bold">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+function openEditModal(loc) {
+    document.getElementById('edit-id').value = loc.id;
+    document.getElementById('edit-name').value = loc.name;
+    document.getElementById('edit-address').value = loc.address;
+    document.getElementById('edit-google_map_url').value = loc.google_map_url;
+    document.getElementById('edit-hours_mon_fri').value = loc.hours_mon_fri;
+    document.getElementById('edit-hours_sat_sun').value = loc.hours_sat_sun;
+    document.getElementById('edit-status').value = loc.status;
+    toggleModal('edit-modal');
+}
+
+async function submitEdit() {
+    const id = document.getElementById('edit-id').value;
+    const data = {
+        name: document.getElementById('edit-name').value,
+        address: document.getElementById('edit-address').value,
+        google_map_url: document.getElementById('edit-google_map_url').value,
+        hours_mon_fri: document.getElementById('edit-hours_mon_fri').value,
+        hours_sat_sun: document.getElementById('edit-hours_sat_sun').value,
+        status: document.getElementById('edit-status').value
+    };
+    await fetch(`/api/locations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    window.location.reload();
+}
+
+async function deleteLocation(id) {
+    if(confirm('Delete this location?')) {
+        await fetch(`/api/locations/${id}`, { method: 'DELETE' });
+        window.location.reload();
+    }
+}
+</script>

@@ -1,0 +1,200 @@
+<div 
+  id="cart-overlay" 
+  class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity duration-300 opacity-0" 
+  onclick="toggleCart()"
+></div>
+
+<div 
+  id="cart-drawer" 
+  class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white z-[70] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col font-sans"
+>
+  
+  <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
+    <h2 class="text-xl font-bold text-gray-900">Your Order</h2>
+    <button 
+      onclick="toggleCart()" 
+      class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+    >
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </button>
+  </div>
+
+  <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+    <p class="text-center text-gray-500 mt-10">Loading cart...</p>
+  </div>
+
+  <div class="border-t border-gray-100 p-6 bg-gray-50/50">
+    <div class="flex justify-between font-bold text-lg mb-6">
+        <span>Total</span>
+        <span id="cart-total-price" class="text-orange-500">0 ֏</span>
+    </div>
+    
+    <% if (typeof user !== 'undefined' && user.role === 'staff') { %>
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Select Table</label>
+            <select id="staff-table-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-gray-700">
+                <option value="">-- Choose Table --</option>
+                <% for(let i=1; i<=30; i++) { %>
+                    <option value="<%= i %>">Table <%= i %></option>
+                <% } %>
+                <option value="Takeaway">Takeaway</option>
+            </select>
+        </div>
+
+        <button 
+          id="checkout-btn" 
+          onclick="createStaffOrder()" 
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-full flex items-center justify-center shadow-lg transition-all pointer-events-none opacity-50">
+            <i class="fa-solid fa-paper-plane mr-2"></i> Confirm Order
+        </button>
+    <% } else { %>
+        <a 
+          id="checkout-btn" 
+          href="/checkout" 
+          class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-full flex items-center justify-center shadow-lg transition-all pointer-events-none opacity-50">
+            Proceed to Checkout
+        </a>
+    <% } %>
+  </div>
+</div>
+
+<script>
+    function toggleCart() {
+        const drawer = document.getElementById('cart-drawer');
+        const overlay = document.getElementById('cart-overlay');
+        const isOpen = drawer.classList.contains('translate-x-0');
+        
+        if (isOpen) {
+            drawer.classList.remove('translate-x-0');
+            drawer.classList.add('translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        } else {
+            drawer.classList.remove('translate-x-full');
+            drawer.classList.add('translate-x-0');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            fetchCart(); 
+        }
+    }
+
+    async function fetchCart() {
+        try {
+            const res = await fetch('/api/cart');
+            const items = await res.json();
+            renderCart(items);
+        } catch (err) {
+            console.error('Error fetching cart:', err);
+        }
+    }
+
+    function renderCart(items) {
+        const container = document.getElementById('cart-items-container');
+        const totalEl = document.getElementById('cart-total-price');
+        const btn = document.getElementById('checkout-btn');
+        const badge = document.getElementById('cart-count');
+
+        container.innerHTML = '';
+        let total = 0;
+        let totalQty = 0;
+
+        if (!items || items.length === 0) {
+            container.innerHTML = `<div class="text-center mt-10"><i class="fa-solid fa-basket-shopping text-4xl text-gray-300 mb-3"></i><p class="text-gray-500">Your cart is empty.</p></div>`;
+            totalEl.innerText = '0 ֏';
+            btn.classList.add('opacity-50', 'pointer-events-none');
+            if (badge) { badge.innerText = '0'; badge.style.display = 'none'; }
+            return;
+        }
+
+        btn.classList.remove('opacity-50', 'pointer-events-none');
+
+        items.forEach(item => {
+            total += (item.price * item.quantity);
+            totalQty += item.quantity;
+            const html = `
+                <div class="flex gap-4 border-b border-gray-50 pb-4 last:border-0">
+                    <div class="h-20 w-20 flex-shrink-0 rounded-xl bg-gray-100 overflow-hidden">
+                        <img src="${item.image_url}" class="h-full w-full object-cover">
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div><h3 class="font-bold text-gray-900">${item.name}</h3><p class="text-xs text-gray-500">Unit: ${item.price} ֏</p></div>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="font-bold text-gray-900">${item.price * item.quantity} ֏</span>
+                            <div class="flex items-center gap-3 bg-gray-100 rounded-full px-2 py-1">
+                                <button onclick="updateQty(${item.cart_id}, 'decrement')" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-orange-500 font-bold transition">-</button>
+                                <span class="text-sm font-semibold text-gray-900 w-4 text-center">${item.quantity}</span>
+                                <button onclick="updateQty(${item.cart_id}, 'increment')" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-orange-500 font-bold transition">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            container.innerHTML += html;
+        });
+
+        totalEl.innerText = total.toLocaleString() + ' ֏';
+        if (badge) { badge.innerText = totalQty; badge.style.display = 'flex'; }
+    }
+
+    async function updateQty(cartId, action) {
+        try {
+            await fetch(`/api/cart/${cartId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action })
+            });
+            fetchCart();
+        } catch (err) { console.error(err); }
+    }
+
+    async function addToCart(productId) {
+        const drawer = document.getElementById('cart-drawer');
+        if (!drawer.classList.contains('translate-x-0')) toggleCart();
+
+        try {
+            const res = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            if (res.status === 401) {
+                 alert("Please login to add items");
+                 setTimeout(() => window.location.href = "/login", 1500);
+            } else if (res.ok) {
+                 fetchCart(); 
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    // UPDATED: Create Order with Table Number
+    async function createStaffOrder() {
+        const tableSelect = document.getElementById('staff-table-select');
+        const tableNumber = tableSelect ? tableSelect.value : null;
+
+        if (!tableNumber) {
+            alert("Please select a Table Number first!");
+            tableSelect.focus();
+            return;
+        }
+
+        if(!confirm(`Confirm order for Table ${tableNumber}?`)) return;
+
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table_number: tableNumber }) // Send Table Number
+            });
+
+            if (res.redirected) {
+                window.location.href = res.url; 
+            } else {
+                alert("Order Failed");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("System Error");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchCart);
+</script>

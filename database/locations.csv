@@ -1,0 +1,3 @@
+id,name,address,google_map_url,status,hours_mon_fri,hours_sat_sun
+1,Downtown Central,"1024 Market Street, San Francisco, CA",https://goo.gl/maps/example1,Open,10:00 - 22:00,11:00 - 23:00
+2,Westside Plaza,"880 West Portal Ave, San Francisco, CA",https://goo.gl/maps/example2,Open,16:00 - 23:00,12:00 - 00:00

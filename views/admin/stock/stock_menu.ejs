@@ -1,0 +1,243 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  
+  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-white">
+    <div>
+      <h3 class="font-bold text-gray-800 text-lg">Master Ingredient List</h3>
+      <p class="text-xs text-gray-500">Define items available for stock requests</p>
+    </div>
+    <button onclick="toggleModal('add-modal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+      <i class="fa-solid fa-plus"></i> Add New Item
+    </button>
+  </div>
+
+  <div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+    <div class="relative">
+      <input type="text" id="search-input" onkeyup="captureAndFilter()" placeholder="Search ingredients (e.g. Salmon, Cup, Napkin)..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-indigo-500 transition-colors bg-white shadow-sm" />
+      <div class="absolute left-3 top-3 text-gray-400">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-8 bg-gray-50 min-h-screen">
+    
+    <% 
+       // Define Categories you want to manage
+       let categories = ['Cook', 'Drink', 'Supplies', 'Packaging'];
+    %>
+
+    <% categories.forEach(function(catName) { %> 
+        
+        <% 
+           // Filter master stock items by category
+           let items = stocks ? stocks.filter(s => s.category === catName) : [];
+        %> 
+        
+        <div class="mb-10 group-section">
+          <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <% if (catName === 'Cook') { %> 🍳 <% } %>
+            <% if (catName === 'Drink') { %> 🥤 <% } %>
+            <% if (catName === 'Supplies') { %> 🧹 <% } %>
+            <% if (catName === 'Packaging') { %> 📦 <% } %>
+            <%= catName %>
+            <span class="text-xs font-normal text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-full"><%= items.length %></span>
+          </h2>
+
+          <% if (items.length > 0) { %>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                 <% items.forEach(function(item) { %>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition duration-300 relative group item-card">
+                        
+                        <div class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition duration-200 z-10">
+                            <button onclick="openEditModal(this)" data-stock="<%= JSON.stringify(item) %>" class="w-7 h-7 rounded bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center">
+                                <i class="fa-solid fa-pen text-[10px]"></i>
+                            </button>
+                            <button onclick="deleteItem(<%= item.id %>, this)" class="w-7 h-7 rounded bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 flex items-center justify-center">
+                                <i class="fa-solid fa-trash text-[10px]"></i>
+                            </button>
+                        </div>
+
+                        <div class="h-32 w-full rounded-lg bg-gray-50 mb-3 overflow-hidden flex items-center justify-center">
+                            <% if (item.image_url) { %>
+                                <img src="<%= item.image_url %>" class="w-full h-full object-cover">
+                            <% } else { %>
+                                <i class="fa-solid fa-box text-3xl text-gray-300"></i>
+                            <% } %>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm mb-1 truncate"><%= item.name %></h4>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded">
+                                    <%= item.unit || 'Unit' %>
+                                </span>
+                                <span class="text-xs text-indigo-600 font-medium">ID: <%= item.id %></span>
+                            </div>
+                        </div>
+                    </div>
+                 <% }); %>
+              </div>
+          <% } else { %>
+              <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                  <p class="text-gray-400 text-sm">No items defined for <%= catName %> yet.</p>
+              </div>
+          <% } %>
+        </div>
+
+    <% }); %> 
+  </div>
+</div>
+
+<div id="add-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+      <h3 class="text-lg font-bold text-gray-800">Add Master Item</h3>
+      <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <form action="/admin/stock/menu/add" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
+        <input type="text" name="name" required placeholder="e.g. Olive Oil" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+          <select name="category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+            <option value="Cook">Cook</option>
+            <option value="Drink">Drink</option>
+            <option value="Supplies">Supplies</option>
+            <option value="Packaging">Packaging</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Unit</label>
+          <select name="unit" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="liter">Liter</option>
+            <option value="pcs">Pcs</option>
+            <option value="box">Box</option>
+            <option value="can">Can</option>
+            <option value="pack">Pack</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image (Optional)</label>
+          <input type="file" name="image" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+      </div>
+
+      <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">Save Item</button>
+    </form>
+  </div>
+</div>
+
+<div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+      <h3 class="text-lg font-bold text-gray-800">Edit Item</h3>
+      <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <div class="p-6 space-y-4">
+      <input type="hidden" id="edit-id" />
+      
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
+        <input type="text" id="edit-name" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+          <select id="edit-category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+            <option value="Cook">Cook</option>
+            <option value="Drink">Drink</option>
+            <option value="Supplies">Supplies</option>
+            <option value="Packaging">Packaging</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Unit</label>
+          <select id="edit-unit" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="liter">Liter</option>
+            <option value="pcs">Pcs</option>
+            <option value="box">Box</option>
+            <option value="can">Can</option>
+            <option value="pack">Pack</option>
+          </select>
+        </div>
+      </div>
+
+       <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
+        <input type="text" id="edit-image-url" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
+      </div>
+
+      <button onclick="submitEdit()" class="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">Update Item</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleModal(id) {
+    document.getElementById(id).classList.toggle("hidden");
+  }
+
+  function captureAndFilter() {
+    const term = document.getElementById('search-input').value.toLowerCase();
+    document.querySelectorAll('.item-card').forEach(card => {
+        const name = card.querySelector('h4').innerText.toLowerCase();
+        card.style.display = name.includes(term) ? '' : 'none';
+    });
+  }
+
+  function openEditModal(btn) {
+    const data = JSON.parse(btn.getAttribute('data-stock'));
+    document.getElementById('edit-id').value = data.id;
+    document.getElementById('edit-name').value = data.name;
+    document.getElementById('edit-category').value = data.category;
+    document.getElementById('edit-unit').value = data.unit;
+    document.getElementById('edit-image-url').value = data.image_url || '';
+    toggleModal('edit-modal');
+  }
+
+  async function submitEdit() {
+    const id = document.getElementById('edit-id').value;
+    const data = {
+        name: document.getElementById('edit-name').value,
+        category: document.getElementById('edit-category').value,
+        unit: document.getElementById('edit-unit').value,
+        image_url: document.getElementById('edit-image-url').value
+    };
+
+    try {
+        const res = await fetch(`/api/stock/menu/${id}`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        if(res.ok) window.location.reload();
+        else alert("Error updating item");
+    } catch(err) { console.error(err); }
+  }
+
+  async function deleteItem(id, btn) {
+      if(!confirm("Permanently delete this item from the master menu?")) return;
+      try {
+          const res = await fetch(`/api/stock/menu/${id}`, { method: 'DELETE' });
+          if(res.ok) btn.closest('.item-card').remove();
+          else alert("Error deleting item");
+      } catch(err) { console.error(err); }
+  }
+</script>
+
+<style>
+    .animate-scale-in { animation: scaleIn 0.2s ease-out; }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>

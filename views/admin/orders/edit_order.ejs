@@ -1,0 +1,136 @@
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100 mt-10">
+    
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Edit Order #<%= order.id %></h2>
+            <p class="text-sm text-gray-500">
+                Created on <%= new Date(order.created_at).toLocaleDateString() %> 
+                at <%= new Date(order.created_at).toLocaleTimeString() %>
+            </p>
+        </div>
+        <a href="/admin/orders" class="text-sm font-bold text-gray-500 hover:text-indigo-600 transition flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 mb-6 flex items-start gap-4">
+        <div class="p-3 bg-indigo-100 text-indigo-600 rounded-full">
+            <i class="fa-solid fa-user"></i>
+        </div>
+        <div>
+            <h3 class="text-sm font-bold text-indigo-900 uppercase tracking-wide">Customer Details</h3>
+            <p class="font-bold text-gray-800"><%= order.user_name || 'Guest User' %></p>
+            <p class="text-sm text-gray-600"><%= order.email %></p>
+        </div>
+    </div>
+
+    <div class="mb-8 border rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="font-bold text-gray-700">Ordered Items</h3>
+            <span class="text-sm font-bold text-indigo-600">Total: <%= Number(order.total_price).toFixed(2) %> ֏</span>
+        </div>
+        
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-500">
+                <tr>
+                    <th class="p-3">Product</th>
+                    <th class="p-3">Price</th>
+                    <th class="p-3">Quantity</th>
+                    <th class="p-3">Subtotal</th>
+                    <th class="p-3 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <% items.forEach(item => { %>
+                <tr>
+                    <td class="p-3 flex items-center gap-3">
+                        <img src="<%= item.image_url %>" class="w-10 h-10 rounded object-cover border">
+                        <span class="font-semibold text-gray-700"><%= item.name %></span>
+                    </td>
+                    
+                    <td class="p-3"><%= item.price %> ֏</td>
+                    
+                    <td class="p-3">
+                        <form action="/admin/orders/items/update/<%= item.id %>" method="POST" class="flex items-center gap-1">
+                            <input type="number" name="quantity" value="<%= item.quantity %>" min="1" 
+                                class="w-16 px-2 py-1 border rounded text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <button type="submit" class="text-indigo-600 hover:text-indigo-800 p-1" title="Update Quantity">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </form>
+                    </td>
+
+                    <td class="p-3 font-bold"><%= (item.price * item.quantity).toFixed(2) %> ֏</td>
+                    
+                    <td class="p-3 text-right">
+                        <form action="/admin/orders/items/delete/<%= item.id %>" method="POST" onsubmit="return confirm('Remove this item?');">
+                             <button type="submit" class="text-red-500 hover:text-red-700 font-bold text-xs bg-red-50 px-3 py-1.5 rounded transition">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+                
+                <% if(items.length === 0) { %>
+                    <tr><td colspan="5" class="p-4 text-center text-gray-400">No items in this order.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <form action="/admin/orders/update/<%= order.id %>" method="POST" class="space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Table Number</label>
+                <input type="text" name="table_number" value="<%= order.table_number %>" placeholder="e.g. 5"
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Order Status</label>
+                <select name="status" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="Completed" <%= order.status === 'Completed' ? 'selected' : '' %>>Completed</option>
+                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Refunded" <%= order.status === 'Refunded' ? 'selected' : '' %>>Refunded</option>
+                    
+                    <% if(order.status === 'Cancel Requested') { %>
+                        <option value="Cancel Requested" selected>Cancel Requested</option>
+                    <% } %>
+                    <% if(order.status === 'Refund Requested') { %>
+                        <option value="Refund Requested" selected>Refund Requested</option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Payment Method</label>
+                <select name="payment_method" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="Pay at Counter" <%= order.payment_method === 'Pay at Counter' ? 'selected' : '' %>>Pay at Counter</option>
+                    <option value="QR" <%= order.payment_method === 'QR' ? 'selected' : '' %>>QR Payment</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Pickup Store</label>
+                <select name="pickup_location" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                     <% locations.forEach(loc => { %>
+                        <option value="<%= loc.name %>" <%= order.pickup_location === loc.name ? 'selected' : '' %>>
+                            <%= loc.name %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+
+        <div class="border-t pt-6">
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors shadow-lg">
+               Update Details
+            </button>
+        </div>
+
+    </form>
+</div>

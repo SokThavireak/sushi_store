@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-100 flex h-screen overflow-hidden">
+    <aside class="w-64 bg-[#0f112e] text-gray-400 flex flex-col flex-shrink-0">
+      <div class="p-6 text-white font-bold text-xl flex items-center gap-3">
+        <i class="fa-solid fa-layer-group text-blue-500"></i> OPULENT
+      </div>
+
+      <div class="px-6 mb-6">
+        <div class="relative">
+          <i
+            class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-sm"
+          ></i>
+          <input
+            type="text"
+            placeholder="Search..."
+            class="w-full bg-[#1e204a] text-sm text-white rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto px-4 space-y-1">
+        <a
+          href="/"
+          class="flex items-center gap-3 px-4 py-3 text-orange-400 hover:bg-[#1e204a] hover:text-orange-300 rounded-lg transition mb-4 border border-[#1e204a]"
+        >
+          <i class="fa-solid fa-globe w-5 text-center"></i> Website Home
+        </a>
+        <% if (typeof user !== 'undefined' && user.role === 'manager' ||
+        user.role === 'admin') { %>
+        <a
+          href="/admin/dashboard"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
+        </a>
+        <% } %> <% if (typeof user !== 'undefined' && user.role === 'manager' ||
+        user.role === 'admin') { %>
+        <a
+          href="/admin/inventory"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-box w-5 text-center"></i> Inventory
+        </a>
+        <% } %> <% if (typeof user !== 'undefined' && user.role === 'manager' ||
+        user.role === 'admin') { %>
+        <a
+          href="/admin/category"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-tags w-5 text-center"></i> Category
+        </a>
+        <% } %> <% if (typeof user !== 'undefined' && user.role === 'admin') {
+        %>
+        <a
+          href="/admin/locations"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-map-location-dot w-5 text-center"></i> Locations
+        </a>
+        <% } %> <% if (typeof user !== 'undefined' && user.role === 'admin') {
+        %>
+        <a
+          href="/admin/users"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-users w-5 text-center"></i> Users
+        </a>
+        <% } %>
+
+        <a
+          href="/admin/orders"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Orders
+        </a>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
+        <a
+          href="/admin/reports"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-file-invoice w-5 text-center"></i> Reports
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
+        <a
+          href="/admin/stock"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> Stock Orders
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
+        <a
+          href="/admin/stock/menu"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> Stock Menu
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'store_manager')) { %>
+        <a
+          href="/manager/daily-stock"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> daily Stock
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
+        <a
+          href="/manager/daily-stock/history"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
+        >
+          <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> history Stock
+        </a>
+        <% } %>
+
+      </nav>
+
+      <div class="p-4 border-t border-[#1e204a]">
+        <a
+          href="/logout"
+          class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-900/20 hover:text-red-300 rounded-lg transition"
+        >
+          <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <header
+        class="h-20 bg-white border-b flex items-center justify-between px-8"
+      >
+        <h2 class="text-2xl font-bold text-gray-800"><%= title %></h2>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-8"><%- body %></div>
+    </main>
+  </body>
+</html>

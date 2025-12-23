@@ -1,0 +1,148 @@
+<div class="mb-8">
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <h2
+      class="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2"
+    >
+      <i class="fa-solid fa-user-plus text-indigo-500"></i> Create New Account
+    </h2>
+
+    <form
+      action="/admin/create-manager"
+      method="POST"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end"
+    >
+      <div class="w-full">
+        <label class="block text-xs font-bold text-gray-500 mb-1"
+          >EMAIL ADDRESS</label
+        >
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="user@opulent.com"
+          class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+        />
+      </div>
+
+      <div class="w-full">
+        <label class="block text-xs font-bold text-gray-500 mb-1"
+          >PASSWORD</label
+        >
+        <input
+          type="password"
+          name="password"
+          required
+          placeholder="••••••"
+          class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+        />
+      </div>
+
+      <div class="w-full">
+        <label class="block text-xs font-bold text-gray-500 mb-1">ROLE</label>
+        <select
+          name="role"
+          id="newRole"
+          onchange="toggleNewLocation()"
+          class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="user">User (Standard)</option>
+          <option value="staff">Staff (New)</option>
+          <option value="store_manager">Store Manager</option>
+          <option value="manager">Head Manager</option>
+        </select>
+      </div>
+
+      <div class="w-full hidden" id="newLocationDiv">
+        <label
+          class="block text-xs font-bold text-gray-500 mb-1 text-orange-600"
+          >ASSIGN STORE</label
+        >
+        <select
+          name="assigned_location_id"
+          class="w-full px-4 py-2 bg-orange-50 border border-orange-200 text-orange-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          <% locations.forEach(loc => { %>
+          <option value="<%= loc.id %>"><%= loc.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+      >
+        <i class="fa-solid fa-check"></i> Create
+      </button>
+    </form>
+  </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <% if (typeof usersList !== 'undefined' && usersList.length > 0) { %> <%
+  usersList.forEach(function(u) { %>
+  <div
+    class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow"
+  >
+    <h3 class="font-bold text-lg text-gray-800 truncate" title="<%= u.email %>">
+      <%= u.email %>
+    </h3>
+
+    <div class="my-3">
+      <% if (u.role === 'admin') { %>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 uppercase tracking-wide">Admin</span>
+      <% } else if (u.role === 'manager') { %>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">Head Manager</span>
+      <% } else if (u.role === 'store_manager') { %>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 uppercase tracking-wide">Store Manager</span>
+      <% } else if (u.role === 'staff') { %>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-700 uppercase tracking-wide">Staff</span>
+      <% } else { %>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 uppercase tracking-wide">User</span>
+      <% } %>
+    </div>
+
+    <div class="flex justify-center gap-2 mt-4">
+      <a
+        href="/admin/users/edit/<%= u.id %>"
+        class="px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-100 transition-colors border border-gray-200"
+      >
+        Edit
+      </a>
+
+      <% if (u.id !== user.id) { %>
+      <form
+        action="/admin/users/delete/<%= u.id %>"
+        method="POST"
+        onsubmit="return confirm('Are you sure you want to delete this user?');"
+      >
+        <button
+          type="submit"
+          class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors border border-red-100"
+        >
+          Delete
+        </button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+  <% }); %> <% } else { %>
+  <p class="text-gray-500 col-span-3 text-center">No users found.</p>
+  <% } %>
+</div>
+
+<script>
+  function toggleNewLocation() {
+    const role = document.getElementById("newRole").value;
+    const locDiv = document.getElementById("newLocationDiv");
+    const locSelect = document.getElementById("assignedLocationSelect");
+
+    // Show location for BOTH Store Manager AND Staff
+    if (role === "store_manager" || role === "staff") {
+      locDiv.classList.remove("hidden");
+      locSelect.setAttribute("required", "true");
+    } else {
+      locDiv.classList.add("hidden");
+      locSelect.removeAttribute("required");
+      locSelect.value = "";
+    }
+  }
+</script>

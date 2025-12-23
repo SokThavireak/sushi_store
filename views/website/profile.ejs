@@ -1,0 +1,57 @@
+<div class="max-w-2xl mx-auto px-6 mt-32 mb-20"> 
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-800">Manage Account</h1>
+        <p class="text-gray-500 mt-2">Update your personal details or settings.</p>
+    </div>
+
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-800 mb-6 border-b pb-2">Profile Details</h2>
+
+        <form action="/profile/update" method="POST" class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                <input type="email" name="email" value="<%= user.email %>" required
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-700 font-medium">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">New Password <span class="text-gray-400 font-normal lowercase">(Leave blank to keep current)</span></label>
+                <input type="password" name="password" placeholder="••••••••"
+                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg shadow-md transition transform hover:-translate-y-0.5">
+                Update Profile
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mt-6">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">Order History</h2>
+                <p class="text-sm text-gray-500">View details of your past transactions.</p>
+            </div>
+            <div class="bg-orange-100 p-3 rounded-full text-orange-600">
+                <i class="fa-solid fa-receipt text-xl"></i>
+            </div>
+        </div>
+        <a href="/orders" class="block w-full py-3 bg-white border-2 border-orange-100 text-orange-600 font-bold rounded-lg hover:bg-orange-50 hover:border-orange-200 transition text-center">
+            View My Orders
+        </a>
+    </div>
+
+    <div class="mt-8 flex gap-4">
+        <form action="/logout" method="GET" class="flex-1">
+            <button class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-from-bracket"></i> Log Out
+            </button>
+        </form>
+
+        <form action="/profile/delete" method="POST" onsubmit="return confirm('Are you sure? This cannot be undone.');" class="flex-1">
+            <button class="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-lg transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trash"></i> Delete Account
+            </button>
+        </form>
+    </div>
+</div>

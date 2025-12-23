@@ -1,0 +1,13 @@
+id,month_name,revenue,is_current_month
+1,Jan,65,f
+2,Feb,59,f
+3,Mar,80,t
+4,Apr,81,f
+5,May,56,f
+6,Jun,55,f
+7,Jul,40,f
+8,Aug,70,f
+9,Sep,60,f
+10,Oct,75,f
+11,Nov,50,f
+12,Dec,65,f

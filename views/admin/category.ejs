@@ -1,0 +1,141 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+    <div class="p-6 flex justify-between items-center border-b border-gray-100">
+        <div>
+            <h3 class="font-bold text-gray-800 text-xl">Category Management</h3>
+            <p class="text-xs text-gray-400 mt-1">
+                Current Access: 
+                <span class="<%= userRole === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' %> px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">
+                    <%= userRole %>
+                </span>
+            </p>
+        </div>
+
+        <button onclick="toggleModal('add-modal')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+            <i class="fa-solid fa-plus"></i> Add Category
+        </button>
+    </div>
+</div>
+
+<% if (categories && categories.length > 0) { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <% categories.forEach(category => { %>
+            <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center text-center relative group">
+                
+                <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-2xl mb-4">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+
+                <h3 class="font-bold text-gray-900 text-lg mb-1"><%= category.name %></h3>
+                <p class="text-xs text-gray-400 mb-4">ID: #<%= category.id %></p>
+
+                <div class="flex gap-2 w-full justify-center mt-auto pt-4 border-t border-gray-50">
+                    
+                    <button onclick="openEditModal(<%= JSON.stringify(category) %>)" class="px-3 py-1.5 bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-600 rounded-lg text-sm font-medium transition">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </button>
+                    
+                    <% if (userRole === 'admin') { %>
+                        <button onclick="deleteCategory(<%= category.id %>)" class="px-3 py-1.5 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-lg text-sm font-medium transition">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    <% } %>
+
+                </div>
+            </div>
+        <% }) %>
+    </div>
+<% } else { %>
+    <div class="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+        <div class="text-gray-300 text-4xl mb-3"><i class="fa-solid fa-box-open"></i></div>
+        <h3 class="text-lg font-medium text-gray-900">No Categories Found</h3>
+    </div>
+<% } %>
+
+<div id="add-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <h3 class="text-lg font-bold text-gray-800">New Category</h3>
+            <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="createCategory(event)" class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category Name</label>
+                <input type="text" id="add-name" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            </div>
+            <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold mt-2">Create Category</button>
+        </form>
+    </div>
+</div>
+
+<div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <h3 class="text-lg font-bold text-gray-800">Edit Category</h3>
+            <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="updateCategory(event)" class="p-6 space-y-4">
+            <input type="hidden" id="edit-id">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category Name</label>
+                <input type="text" id="edit-name" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            </div>
+            <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold mt-2">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const currentUserRole = "<%= userRole %>"; 
+
+    function toggleModal(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function openEditModal(category) {
+        document.getElementById('edit-id').value = category.id;
+        document.getElementById('edit-name').value = category.name;
+        toggleModal('edit-modal');
+    }
+
+    async function createCategory(e) {
+        e.preventDefault();
+        const name = document.getElementById('add-name').value;
+        try {
+            const res = await fetch('/api/category', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            if (res.ok) window.location.reload();
+            else alert('Error creating category');
+        } catch (err) { console.error(err); }
+    }
+
+    async function updateCategory(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-id').value;
+        const name = document.getElementById('edit-name').value;
+        try {
+            const res = await fetch(`/api/category/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            if (res.ok) window.location.reload();
+            else alert('Error updating category');
+        } catch (err) { console.error(err); }
+    }
+
+    async function deleteCategory(id) {
+        if (currentUserRole !== 'admin') {
+            alert("Access Denied: Only Admins can delete categories.");
+            return;
+        }
+        if (!confirm('Are you sure you want to delete this category?')) return;
+        try {
+            const res = await fetch(`/api/category/${id}`, { method: 'DELETE' });
+            if (res.ok) window.location.reload();
+            else alert('Error deleting category');
+        } catch (err) { console.error(err); }
+    }
+</script>

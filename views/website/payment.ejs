@@ -1,0 +1,28 @@
+<div class="max-w-md mx-auto px-6 mt-40 mb-20 text-center">
+    <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+        
+        <div class="mb-6">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Confirm Payment</h1>
+            <p class="text-gray-500">Order ID: #<%= orderId %></p>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-2xl mb-8 border border-gray-100">
+            <p class="text-sm text-gray-500 mb-1">Total Amount</p>
+            <p class="text-4xl font-extrabold text-indigo-600"><%= amount %> $</p>
+        </div>
+
+        <form action="/payment/confirm/<%= orderId %>" method="POST">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>Simulate Successful Payment</span>
+            </button>
+        </form>
+
+        <div class="mt-6">
+            <a href="/" class="text-sm text-gray-400 hover:text-gray-600">Cancel</a>
+        </div>
+    </div>
+</div>

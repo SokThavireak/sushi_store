@@ -1,0 +1,52 @@
+<%- include('partials/header.ejs') %>
+<%- include('partials/nav.ejs') %>
+
+<main class="min-h-screen w-full">
+    <%- body %>
+</main>
+<div id="toast-container" class="fixed top-24 right-5 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+<script>
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        // Define Colors & Icons based on Type
+        let bgClass, icon;
+        if (type === 'error') {
+            bgClass = 'bg-red-500';
+            icon = '<i class="fa-solid fa-circle-exclamation"></i>';
+        } else if (type === 'info') {
+            bgClass = 'bg-blue-500';
+            icon = '<i class="fa-solid fa-circle-info"></i>';
+        } else {
+            bgClass = 'bg-green-500'; // Success (Default)
+            icon = '<i class="fa-solid fa-circle-check"></i>';
+        }
+
+        // Create Toast HTML
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform translate-x-full transition-all duration-500 opacity-0 min-w-[300px] pointer-events-auto`;
+        toast.innerHTML = `
+            <div class="text-xl">${icon}</div>
+            <div class="font-bold text-sm tracking-wide">${message}</div>
+        `;
+
+        // Add to DOM
+        container.appendChild(toast);
+
+        // Animate In
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full', 'opacity-0');
+        }, 10);
+
+        // Animate Out & Remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full', 'opacity-0');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+</script>
+
+<%- include('partials/cart-drawer.ejs') %>
+
+<%- include('partials/footer.ejs') %>

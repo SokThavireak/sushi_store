@@ -1,0 +1,154 @@
+<style>
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  .animate-fade-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0; 
+  }
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+</style>
+
+<div class="max-w-7xl mx-auto px-6 mt-36 mb-20">
+    
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
+        <div class="animate-fade-up">
+            <div class="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider mb-6">
+                <i class="fa-solid fa-trophy"></i>
+                <span>Voted #1 Sushi Store in Cambodia</span>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+                Experience the <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Soul of Japan</span>
+            </h1>
+            <p class="text-lg text-gray-500 mb-8 leading-relaxed max-w-lg">
+                Welcome to Murakami City. We bring the authentic taste of Japan to the heart of Cambodia. 
+                Led by chefs from 5-star hotels, we promise speed, hygiene, and unmatched quality in every bite.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a href="/menu" class="bg-gray-900 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-orange-500 hover:shadow-orange-200 hover:-translate-y-1 transition-all duration-300">
+                    View Our Menu
+                </a>
+                <a href="/location" class="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-full font-bold shadow-sm hover:border-orange-500 hover:text-orange-500 transition-all duration-300">
+                    Find Our Location
+                </a>
+            </div>
+        </div>
+
+        <div class="relative animate-fade-up delay-200">
+            <div class="relative z-10 rounded-[3rem] overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-all duration-700">
+                <img src="https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=1925" alt="Master Chef" class="w-full h-[500px] object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute bottom-8 left-8 text-white">
+                    <p class="text-sm font-bold opacity-80 uppercase tracking-widest">Head Chef</p>
+                    <h3 class="text-2xl font-bold">Kenji Nakamura</h3>
+                    <p class="text-xs mt-1 bg-white/20 backdrop-blur-md inline-block px-2 py-1 rounded">Ex-5 Star Hotel Executive Chef</p>
+                </div>
+            </div>
+            
+            <div class="absolute -top-10 -right-5 z-20 bg-white p-4 rounded-2xl shadow-xl animate-float">
+                <div class="flex items-center gap-3">
+                    <div class="bg-yellow-100 p-3 rounded-full text-yellow-600">
+                        <i class="fa-solid fa-star text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-gray-900 text-lg">4.9/5</div>
+                        <div class="text-xs text-gray-500 font-medium">Customer Favorite</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute top-10 -left-10 w-full h-full border-2 border-orange-200 rounded-[3rem] -z-10"></div>
+        </div>
+    </section>
+
+    <section class="mb-24">
+        <div class="text-center mb-16 animate-fade-up delay-100">
+            <h2 class="text-3xl font-extrabold text-gray-900">Why We Are The Best</h2>
+            <p class="text-gray-400 mt-2">Uncompromising quality standard since 2015</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-100 group">
+                <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-plane-arrival"></i>
+                </div>
+                <h3 class="font-bold text-xl text-gray-900 mb-3">Direct from Japan</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    We don't use local substitutes. Our fish and rice are flown in daily from Tokyo markets to ensure authentic flavor.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-200 group">
+                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h3 class="font-bold text-xl text-gray-900 mb-3">5-Star Hotel Chefs</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    Our culinary team is led by masters with over 20 years of experience in top-tier 5-star luxury hotels.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-300 group">
+                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-stopwatch"></i>
+                </div>
+                <h3 class="font-bold text-xl text-gray-900 mb-3">Fast & Clean</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    We pride ourselves on immaculate hygiene and lightning-fast cooking without sacrificing quality.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-300 group">
+                <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+                <h3 class="font-bold text-xl text-gray-900 mb-3">Highly Recommended</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    With thousands of 5-star reviews, we are the go-to spot for locals and tourists seeking the best.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="relative rounded-[3rem] overflow-hidden bg-gray-900 text-white py-20 px-8 text-center animate-fade-up delay-200">
+        <div class="absolute inset-0 opacity-30">
+            <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=2000" class="w-full h-full object-cover" />
+        </div>
+        <div class="relative z-10 max-w-2xl mx-auto">
+            <span class="text-orange-400 font-bold uppercase tracking-widest text-xs mb-4 block">Premium Location</span>
+            <h2 class="text-4xl font-extrabold mb-6">Located in the Best Area</h2>
+            <p class="text-gray-300 text-lg mb-8">
+                Enjoy your meal in a clean, modern, and accessible environment. We are situated in the heart of the city with ample parking.
+            </p>
+            <div class="grid grid-cols-3 gap-4 border-t border-white/10 pt-8">
+                <div>
+                    <div class="text-3xl font-bold text-orange-400">100%</div>
+                    <div class="text-xs text-gray-400 uppercase mt-1">Quality</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-orange-400">20min</div>
+                    <div class="text-xs text-gray-400 uppercase mt-1">Avg Cook Time</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-orange-400">Top 1</div>
+                    <div class="text-xs text-gray-400 uppercase mt-1">In Cambodia</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>

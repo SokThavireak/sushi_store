@@ -1,0 +1,122 @@
+<nav
+  class="fixed top-0 w-full z-50 px-8 py-6 transition-all duration-300 backdrop-blur-md bg-white/30"
+>
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <div class="text-4xl font-extrabold tracking-tight">
+      <a
+        href="<%= (typeof user !== 'undefined' && user.role === 'staff') ? '/staff/menu' : '/' %>"
+        class="text-gray-900"
+      >
+        Murakami<span class="text-orange-500">.</span>
+      </a>
+    </div>
+
+    <div
+      class="flex gap-10 items-center text-base font-bold cursor-pointer text-gray-900"
+    >
+      <% if (typeof user === 'undefined' || user.role !== 'staff') { %>
+      <div class="pb-1 hover:text-orange-500 transition-colors">
+        <a href="/">Home</a>
+      </div>
+      <div class="pb-1 hover:text-orange-500 transition-colors">
+        <a href="/menu">Menu</a>
+      </div>
+      <div class="pb-1 hover:text-orange-500 transition-colors">
+        <a href="/about">About</a>
+      </div>
+      <div class="pb-1 hover:text-orange-500 transition-colors">
+        <a href="/offers">Offers</a>
+      </div>
+      <div class="pb-1 hover:text-orange-500 transition-colors">
+        <a href="/location">Locations</a>
+      </div>
+      <% } %> <% if (typeof user !== 'undefined' && user) { %> <% if (user.role
+      === 'manager' || user.role === 'admin' || user.role === 'store_manager') {
+      %>
+      <div class="pb-1 text-gray-900 hover:text-orange-500 transition-colors">
+        <a href="/admin/dashboard">Dashboard</a>
+      </div>
+      <% } %>
+
+      <div class="relative">
+        <button
+          onclick="toggleProfileMenu()"
+          class="flex items-center gap-2 px-4 py-2 bg-white/50 text-gray-900 rounded-full hover:bg-white hover:shadow-md transition-all border border-gray-200 focus:outline-none backdrop-blur-sm"
+        >
+          <i class="fa-solid fa-user"></i>
+          <span class="capitalize"><%= user.email.split('@')[0] %></span>
+          <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+        </button>
+
+        <div
+          id="profile-menu"
+          class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50"
+        >
+          <a
+            href="/profile"
+            class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors border-b border-gray-50"
+          >
+            <i class="fa-solid fa-gear mr-2"></i> Manage Account
+          </a>
+          <a
+            href="/logout"
+            class="block px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+          >
+            <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
+          </a>
+          <a
+            href="/orders"
+            class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors border-b border-gray-50"
+          >
+            <i class="fa-solid fa-receipt mr-2"></i> Order History
+          </a>
+        </div>
+      </div>
+
+      <% } else { %>
+      <a
+        href="/login"
+        class="px-8 py-3 bg-transparent text-gray-900 font-bold border-2 border-gray-900 rounded-full hover:bg-orange-500 hover:border-orange-500 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md text-lg"
+      >
+        Login
+      </a>
+      <% } %>
+
+      <div class="pl-4 border-l border-gray-400/50 ml-4">
+        <button
+          onclick="toggleCart()"
+          class="relative text-gray-700 hover:text-orange-500 transition"
+        >
+          <i class="fa-solid fa-shopping-bag text-2xl"></i>
+          <span
+            id="cart-count"
+            class="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full"
+            >0</span
+          >
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  function toggleProfileMenu() {
+    const menu = document.getElementById("profile-menu");
+    menu.classList.toggle("hidden");
+  }
+
+  window.addEventListener("click", function (e) {
+    const button = document.querySelector(
+      'button[onclick="toggleProfileMenu()"]'
+    );
+    const menu = document.getElementById("profile-menu");
+    if (
+      button &&
+      menu &&
+      !button.contains(e.target) &&
+      !menu.contains(e.target)
+    ) {
+      menu.classList.add("hidden");
+    }
+  });
+</script>

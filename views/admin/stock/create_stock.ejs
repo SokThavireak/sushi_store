@@ -1,0 +1,226 @@
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-10">
+  
+  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
+    <div>
+        <h3 class="font-bold text-gray-800 text-lg">Create Stock Request</h3>
+        <p class="text-xs text-gray-500">Select items from the master menu to restock</p>
+    </div>
+    <a href="/admin/stock" class="text-gray-400 hover:text-gray-600 transition">
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </a>
+  </div>
+
+  <div class="p-8">
+    <form id="stockForm" class="space-y-6">
+        
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Requesting For Location</label>
+            
+            <% if (user.role === 'store_manager') { %>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-store text-gray-400"></i>
+                    </div>
+                    <input type="text" value="My Assigned Store" disabled class="pl-10 w-full bg-gray-100 border border-gray-200 rounded-lg p-3 text-gray-600 font-bold">
+                    <input type="hidden" id="location_name" value=""> 
+                </div>
+            <% } else { %>
+                <div class="relative">
+                    <select id="location_name" class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <% locations.forEach(loc => { %>
+                           <option value="<%= loc.name %>"><%= loc.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="border-t border-b border-gray-100 py-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-indigo-500"></i> Items Needed
+                </h3>
+                <button type="button" onclick="addItemRow()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Add Another Line
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-12 gap-3 mb-2 px-1">
+                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Category</div>
+                <div class="col-span-5 text-[10px] font-bold text-gray-400 uppercase">Item Name</div>
+                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Quantity</div>
+                <div class="col-span-1"></div>
+            </div>
+
+            <div id="items-container" class="space-y-3">
+                </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="button" onclick="submitStock()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+                <span>Submit Request</span>
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </form>
+  </div>
+</div>
+
+<script>
+    // 1. INJECT MASTER DATA FROM BACKEND
+    // We pass the "stocks" array (which contains name, category, unit) to JavaScript
+    const masterInventory = <%- JSON.stringify(stocks || []) %>;
+
+    // 2. INITIALIZE
+    document.addEventListener('DOMContentLoaded', addItemRow);
+
+    // 3. ADD ROW FUNCTION
+    function addItemRow() {
+        const container = document.getElementById('items-container');
+        const rowId = Date.now(); // Unique ID for event handling
+        const div = document.createElement('div');
+        
+        div.className = "grid grid-cols-12 gap-3 items-center item-row bg-gray-50 p-2 rounded-lg border border-gray-100 animate-fade-in";
+        div.innerHTML = `
+            <div class="col-span-3">
+                <select onchange="filterItems(this)" class="category-select w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-medium text-gray-600 focus:border-indigo-500 focus:outline-none">
+                    <option value="" disabled selected>Select...</option>
+                    <option value="Cook">Cook</option>
+                    <option value="Drink">Drink</option>
+                    <option value="Supplies">Supplies</option>
+                    <option value="Packaging">Packaging</option>
+                </select>
+            </div>
+            
+            <div class="col-span-5 relative">
+                <select onchange="updateUnit(this)" disabled class="item-select w-full bg-gray-100 border border-gray-200 rounded-lg p-2.5 text-sm font-bold text-gray-800 focus:border-indigo-500 focus:outline-none opacity-60 cursor-not-allowed">
+                    <option value="">-- Choose Category First --</option>
+                </select>
+            </div>
+            
+            <div class="col-span-3 relative">
+                <input type="number" min="1" placeholder="0" class="qty-input w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-bold focus:border-indigo-500 focus:outline-none pl-3 pr-12">
+                <span class="unit-badge absolute right-3 top-2.5 text-xs font-bold text-gray-400 bg-gray-100 px-1 rounded">
+                    UNIT
+                </span>
+            </div>
+
+            <div class="col-span-1 flex justify-center">
+                <button type="button" onclick="removeRow(this)" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    // 4. FILTER ITEMS BASED ON CATEGORY
+    function filterItems(categorySelect) {
+        const row = categorySelect.closest('.item-row');
+        const itemSelect = row.querySelector('.item-select');
+        const selectedCat = categorySelect.value;
+        
+        // Clear previous options
+        itemSelect.innerHTML = '<option value="" disabled selected>Select Item...</option>';
+        
+        // Filter masterInventory for items matching the category
+        const filteredItems = masterInventory.filter(item => item.category === selectedCat);
+
+        if (filteredItems.length > 0) {
+            // Enable select and populate
+            itemSelect.disabled = false;
+            itemSelect.classList.remove('bg-gray-100', 'opacity-60', 'cursor-not-allowed');
+            itemSelect.classList.add('bg-white');
+
+            filteredItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.text = item.name;
+                option.setAttribute('data-unit', item.unit || 'pcs'); // Store unit in data attribute
+                itemSelect.appendChild(option);
+            });
+        } else {
+            // No items found
+            itemSelect.innerHTML = '<option value="">No items found</option>';
+            itemSelect.disabled = true;
+        }
+    }
+
+    // 5. UPDATE UNIT DISPLAY
+    function updateUnit(itemSelect) {
+        const row = itemSelect.closest('.item-row');
+        const unitBadge = row.querySelector('.unit-badge');
+        
+        // Get selected option
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+        const unit = selectedOption.getAttribute('data-unit');
+        
+        // Update text
+        if(unit) {
+            unitBadge.innerText = unit.toUpperCase();
+            unitBadge.classList.remove('text-gray-400');
+            unitBadge.classList.add('text-indigo-500');
+        }
+    }
+
+    function removeRow(btn) {
+        const row = btn.closest('.item-row');
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(-10px)';
+        setTimeout(() => row.remove(), 200);
+    }
+
+    // 6. SUBMIT FORM
+    async function submitStock() {
+        const locName = document.getElementById('location_name')?.value;
+        const rows = document.querySelectorAll('.item-row');
+        const items = [];
+
+        rows.forEach(row => {
+            const catSelect = row.querySelector('.category-select');
+            const itemSelect = row.querySelector('.item-select');
+            const qtyInput = row.querySelector('.qty-input');
+
+            // Only add valid rows
+            if(catSelect.value && itemSelect.value && qtyInput.value > 0) {
+                items.push({ 
+                    category: catSelect.value, 
+                    name: itemSelect.value, 
+                    quantity: qtyInput.value 
+                });
+            }
+        });
+
+        if(items.length === 0) return alert("Please add at least one item.");
+
+        try {
+            const btn = document.querySelector('button[onclick="submitStock()"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+            const res = await fetch('/api/stock/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ location_name: locName, items: items })
+            });
+
+            if(res.ok) {
+                window.location.href = '/admin/stock';
+            } else {
+                const err = await res.json();
+                alert(err.error || "Error creating request");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Server connection error");
+        }
+    }
+</script>
+
+<style>
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; transition: all 0.2s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>

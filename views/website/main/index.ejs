@@ -1,0 +1,191 @@
+<style>
+  /* Initial State: Hidden & Moved Down */
+  .scroll-hidden {
+    opacity: 0;
+    transform: translateY(60px);
+    /* This transition handles the entrance */
+    transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform; /* Optimization for smoothness */
+  }
+
+  /* Active State: Visible & Reset Position */
+  .reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<%- include('./header.ejs') %>
+
+<%- include('./our_category.ejs') %>
+
+<%- include('./mostsale.ejs') %>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+  let mm = gsap.matchMedia();
+
+  mm.add("(min-width: 1024px)", () => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#feature-scroll-section",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+        snap: {
+          snapTo: 1 / 4,
+          duration: { min: 0.3, max: 0.6 },
+          delay: 0,
+          ease: "power1.inOut",
+        },
+      },
+    });
+
+    const cards = document.querySelectorAll(".feature-card");
+
+    tl.to(cards[1], { y: 0, duration: 1, ease: "none" })
+      .to(cards[2], { y: 0, duration: 1, ease: "none" })
+      .to(cards[3], { y: 0, duration: 1, ease: "none" });
+
+    tl.add("zoomStart");
+    const gridWidth = 280;
+    const gridHeight = 400;
+    const gap = 24;
+    const commonGridProps = {
+      width: `${gridWidth}px`,
+      height: `${gridHeight}px`,
+      borderRadius: "1rem",
+      top: "50%",
+      y: "-50%",
+      ease: "power2.inOut",
+      duration: 1,
+    };
+    tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
+      .to(
+        ".icon-container",
+        {
+          width: "3.5rem",
+          height: "3.5rem",
+          marginBottom: "1rem",
+          duration: 1,
+        },
+        "zoomStart"
+      )
+      .to(
+        ".icon-container svg",
+        { width: "2rem", height: "2rem", duration: 1 },
+        "zoomStart"
+      );
+    tl.to(
+      cards[0],
+      {
+        ...commonGridProps,
+        left: `calc(50% - ${gridWidth * 2 + gap * 1.5}px)`,
+      },
+      "zoomStart"
+    )
+      .to(
+        cards[1],
+        {
+          ...commonGridProps,
+          left: `calc(50% - ${gridWidth * 1 + gap * 0.5}px)`,
+        },
+        "zoomStart"
+      )
+      .to(
+        cards[2],
+        { ...commonGridProps, left: `calc(50% + ${gap * 0.5}px)` },
+        "zoomStart"
+      )
+      .to(
+        cards[3],
+        {
+          ...commonGridProps,
+          left: `calc(50% + ${gridWidth * 1 + gap * 1.5}px)`,
+        },
+        "zoomStart"
+      );
+  });
+
+  mm.add("(max-width: 1023px)", () => {
+    gsap.set(".feature-card", {
+      position: "relative",
+      transform: "none",
+      height: "400px",
+      width: "100%",
+      marginBottom: "1rem",
+      borderRadius: "1rem",
+    });
+    gsap.set("#feature-scroll-section > div", { height: "auto" });
+    gsap.set("#feature-scroll-section .sticky", {
+      position: "relative",
+      height: "auto",
+      padding: "1rem",
+    });
+  });
+
+  // SCROLL ANIMATION OBSERVER
+  document.addEventListener("DOMContentLoaded", function () {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Just add the active class, don't remove scroll-hidden
+            // The CSS specificity handles the override
+            entry.target.classList.add("reveal-active");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    ); // Slightly higher threshold prevents accidental triggering
+
+    document
+      .querySelectorAll(".scroll-hidden")
+      .forEach((el) => observer.observe(el));
+  });
+
+  // Existing Functions
+  function filterMenu() {
+    const searchInput = document
+      .getElementById("menu-search")
+      .value.toLowerCase();
+    const productCards = document.querySelectorAll(".product-card");
+
+    productCards.forEach((card) => {
+      const productName = card
+        .querySelector(".product-name")
+        .innerText.toLowerCase();
+      if (productName.includes(searchInput)) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  async function addToCart(productId) {
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: productId }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        const notification = document.createElement("div");
+        notification.className =
+          "fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-xl z-50 font-bold animate-bounce";
+        notification.innerText = "Added to Cart! 🛒";
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+      } else {
+        alert("Error adding to cart");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+</script>

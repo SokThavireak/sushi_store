@@ -1,0 +1,128 @@
+/* --- FOOTER --- */
+footer {
+    background-color: var(--primary-black);
+    color: white;
+    padding: 5rem 1rem 2rem;
+    margin-top: 4rem;
+    border-radius: 24px 24px 0 0; /* Rounded top corners for app-feel */
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+    gap: 3rem;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-col h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.footer-links li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-links a {
+    color: #9CA3AF; /* Light gray */
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--primary-orange);
+}
+
+.footer-logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.footer-desc {
+    color: #9CA3AF;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 300px;
+}
+
+/* Newsletter Input */
+.newsletter-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.newsletter-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.newsletter-input:focus {
+    border-color: var(--primary-orange);
+    background: rgba(255,255,255,0.1);
+}
+
+.btn-subscribe {
+    background-color: var(--primary-orange);
+    color: white;
+    border: none;
+    padding: 0 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-subscribe:hover {
+    transform: translateY(-2px);
+}
+
+/* Bottom Bar */
+.footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #6B7280;
+    font-size: 0.85rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.social-links a:hover {
+    color: white;
+}
+
+/* Mobile Footer */
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        text-align: center;
+    }
+    .newsletter-form {
+        flex-direction: column;
+    }
+    .footer-bottom {
+        flex-direction: column-reverse;
+        gap: 1.5rem;
+    }
+    .footer-desc { margin: 0 auto 2rem; }
+}

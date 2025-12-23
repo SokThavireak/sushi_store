@@ -1,0 +1,130 @@
+<style>
+    /* Entrance Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .scroll-hidden {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 1s ease-out, transform 1s ease-out;
+    }
+    .animate-fade-up {
+        animation: fadeInUp 1.4s ease-out forwards;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-6 mt-36">
+    <div class="mb-20 flex justify-center scroll-hidden">
+        <div class="relative w-full max-w-4xl group">
+            <input type="text" id="menu-search" onkeyup="filterMenu()" placeholder="Search..." class="w-full pl-20 pr-8 py-6 rounded-full border-0 bg-white shadow-2xl text-2xl text-gray-700 focus:ring-4 focus:ring-orange-100 focus:outline-none" />
+            <div class="absolute left-8 top-1/2 -translate-y-1/2 text-orange-500 text-3xl"><i class="fa-solid fa-magnifying-glass"></i></div>
+        </div>
+    </div>
+
+    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+        <% categories.sort((a, b) => a.name === 'Most Sales' ? -1 : (b.name === 'Most Sales' ? 1 : 0)); %>
+        
+        <% categories.forEach((category) => { %>
+            <% let categoryProducts = category.name === 'Most Sales' ? products.filter(p => p.is_best_seller) : products.filter(p => p.category === category.name); %>
+            <% if (categoryProducts.length > 0) { %>
+                
+                <section 
+                    id="<%= category.name.trim().toLowerCase().replace(/\s+/g, '-') %>" 
+                    class="mb-24 menu-section scroll-hidden"
+                    style="scroll-margin-top: 160px;" 
+                >
+                    
+                    <h2 class="text-4xl font-extrabold text-gray-900 mb-10 border-b pb-4">
+                        <%= category.name === 'Most Sales' ? '🔥 Best Sellers' : category.name + ' Collection' %>
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                        <% categoryProducts.forEach(product => { %>
+                            <div class="group relative h-[450px] w-full rounded-[2.5rem] overflow-hidden shadow-xl product-card border border-gray-100">
+                                <div class="absolute inset-0 w-full h-full">
+                                    <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                                </div>
+                                <div class="absolute bottom-0 left-0 w-full p-8 z-20 flex items-end justify-between">
+                                    <div class="flex flex-col gap-1 w-3/4">
+                                        <h3 class="text-white text-3xl font-bold product-name"><%= product.name %></h3>
+                                        <span class="text-white text-2xl font-bold"><%= product.price %> ֏</span>
+                                    </div>
+                                    <button onclick="addToCart(<%= product.id %>)" class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all">
+                                        <i class="fa-solid fa-basket-shopping text-xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </section>
+            <% } %>
+        <% }) %>
+    <% } %>
+</div>
+
+<script>
+    // 1. FORCE SCROLL SCRIPT
+    function forceScrollToHash() {
+        if (window.location.hash) {
+            const id = window.location.hash.substring(1); // e.g. "rolls"
+            const element = document.getElementById(id);
+            
+            console.log("Trying to scroll to ID:", id); // Check Console F12 if this appears
+
+            if (element) {
+                // Flash the section border so you know it was found (Debug visual)
+                // element.style.border = "2px solid red"; 
+                
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+                
+                // If scrollIntoView fails, use fallback manual scroll
+                // const offset = 150; 
+                // const bodyRect = document.body.getBoundingClientRect().top;
+                // const elementRect = element.getBoundingClientRect().top;
+                // const elementPosition = elementRect - bodyRect;
+                // const offsetPosition = elementPosition - offset;
+                // window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+            } else {
+                console.warn("Element not found with ID:", id);
+                console.log("Available IDs on page:");
+                document.querySelectorAll('section[id]').forEach(el => console.log(el.id));
+            }
+        }
+    }
+
+    // Try scrolling immediately
+    window.addEventListener('load', forceScrollToHash);
+
+    // Try again after 500ms (in case images shifted layout)
+    setTimeout(forceScrollToHash, 500);
+
+    // Try again after 1.5 seconds (just to be absolutely sure)
+    setTimeout(forceScrollToHash, 1500);
+
+
+    // 2. ANIMATION OBSERVER
+    document.addEventListener("DOMContentLoaded", function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('scroll-hidden');
+                    entry.target.classList.add('animate-fade-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 }); 
+
+        document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
+    });
+
+    // 3. SEARCH FILTER
+    function filterMenu() {
+        const searchInput = document.getElementById('menu-search').value.toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+            const name = card.querySelector('.product-name').innerText.toLowerCase();
+            card.style.display = name.includes(searchInput) ? '' : 'none';
+        });
+    }
+</script>
