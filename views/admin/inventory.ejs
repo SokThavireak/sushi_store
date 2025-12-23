@@ -20,168 +20,172 @@
 
   <div class="p-8 bg-gray-50 min-h-screen">
 
-    <% // 1. SETUP CATEGORIES (Ensure "On Sale" and "Most Sales" exist) let displayCategories=categories ?
-      JSON.parse(JSON.stringify(categories)) : []; // Force add "On Sale" if it's missing if
-      (!displayCategories.some(c=> c.name === 'On Sale')) {
-      displayCategories.unshift({ name: 'On Sale' });
+    <% 
+      // 1. SETUP CATEGORIES (Ensure "On Sale" and "Most Sales" exist) 
+      let displayCategories = categories ? JSON.parse(JSON.stringify(categories)) : []; 
+
+      // Force add "On Sale" if it's missing 
+      if (!displayCategories.some(c => c.name === 'On Sale')) {
+        displayCategories.unshift({ name: 'On Sale' });
       }
+
       // Force add "Most Sales" if it's missing
       if (!displayCategories.some(c => c.name === 'Most Sales')) {
-      displayCategories.unshift({ name: 'Most Sales' });
+        displayCategories.unshift({ name: 'Most Sales' });
       }
 
       // 2. SORT ORDER: On Sale -> Most Sales -> Others
       displayCategories.sort((a, b) => {
-      if (a.name === 'On Sale') return -1;
-      if (b.name === 'On Sale') return 1;
-      if (a.name === 'Most Sales') return -1;
-      if (b.name === 'Most Sales') return 1;
-      return 0;
+        if (a.name === 'On Sale') return -1;
+        if (b.name === 'On Sale') return 1;
+        if (a.name === 'Most Sales') return -1;
+        if (b.name === 'Most Sales') return 1;
+        return 0;
       });
+    %>
+
+    <% displayCategories.forEach(function(category) { %>
+
+      <% 
+        let categoryProducts = []; 
+        
+        // --- FILTER LOGIC --- 
+        if (category.name === 'On Sale') { 
+            // Capture ALL products with a discount 
+            categoryProducts = products ? products.filter(p => 
+              p.discount_type && p.discount_type !== 'none' && p.discount_value > 0
+            ) : [];
+
+        } else if (category.name === 'Most Sales') {
+            // Capture Best Sellers
+            categoryProducts = products ? products.filter(p => p.is_best_seller === true) : [];
+
+        } else {
+            // Normal Category Filter
+            categoryProducts = products ? products.filter(p => p.category === category.name) : [];
+        }
       %>
 
-      <% displayCategories.forEach(function(category) { %>
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <% if (category.name === 'On Sale') { %>
+            💰 Big Deals (On Sale)
+          <% } else if (category.name === 'Most Sales') { %>
+            🔥 Best Sellers (Most Sales)
+          <% } else if (category.name === 'Roll') { %>
+            Most Wanted (Rolls)
+          <% } else { %>
+            <%= category.name %> Collection
+          <% } %>
 
-        <% let categoryProducts=[]; // --- FILTER LOGIC --- if (category.name==='On Sale' ) { // Capture ALL products
-          with a discount categoryProducts=products ? products.filter(p=>
-          p.discount_type && p.discount_type !== 'none' && p.discount_value > 0
-          ) : [];
+          <span class="text-sm font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+            <%= categoryProducts.length %> items
+          </span>
+        </h2>
 
-          } else if (category.name === 'Most Sales') {
-          // Capture Best Sellers
-          categoryProducts = products ? products.filter(p => p.is_best_seller === true) : [];
+        <% if (categoryProducts.length > 0) { %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% categoryProducts.forEach(function(product) { %>
 
-          } else {
-          // Normal Category Filter
-          categoryProducts = products ? products.filter(p => p.category === category.name) : [];
-          }
-          %>
+              <div class="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-md transition duration-300 relative group">
 
-          <div class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-
-              <% if (category.name==='On Sale' ) { %>
-                💰 Big Deals (On Sale)
-                <% } else if (category.name==='Most Sales' ) { %>
-                  🔥 Best Sellers (Most Sales)
-                  <% } else if (category.name==='Roll' ) { %>
-                    Most Wanted (Rolls)
-                    <% } else { %>
-                      <%= category.name %> Collection
-                        <% } %>
-
-                          <span class="text-sm font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-                            <%= categoryProducts.length %> items
-                          </span>
-            </h2>
-
-            <% if (categoryProducts.length> 0) { %>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <% categoryProducts.forEach(function(product) { %>
-
-                  <div
-                    class="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-md transition duration-300 relative group">
-
-                    <% if (product.is_best_seller) { %>
-                      <span
-                        class="absolute top-7 left-7 z-10 bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">TOP
-                        HIT</span>
-                      <% } %>
-
-                        <% // PRICE CALCULATION LOGIC let finalPrice=Number(product.price); let hasDiscount=false; if
-                          (product.discount_type==='percentage' && product.discount_value> 0) {
-                          finalPrice = product.price - (product.price * (product.discount_value / 100));
-                          hasDiscount = true;
-                          } else if (product.discount_type === 'subtract' && product.discount_value > 0) {
-                          finalPrice = product.price - product.discount_value;
-                          hasDiscount = true;
-                          }
-
-                          if (finalPrice < 0) finalPrice=0; // Format price nicely finalPrice=Math.round(finalPrice *
-                            100) / 100; %>
-
-                            <% if (hasDiscount) { %>
-                              <span
-                                class="absolute top-7 right-7 z-10 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
-                                <% if (product.discount_type==='percentage' ) { %>
-                                  -<%= product.discount_value %>%
-                                    <% } else { %>
-                                      -<%= product.discount_value %>$
-                                        <% } %>
-                              </span>
-                              <% } %>
-
-                                <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-gray-100">
-                                  <% if (product.image_url) { %>
-                                    <img src="<%= product.image_url %>" alt="<%= product.name %>"
-                                      class="w-full h-full object-cover" />
-                                    <% } else { %>
-                                      <div class="w-full h-full flex items-center justify-center text-gray-300">
-                                        <i class="fa-solid fa-image text-2xl"></i>
-                                      </div>
-                                      <% } %>
-                                </div>
-
-                                <div class="px-1">
-                                  <h3 class="font-bold text-gray-900 text-lg leading-tight mb-1">
-                                    <%= product.name %>
-                                  </h3>
-                                  <p class="text-xs text-gray-400 mb-4 font-medium">
-                                    <%= product.category %> Item
-                                  </p>
-
-                                  <div class="flex items-center justify-between">
-
-                                    <div class="flex flex-col">
-                                      <% if (hasDiscount) { %>
-                                        <span class="text-xs text-gray-400 line-through">
-                                          <%= product.price %> ៛
-                                        </span>
-                                        <span class="font-bold text-red-600 text-lg">
-                                          <%= finalPrice %> ៛
-                                        </span>
-                                        <% } else { %>
-                                          <span class="font-bold text-gray-900 text-lg">
-                                            <%= product.price %> ៛
-                                          </span>
-                                          <% } %>
-                                    </div>
-
-                                    <div class="flex gap-2">
-                                      <button data-product="<%= JSON.stringify(product) %>"
-                                        onclick="openEditModal(this)"
-                                        class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition text-gray-600">
-                                        <i class="fa-solid fa-pen"></i>
-                                      </button>
-
-                                      <form action="/admin/inventory/delete/<%= product.id %>" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                        <button type="submit"
-                                          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                                          Delete
-                                        </button>
-                                      </form>
-                                    </div>
-                                  </div>
-                                </div>
-                  </div>
-                  <% }); %>
-              </div>
-              <% } else { %>
-                <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50/50">
-                  <p class="text-gray-400 text-sm">No products in <%= category.name %> yet.</p>
-                  <% if (category.name !=='On Sale' && category.name !=='Most Sales' ) { %>
-                    <button onclick="toggleModal('add-modal')"
-                      class="text-blue-600 text-sm font-bold mt-2 hover:underline">
-                      + Add a <%= category.name %> Product
-                    </button>
-                    <% } %>
-                </div>
+                <% if (product.is_best_seller) { %>
+                  <span class="absolute top-7 left-7 z-10 bg-yellow-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">TOP HIT</span>
                 <% } %>
+
+                <% 
+                  // PRICE CALCULATION LOGIC 
+                  let finalPrice = Number(product.price);
+                  let hasDiscount = false; 
+
+                  if (product.discount_type === 'percentage' && product.discount_value > 0) {
+                      finalPrice = product.price - (product.price * (product.discount_value / 100));
+                      hasDiscount = true;
+                  } else if (product.discount_type === 'subtract' && product.discount_value > 0) {
+                      finalPrice = product.price - product.discount_value;
+                      hasDiscount = true;
+                  }
+
+                  if (finalPrice < 0) finalPrice = 0;
+                  
+                  // Format price nicely 
+                  finalPrice = Math.round(finalPrice * 100) / 100;
+                %>
+
+                <% if (hasDiscount) { %>
+                  <span class="absolute top-7 right-7 z-10 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                    <% if (product.discount_type === 'percentage') { %>
+                      -<%= product.discount_value %>%
+                    <% } else { %>
+                      -<%= product.discount_value %>$
+                    <% } %>
+                  </span>
+                <% } %>
+
+                <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-gray-100">
+                  <% if (product.image_url) { %>
+                    <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover" />
+                  <% } else { %>
+                    <div class="w-full h-full flex items-center justify-center text-gray-300">
+                      <i class="fa-solid fa-image text-2xl"></i>
+                    </div>
+                  <% } %>
+                </div>
+
+                <div class="px-1">
+                  <h3 class="font-bold text-gray-900 text-lg leading-tight mb-1">
+                    <%= product.name %>
+                  </h3>
+                  <p class="text-xs text-gray-400 mb-4 font-medium">
+                    <%= product.category %> Item
+                  </p>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex flex-col">
+                      <% if (hasDiscount) { %>
+                        <span class="text-xs text-gray-400 line-through">
+                          <%= product.price %> ៛
+                        </span>
+                        <span class="font-bold text-red-600 text-lg">
+                          <%= finalPrice %> ៛
+                        </span>
+                      <% } else { %>
+                        <span class="font-bold text-gray-900 text-lg">
+                          <%= product.price %> ៛
+                        </span>
+                      <% } %>
+                    </div>
+
+                    <div class="flex gap-2">
+                      <button data-product="<%= JSON.stringify(product) %>" onclick="openEditModal(this)"
+                        class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-blue-100 hover:text-blue-600 transition text-gray-600">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+
+                      <form action="/admin/inventory/delete/<%= product.id %>" method="POST"
+                        onsubmit="return confirm('Are you sure you want to delete this item?');">
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                          Delete
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
           </div>
-
-          <% }); %>
-
+        <% } else { %>
+          <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50/50">
+            <p class="text-gray-400 text-sm">No products in <%= category.name %> yet.</p>
+            <% if (category.name !== 'On Sale' && category.name !== 'Most Sales') { %>
+              <button onclick="toggleModal('add-modal')" class="text-blue-600 text-sm font-bold mt-2 hover:underline">
+                + Add a <%= category.name %> Product
+              </button>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% }); %>
   </div>
 </div>
 
@@ -203,23 +207,23 @@
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
           <select name="category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
-            <% if (categories && categories.length> 0) { %>
-              <% categories.forEach(cat=> {
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => {
                 // Skip virtual categories in the dropdown
                 if(cat.name !== 'On Sale' && cat.name !== 'Most Sales') { %>
-                <option value="<%= cat.name %>">
-                  <%= cat.name %>
-                </option>
-                <% } }) %>
-                  <% } else { %>
-                    <option value="" disabled>No Categories Found</option>
-                    <% } %>
+                  <option value="<%= cat.name %>">
+                    <%= cat.name %>
+                  </option>
+                <% } 
+              }) %>
+            <% } else { %>
+              <option value="" disabled>No Categories Found</option>
+            <% } %>
           </select>
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price</label>
-          <input type="number" name="price" required
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+          <input type="number" name="price" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
         </div>
       </div>
 
@@ -259,8 +263,7 @@
   </div>
 </div>
 
-<div id="edit-modal"
-  class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+<div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
       <h3 class="text-lg font-bold text-gray-800">Edit Product</h3>
@@ -279,14 +282,15 @@
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
           <select id="edit-category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
-            <% if (categories && categories.length> 0) { %>
-              <% categories.forEach(cat=> {
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => {
                 if(cat.name !== 'On Sale' && cat.name !== 'Most Sales') { %>
-                <option value="<%= cat.name %>">
-                  <%= cat.name %>
-                </option>
-                <% } }) %>
-                  <% } %>
+                  <option value="<%= cat.name %>">
+                    <%= cat.name %>
+                  </option>
+                <% } 
+              }) %>
+            <% } %>
           </select>
         </div>
         <div>
@@ -354,11 +358,11 @@
     document.getElementById("edit-name").value = product.name;
     document.getElementById("edit-category").value = product.category;
     document.getElementById("edit-price").value = product.price;
-
+    
     // NEW: Load Discount Data
     document.getElementById("edit-discount_type").value = product.discount_type || 'none';
     document.getElementById("edit-discount_value").value = product.discount_value || 0;
-
+    
     document.getElementById("edit-image_url").value = product.image_url;
     document.getElementById("edit-is_best_seller").value = product.is_best_seller ? "true" : "false";
     toggleModal("edit-modal");
@@ -367,7 +371,7 @@
   function deleteItem(id) {
     // 1. Confirm with the user
     if (!confirm("Are you sure you want to delete this item?")) return;
-
+    
     // 2. Send DELETE request to the server
     fetch('/api/inventory/' + id, {
       method: 'DELETE',
@@ -393,7 +397,6 @@
 
   async function submitEdit() {
     const id = document.getElementById("edit-id").value;
-
     const data = {
       name: document.getElementById("edit-name").value,
       category: document.getElementById("edit-category").value,
@@ -404,7 +407,7 @@
       image_url: document.getElementById("edit-image_url").value,
       is_best_seller: document.getElementById("edit-is_best_seller").value === "true"
     };
-
+    
     try {
       const res = await fetch(`/api/inventory/${id}`, {
         method: "PATCH",

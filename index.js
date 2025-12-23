@@ -1204,15 +1204,16 @@ app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'st
 //Updated Order Logic
 app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
     try {
-        // 1. Update SELECT to include user_name (for the new table column)
+        // FIXED: Removed 'u.name' because it doesn't exist in your users table yet.
+        // We only select o.* and u.email.
         let query = `
-            SELECT o.*, u.email, u.name as user_name 
+            SELECT o.*, u.email 
             FROM orders o 
             LEFT JOIN users u ON o.user_id = u.id 
         `;
         let params = [];
 
-        // 2. KEEP EXISTING FILTER: If User is Store Manager OR Staff OR Cashier, filter by their location
+        // 2. KEEP EXISTING FILTER: If User is Store Manager, Staff, or Cashier, filter by their location
         if ((req.user.role === 'store_manager' || req.user.role === 'staff' || req.user.role === 'cashier') && req.user.assigned_location_id) {
             const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
             if (locRes.rows.length > 0) {
@@ -1231,15 +1232,15 @@ app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'sto
 
         const result = await pool.query(query, params);
         
-        // Ensure path matches your folder structure (views/admin/orders.ejs or views/admin/orders/orders.ejs)
-        res.render('admin/orders', { 
+        // Render the View
+        res.render('admin/orders/orders', { 
             title: 'Order Management', 
             orders: result.rows, 
             user: req.user 
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error");
+        res.status(500).send("Server Error: " + err.message);
     }
 });
 
