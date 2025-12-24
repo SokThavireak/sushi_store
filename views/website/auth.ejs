@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Welcome to Opulent POS</title>
     <style>
-        /* Custom Animation Logic */
+        /* BASE STYLES (Desktop) */
         .container-box {
             position: relative;
             overflow: hidden;
@@ -38,6 +38,7 @@
             z-index: 1;
         }
 
+        /* DESKTOP ANIMATIONS */
         .container-box.right-panel-active .sign-in-container {
             transform: translateX(100%);
         }
@@ -54,7 +55,7 @@
             50%, 100% { opacity: 1; z-index: 5; }
         }
 
-        /* The Moving Overlay */
+        /* OVERLAY (The Orange Slider) */
         .overlay-container {
             position: absolute;
             top: 0;
@@ -70,9 +71,8 @@
             transform: translateX(-100%);
         }
 
-        /* ORANGE GRADIENT BACKGROUND */
         .overlay {
-            background: #f97316; 
+            background: #f97316;
             background: -webkit-linear-gradient(to right, #ea580c, #f97316); 
             background: linear-gradient(to right, #ea580c, #f97316);
             background-repeat: no-repeat;
@@ -106,30 +106,99 @@
             transition: transform 0.6s ease-in-out;
         }
 
-        .overlay-left {
-            transform: translateX(-20%);
-        }
+        .overlay-left { transform: translateX(-20%); }
+        .container-box.right-panel-active .overlay-left { transform: translateX(0); }
+        .overlay-right { right: 0; transform: translateX(0); }
+        .container-box.right-panel-active .overlay-right { transform: translateX(20%); }
 
-        .container-box.right-panel-active .overlay-left {
-            transform: translateX(0);
-        }
+        /* MOBILE TOGGLE LINKS (Hidden on Desktop) */
+        .mobile-toggle { display: none; }
 
-        .overlay-right {
-            right: 0;
-            transform: translateX(0);
-        }
+        /* ========================================= */
+        /* MOBILE RESPONSIVENESS FIX                 */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            .container-box {
+                width: 90%; /* Use full width on phone */
+                min-height: 550px; /* Taller to fit content */
+                border-radius: 20px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            }
 
-        .container-box.right-panel-active .overlay-right {
-            transform: translateX(20%);
+            /* Hide the sliding overlay on mobile */
+            .overlay-container {
+                display: none;
+            }
+
+            /* Make forms full width */
+            .form-container {
+                width: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                padding: 0;
+            }
+
+            .sign-in-container {
+                width: 100%;
+                transition: all 0.4s ease-in-out;
+            }
+
+            .sign-up-container {
+                width: 100%;
+                transition: all 0.4s ease-in-out;
+            }
+
+            /* MOBILE STATE LOGIC */
+            /* Default: Show Sign In, Hide Sign Up */
+            .sign-in-container {
+                opacity: 1;
+                z-index: 5;
+                pointer-events: all;
+            }
+            .sign-up-container {
+                opacity: 0;
+                z-index: 1;
+                pointer-events: none;
+                transform: none; /* Reset desktop transform */
+            }
+
+            /* Active (Register): Show Sign Up, Hide Sign In */
+            .container-box.right-panel-active .sign-in-container {
+                transform: none; /* Reset desktop transform */
+                opacity: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+            .container-box.right-panel-active .sign-up-container {
+                transform: none; /* Reset desktop transform */
+                opacity: 1;
+                z-index: 5;
+                pointer-events: all;
+                animation: none; /* Disable desktop animation */
+            }
+
+            /* Show the Mobile Toggle Links */
+            .mobile-toggle {
+                display: block;
+                margin-top: 20px;
+                font-size: 14px;
+                color: #6b7280;
+            }
+            .mobile-toggle a {
+                color: #f97316;
+                font-weight: bold;
+                cursor: pointer;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center flex-col font-sans h-screen">
+<body class="bg-gray-100 flex justify-center items-center flex-col font-sans h-screen px-4">
 
     <div class="container-box bg-white rounded-[20px] shadow-2xl relative <%= (typeof action !== 'undefined' && action === 'register') ? 'right-panel-active' : '' %>" id="container">
         
         <div class="form-container sign-up-container">
-            <form action="/register" method="POST" class="bg-white flex flex-col items-center justify-center h-full px-12 text-center">
+            <form action="/register" method="POST" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
                 <h1 class="font-bold text-3xl mb-4">Create Account</h1>
                 
                 <div class="flex gap-4 mb-4">
@@ -146,11 +215,15 @@
                 <button class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
                     Sign Up
                 </button>
+
+                <p class="mobile-toggle">
+                    Already have an account? <a id="mobileSignIn">Sign In</a>
+                </p>
             </form>
         </div>
 
         <div class="form-container sign-in-container">
-            <form action="/login" method="POST" class="bg-white flex flex-col items-center justify-center h-full px-12 text-center">
+            <form action="/login" method="POST" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
                 <h1 class="font-bold text-3xl mb-4">Sign in</h1>
                 
                 <div class="flex gap-4 mb-4">
@@ -169,12 +242,15 @@
                 <button class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
                     Sign In
                 </button>
+
+                <p class="mobile-toggle">
+                    Don't have an account? <a id="mobileSignUp">Sign Up</a>
+                </p>
             </form>
         </div>
 
         <div class="overlay-container">
             <div class="overlay">
-                
                 <div class="overlay-panel overlay-left">
                     <h1 class="font-bold text-3xl mb-4">Welcome Back!</h1>
                     <p class="text-sm font-thin leading-5 mb-8">
@@ -194,23 +270,37 @@
                         Sign Up
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script>
+        // Desktop Buttons
         const signUpButton = document.getElementById('signUp');
         const signInButton = document.getElementById('signIn');
+        // Mobile Buttons
+        const mobileSignUp = document.getElementById('mobileSignUp');
+        const mobileSignIn = document.getElementById('mobileSignIn');
+        
         const container = document.getElementById('container');
 
-        signUpButton.addEventListener('click', () => {
+        // Function to switch to Sign Up
+        function activateSignUp() {
             container.classList.add("right-panel-active");
-        });
+        }
 
-        signInButton.addEventListener('click', () => {
+        // Function to switch to Sign In
+        function activateSignIn() {
             container.classList.remove("right-panel-active");
-        });
+        }
+
+        // Add Event Listeners
+        signUpButton.addEventListener('click', activateSignUp);
+        signInButton.addEventListener('click', activateSignIn);
+        
+        // Mobile Event Listeners
+        if(mobileSignUp) mobileSignUp.addEventListener('click', activateSignUp);
+        if(mobileSignIn) mobileSignIn.addEventListener('click', activateSignIn);
     </script>
 </body>
 </html>
