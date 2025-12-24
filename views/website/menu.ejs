@@ -113,7 +113,10 @@
 </div>
 
 <script>
-    // 1. SCROLL TO HASH (Preserves navigation from Categories page)
+    // 1. CHECK LOGIN STATUS (Server-side variable passed to Client)
+    const IS_LOGGED_IN = <%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>;
+
+    // 2. SCROLL TO HASH
     function forceScrollToHash() {
         if (window.location.hash) {
             const id = window.location.hash.substring(1);
@@ -128,7 +131,7 @@
     window.addEventListener('load', forceScrollToHash);
     setTimeout(forceScrollToHash, 500);
 
-    // 2. ANIMATION OBSERVER
+    // 3. ANIMATION OBSERVER
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -143,7 +146,7 @@
         document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
 
-    // 3. SEARCH FILTER
+    // 4. SEARCH FILTER
     function filterMenu() {
         const searchInput = document.getElementById('menu-search').value.toLowerCase();
         document.querySelectorAll('.product-card').forEach(card => {
@@ -158,9 +161,11 @@
         });
     }
 
-    // 4. NEW: STYLED NOTIFICATION SYSTEM (Consistent with Auth/Admin)
+    // 5. STYLED NOTIFICATION SYSTEM
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
+        if (!container) return;
+
         const toast = document.createElement('div');
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
@@ -168,7 +173,7 @@
 
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
         
-        // Use CSS Animation instead of JS transition for consistency
+        // CSS Animation
         toast.style.animation = 'slideIn 0.5s forwards';
         
         toast.innerHTML = `
@@ -178,14 +183,25 @@
 
         container.appendChild(toast);
 
+        // Remove after 3 seconds
         setTimeout(() => {
             toast.style.animation = 'slideOut 0.5s forwards';
             setTimeout(() => toast.remove(), 500);
         }, 3000);
     }
 
-    // 5. ADD TO CART
+    // 6. ADD TO CART (With Login Check)
     async function addToCart(productId) {
+        // Step A: Check Login first
+        if (!IS_LOGGED_IN) {
+            showNotification('⚠️ Please Login to Order!', 'error');
+            setTimeout(() => {
+                window.location.href = '/auth'; // Redirect to login page
+            }, 1500);
+            return;
+        }
+
+        // Step B: Proceed to add to cart
         try {
             const res = await fetch('/api/cart', {
                 method: 'POST',
