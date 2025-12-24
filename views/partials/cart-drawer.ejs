@@ -1,61 +1,53 @@
-<div 
-  id="cart-overlay" 
-  class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity duration-300 opacity-0" 
-  onclick="toggleCart()"
-></div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div id="cart-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity duration-300 opacity-0"
+    onclick="toggleCart()"></div>
 
-<div 
-  id="cart-drawer" 
-  class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white z-[70] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col font-sans"
->
-  
-  <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
-    <h2 class="text-xl font-bold text-gray-900">Your Order</h2>
-    <button 
-      onclick="toggleCart()" 
-      class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
-    >
-      <i class="fa-solid fa-xmark text-xl"></i>
-    </button>
-  </div>
+<div id="cart-drawer"
+    class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white z-[70] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col font-sans">
 
-  <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-6">
-    <p class="text-center text-gray-500 mt-10">Loading cart...</p>
-  </div>
-
-  <div class="border-t border-gray-100 p-6 bg-gray-50/50">
-    <div class="flex justify-between font-bold text-lg mb-6">
-        <span>Total</span>
-        <span id="cart-total-price" class="text-orange-500">0 ֏</span>
+    <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
+        <h2 class="text-xl font-bold text-gray-900">Your Order</h2>
+        <button onclick="toggleCart()"
+            class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
     </div>
-    
-    <% if (typeof user !== 'undefined' && user.role === 'staff') { %>
-        <div class="mb-4">
-            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Select Table</label>
-            <select id="staff-table-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-gray-700">
-                <option value="">-- Choose Table --</option>
-                <% for(let i=1; i<=30; i++) { %>
-                    <option value="<%= i %>">Table <%= i %></option>
-                <% } %>
-                <option value="Takeaway">Takeaway</option>
-            </select>
+
+    <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+        <p class="text-center text-gray-500 mt-10">Loading cart...</p>
+    </div>
+
+    <div class="border-t border-gray-100 p-6 bg-gray-50/50">
+        <div class="flex justify-between font-bold text-lg mb-6">
+            <span>Total</span>
+            <span id="cart-total-price" class="text-orange-500">0 ֏</span>
         </div>
 
-        <button 
-          id="checkout-btn" 
-          onclick="createStaffOrder()" 
-          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-full flex items-center justify-center shadow-lg transition-all pointer-events-none opacity-50">
-            <i class="fa-solid fa-paper-plane mr-2"></i> Confirm Order
-        </button>
-    <% } else { %>
-        <a 
-          id="checkout-btn" 
-          href="/checkout" 
-          class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-full flex items-center justify-center shadow-lg transition-all pointer-events-none opacity-50">
-            Proceed to Checkout
-        </a>
-    <% } %>
-  </div>
+        <% if (typeof user !=='undefined' && user.role==='staff' ) { %>
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Select Table</label>
+                <select id="staff-table-select"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-gray-700">
+                    <option value="">-- Choose Table --</option>
+                    <% for(let i=1; i<=30; i++) { %>
+                        <option value="<%= i %>">Table <%= i %>
+                        </option>
+                        <% } %>
+                            <option value="Takeaway">Takeaway</option>
+                </select>
+            </div>
+
+            <button id="checkout-btn" onclick="createStaffOrder()"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-full flex items-center justify-center shadow-lg transition-all pointer-events-none opacity-50">
+                <i class="fa-solid fa-paper-plane mr-2"></i> Confirm Order
+            </button>
+            <% } else { %>
+                <a id="checkout-btn" href="/checkout"
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-full flex items-center justify-center shadow-lg transition-all pointer-events-none opacity-50">
+                    Proceed to Checkout
+                </a>
+                <% } %>
+    </div>
 </div>
 
 <script>
@@ -63,7 +55,7 @@
         const drawer = document.getElementById('cart-drawer');
         const overlay = document.getElementById('cart-overlay');
         const isOpen = drawer.classList.contains('translate-x-0');
-        
+
         if (isOpen) {
             drawer.classList.remove('translate-x-0');
             drawer.classList.add('translate-x-full');
@@ -74,7 +66,7 @@
             drawer.classList.add('translate-x-0');
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            fetchCart(); 
+            fetchCart();
         }
     }
 
@@ -147,8 +139,8 @@
     }
 
     async function addToCart(productId) {
+        // 1. Open the drawer if it's closed (optional, removed if you want just the alert)
         const drawer = document.getElementById('cart-drawer');
-        if (!drawer.classList.contains('translate-x-0')) toggleCart();
 
         try {
             const res = await fetch('/api/cart', {
@@ -156,15 +148,37 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productId })
             });
-            if (res.status === 401) {
-                 alert("Please login to add items");
-                 setTimeout(() => window.location.href = "/login", 1500);
-            } else if (res.ok) {
-                 fetchCart(); 
-            }
-        } catch (err) { console.error(err); }
-    }
 
+            // 2. CHECK FOR 401 (NOT LOGGED IN)
+            if (res.status === 401) {
+                // Use SweetAlert instead of window.alert
+                Swal.fire({
+                    title: 'Login Required',
+                    text: "Please login to add items to your cart",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f97316',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Login Now',
+                    background: '#fff',
+                    customClass: { popup: 'rounded-2xl shadow-xl' }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/auth'; // Redirect to your login page
+                    }
+                });
+                return;
+            }
+
+            // 3. SUCCESS
+            else if (res.ok) {
+                if (!drawer.classList.contains('translate-x-0')) toggleCart(); // Open cart on success
+                fetchCart();
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
     // UPDATED: Create Order with Table Number
     async function createStaffOrder() {
         const tableSelect = document.getElementById('staff-table-select');
@@ -176,7 +190,7 @@
             return;
         }
 
-        if(!confirm(`Confirm order for Table ${tableNumber}?`)) return;
+        if (!confirm(`Confirm order for Table ${tableNumber}?`)) return;
 
         try {
             const res = await fetch('/api/orders', {
@@ -186,7 +200,7 @@
             });
 
             if (res.redirected) {
-                window.location.href = res.url; 
+                window.location.href = res.url;
             } else {
                 alert("Order Failed");
             }
