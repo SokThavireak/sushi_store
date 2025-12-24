@@ -70,19 +70,21 @@ pool.connect().then(() => console.log('✅ Database connected successfully')).ca
 // =========================================================
 // 1. Middleware Setup (FIXED: Memory Leak)
 // =========================================================
+// Add this line so cookies work behind Render's proxy
+app.set('trust proxy', 1); 
+
 app.use(
   session({
-    store: new pgSession({
-      pool: pool,                // Use our DB pool
-      tableName: 'session',      // Use the table we created in Step 2
-      createTableIfMissing: true // Tries to create table if you forgot Step 2
+    store: new pgSession({ 
+      pool: pool, 
+      tableName: 'session' 
     }),
-    secret: process.env.SESSION_SECRET || "fallback_secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false, // Changed to false for better login handling
+    saveUninitialized: false,
     cookie: { 
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        secure: isProduction // Secure cookies in production
+        secure: true, // Requires 'trust proxy' to be set!
+        maxAge: 24 * 60 * 60 * 1000 
     } 
   })
 );
