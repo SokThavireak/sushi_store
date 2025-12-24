@@ -11,6 +11,15 @@
         transform: translateY(40px);
         transition: opacity 0.8s ease-out, transform 0.8s ease-out;
     }
+
+    /* CRITICAL FIX: On mobile, force elements to be visible immediately 
+       to prevent the "white screen" issue if the animation lags. */
+    @media (max-width: 640px) {
+        .scroll-hidden {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+    }
     
     /* Active animation class */
     .animate-fade-up {
@@ -20,16 +29,16 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-24 lg:mt-36">
     
-    <div class="mb-12 lg:mb-20 flex justify-center scroll-hidden">
+    <div class="mb-8 lg:mb-20 flex justify-center scroll-hidden">
         <div class="relative w-full max-w-4xl group">
             <input 
                 type="text" 
                 id="menu-search" 
                 onkeyup="filterMenu()" 
                 placeholder="Search..." 
-                class="w-full pl-14 lg:pl-20 pr-8 py-4 lg:py-6 rounded-full border-0 bg-white shadow-xl text-lg lg:text-2xl text-gray-700 focus:ring-4 focus:ring-orange-100 focus:outline-none transition-all" 
+                class="w-full pl-12 lg:pl-20 pr-8 py-3 lg:py-6 rounded-full border-0 bg-white shadow-xl text-base lg:text-2xl text-gray-700 focus:ring-4 focus:ring-orange-100 focus:outline-none transition-all" 
             />
-            <div class="absolute left-5 lg:left-8 top-1/2 -translate-y-1/2 text-orange-500 text-2xl lg:text-3xl">
+            <div class="absolute left-5 lg:left-8 top-1/2 -translate-y-1/2 text-orange-500 text-xl lg:text-3xl">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
         </div>
@@ -44,18 +53,17 @@
                 
                 <section 
                     id="<%= category.name.trim().toLowerCase().replace(/\s+/g, '-') %>" 
-                    class="mb-16 lg:mb-24 menu-section scroll-hidden"
+                    class="mb-12 lg:mb-24 menu-section scroll-hidden"
                     style="scroll-margin-top: 140px;" 
                 >
-                     
-                    <h2 class="text-2xl lg:text-4xl font-extrabold text-gray-900 mb-6 lg:mb-10 border-b pb-4 flex items-center gap-2">
+                    <h2 class="text-xl lg:text-4xl font-extrabold text-gray-900 mb-4 lg:mb-10 border-b pb-4 flex items-center gap-2">
                         <%= category.name === 'Most Sales' ? '🔥 Best Sellers' : category.name + ' Collection' %>
                     </h2>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
+                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-10">
                         <% categoryProducts.forEach(product => { %>
                             
-                            <div class="group relative h-[350px] lg:h-[450px] w-full rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-lg hover:shadow-2xl product-card border border-gray-100 transition-all duration-300">
+                            <div class="group relative h-64 lg:h-[450px] w-full rounded-2xl lg:rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl product-card border border-gray-100 transition-all duration-300">
                                 
                                 <div class="absolute inset-0 w-full h-full">
                                     <img 
@@ -64,25 +72,25 @@
                                         loading="lazy" 
                                         alt="<%= product.name %>"
                                     />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                                 </div>
                                 
-                                <div class="absolute bottom-0 left-0 w-full p-6 lg:p-8 z-20 flex items-end justify-between">
+                                <div class="absolute bottom-0 left-0 w-full p-3 lg:p-8 z-20 flex items-end justify-between">
                                     
-                                    <div class="flex flex-col gap-1 w-[70%]">
-                                        <h3 class="text-white text-xl lg:text-3xl font-bold product-name leading-tight drop-shadow-md">
+                                    <div class="flex flex-col gap-0.5 lg:gap-1 w-[75%]">
+                                        <h3 class="text-white text-sm lg:text-3xl font-bold product-name leading-tight drop-shadow-md line-clamp-2">
                                             <%= product.name %>
                                         </h3>
-                                        <span class="text-orange-300 text-lg lg:text-2xl font-bold">
+                                        <span class="text-orange-300 text-sm lg:text-2xl font-bold">
                                             <%= product.price %> ֏
                                         </span>
                                     </div>
 
                                     <button 
                                         onclick="addToCart(<%= product.id %>)" 
-                                        class="w-12 h-12 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all transform active:scale-95"
+                                        class="w-8 h-8 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all transform active:scale-95"
                                     >
-                                        <i class="fa-solid fa-basket-shopping text-lg lg:text-xl"></i>
+                                        <i class="fa-solid fa-basket-shopping text-xs lg:text-xl"></i>
                                     </button>
                                 </div>
                             </div>
@@ -96,27 +104,25 @@
 </div>
 
 <script>
-    // 1. FORCE SCROLL SCRIPT (Handles Anchor Links)
+    // 1. SCROLL SCRIPT
     function forceScrollToHash() {
         if (window.location.hash) {
-            const id = window.location.hash.substring(1); 
+            const id = window.location.hash.substring(1);
             const element = document.getElementById(id);
-
             if (element) {
-                const yOffset = -140; // Offset for navbar
+                const yOffset = -140; 
                 const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
                 window.scrollTo({ top: y, behavior: 'smooth' });
             }
         }
     }
 
-    // Try scrolling at multiple intervals to ensure it works after images load
     window.addEventListener('load', forceScrollToHash);
     setTimeout(forceScrollToHash, 500);
-    setTimeout(forceScrollToHash, 1000);
 
-    // 2. ANIMATION OBSERVER (Make cards appear)
+    // 2. ANIMATION OBSERVER
     document.addEventListener("DOMContentLoaded", function() {
+        // We only really need this on desktop now since CSS handles mobile visibility
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -125,7 +131,7 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.05 }); // Lower threshold for better mobile detection
+        }, { threshold: 0 }); // Threshold 0 ensures it triggers as soon as 1px is visible
 
         document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
@@ -135,13 +141,16 @@
         const searchInput = document.getElementById('menu-search').value.toLowerCase();
         document.querySelectorAll('.product-card').forEach(card => {
             const name = card.querySelector('.product-name').innerText.toLowerCase();
-            // Find parent wrapper if needed, or just hide card
-            // We hide the direct parent wrapper if it's the grid item
+            // Use closest wrapper if it exists (the grid div wrapper), otherwise the card itself
+            // In the new grid layout, the card IS the direct child of the grid, so we just toggle the card.
             const wrapper = card.closest('.group'); 
-            if(wrapper) {
-                wrapper.style.display = name.includes(searchInput) ? '' : 'none';
+            
+            // Note: In the new grid structure, 'wrapper' is the card itself basically. 
+            // We'll just toggle the display of the card div directly.
+            if(name.includes(searchInput)) {
+                card.style.display = '';
             } else {
-                card.style.display = name.includes(searchInput) ? '' : 'none';
+                card.style.display = 'none';
             }
         });
     }
