@@ -17,7 +17,7 @@
             to { transform: translateX(100%); opacity: 0; }
         }
 
-        /* BASE STYLES (Desktop) */
+        /* BASE STYLES */
         .container-box {
             position: relative;
             overflow: hidden;
@@ -39,7 +39,7 @@
         /* Sign Up Form */
         .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
 
-        /* DESKTOP ANIMATIONS */
+        /* ANIMATIONS */
         .container-box.right-panel-active .sign-in-container { transform: translateX(100%); }
         .container-box.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; animation: show 0.6s; }
 
@@ -48,7 +48,7 @@
             50%, 100% { opacity: 1; z-index: 5; }
         }
 
-        /* OVERLAY (The Orange Slider) */
+        /* OVERLAY */
         .overlay-container {
             position: absolute; top: 0; left: 50%; width: 50%; height: 100%; overflow: hidden;
             transition: transform 0.6s ease-in-out; z-index: 100;
@@ -76,10 +76,10 @@
         .overlay-right { right: 0; transform: translateX(0); }
         .container-box.right-panel-active .overlay-right { transform: translateX(20%); }
 
-        /* MOBILE TOGGLE LINKS (Hidden on Desktop) */
+        /* MOBILE TOGGLE LINKS */
         .mobile-toggle { display: none; }
 
-        /* MOBILE RESPONSIVENESS FIX */
+        /* MOBILE RESPONSIVENESS */
         @media (max-width: 768px) {
             .container-box { width: 90%; min-height: 550px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
             .overlay-container { display: none; }
@@ -223,12 +223,13 @@
            3. AUTH AJAX HANDLER 
            ======================== */
         async function handleAuth(event, endpoint) {
-            event.preventDefault(); 
+            event.preventDefault(); // Stop page reload
             
             const form = event.target;
             const btn = form.querySelector('button');
             const originalText = btn.innerText;
             
+            // 1. Loading State
             btn.innerText = "Processing...";
             btn.disabled = true;
             btn.classList.add('opacity-70', 'cursor-not-allowed');
@@ -237,6 +238,7 @@
             const data = Object.fromEntries(formData.entries());
 
             try {
+                // 2. Send Request
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -246,14 +248,34 @@
                 const result = await response.json().catch(() => ({}));
 
                 if (response.ok) {
+                    // SUCCESS
                     showNotification(result.message || 'Authentication Successful!', 'success');
                     
-                    // REDIRECT based on server response (Staff -> /staff/menu)
+                    // -----------------------------------------------------
+                    // REDIRECT LOGIC BASED ON ROLE
+                    // -----------------------------------------------------
+                    let targetUrl = '/'; // Default: User Home
+
+                    // Attempt to get role from the response object
+                    // Backend typically sends: { user: { role: 'staff', ... }, ... }
+                    const role = result.role || (result.user && result.user.role);
+
+                    if (role) {
+                        if (role === 'staff') {
+                            targetUrl = '/staff/menu';
+                        } else if (['admin', 'manager', 'store_manager'].includes(role)) {
+                            targetUrl = '/dashboard';
+                        } else {
+                            targetUrl = '/'; // Standard user
+                        }
+                    }
+
                     setTimeout(() => {
-                        window.location.href = result.redirectUrl || '/'; 
+                        window.location.href = targetUrl; 
                     }, 1000);
 
                 } else {
+                    // ERROR
                     showNotification(result.error || 'Invalid credentials', 'error');
                     btn.innerText = originalText;
                     btn.disabled = false;
