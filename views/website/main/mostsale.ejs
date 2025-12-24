@@ -1,19 +1,21 @@
-<section class="py-16 bg-white">
+<section class="py-8 lg:py-16 bg-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-end mb-8 scroll-hidden">
-      <h2 class="text-3xl font-extrabold text-gray-900">🔥 Most Sales</h2>
-      <a href="/menu" class="text-orange-500 font-semibold hover:underline">View All &rarr;</a>
+    <div class="flex justify-between items-end mb-6 lg:mb-8 scroll-hidden">
+      <h2 class="text-2xl lg:text-3xl font-extrabold text-gray-900">🔥 Most Sales</h2>
+      <a href="/menu" class="text-orange-500 font-semibold hover:underline text-sm lg:text-base">View All &rarr;</a>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-      <% const bestSellers = (typeof products !== 'undefined') ?
-      products.filter(p => p.is_best_seller === true) : []; const displayItems =
-      bestSellers.slice(0, 4); %> <% if (displayItems.length > 0) { %> <%
-      displayItems.forEach((product, index) => { %>
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
+      <% const bestSellers = (typeof products !== 'undefined') ? products.filter(p => p.is_best_seller === true) : []; 
+         const displayItems = bestSellers.slice(0, 4);
+      %> 
+      
+      <% if (displayItems.length > 0) { %> 
+        <% displayItems.forEach((product, index) => { %>
 
       <div
-        class="group relative h-[450px] w-full rounded-[2rem] overflow-hidden shadow-xl transition-all duration-300 hover:shadow-2xl border border-gray-100 scroll-hidden"
-        style="transition-delay: <%= index * 0.4 %>s"
+        class="group relative h-64 lg:h-[450px] w-full rounded-2xl lg:rounded-[2rem] overflow-hidden shadow-md lg:shadow-xl transition-all duration-300 hover:shadow-2xl border border-gray-100 scroll-hidden"
+        style="transition-delay: <%= index * 0.1 %>s"
       >
         <div class="absolute inset-0 w-full h-full">
           <% if (product.image_url) { %>
@@ -23,66 +25,58 @@
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <% } else { %>
-          <div
-            class="w-full h-full bg-gray-800 flex items-center justify-center text-6xl"
-          >
+          <div class="w-full h-full bg-gray-800 flex items-center justify-center text-4xl lg:text-6xl">
             🍣
           </div>
           <% } %>
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"
-          ></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-300"></div>
         </div>
 
-        <div
-          class="absolute top-5 left-5 bg-yellow-400 text-black text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-20 flex items-center gap-1"
-        >
+        <div class="absolute top-3 left-3 lg:top-5 lg:left-5 bg-yellow-400 text-black text-[10px] lg:text-xs font-bold px-2 py-1 lg:px-3 lg:py-1.5 rounded-full shadow-lg z-20 flex items-center gap-1">
           <i class="fa-solid fa-fire"></i> TOP HIT
         </div>
 
-        <div
-          class="absolute bottom-0 left-0 w-full p-6 z-20 flex flex-col gap-2 translate-y-2 group-hover:translate-y-0 transition-transform duration-300"
-        >
-          <span
-            class="text-orange-400 text-xs font-bold uppercase tracking-wider mb-1"
-          >
+        <div class="absolute bottom-0 left-0 w-full p-3 lg:p-6 z-20 flex flex-col gap-0.5 lg:gap-2 translate-y-1 lg:translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+          
+          <span class="text-orange-400 text-[10px] lg:text-xs font-bold uppercase tracking-wider mb-0 lg:mb-1">
             <%= product.category %> Favorite
           </span>
-          <h3
-            class="text-white text-2xl font-bold leading-tight shadow-black drop-shadow-md"
-          >
+          
+          <h3 class="text-white text-sm lg:text-2xl font-bold leading-tight shadow-black drop-shadow-md line-clamp-2">
             <%= product.name %>
           </h3>
-          <p
-            class="text-gray-300 text-sm line-clamp-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75"
-          >
+          
+          <p class="hidden lg:block text-gray-300 text-sm line-clamp-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75">
             Delicious fresh ingredients prepared daily for maximum flavor.
           </p>
-          <div
-            class="flex items-center justify-between mt-2 pt-4 border-t border-white/20"
-          >
+
+          <div class="flex items-center justify-between mt-1 lg:mt-2 pt-2 lg:pt-4 border-t border-white/20">
             <div class="flex flex-col">
-              <span class="text-gray-400 text-xs uppercase">Price</span>
-              <span class="text-white text-2xl font-extrabold"
-                ><%= product.price %> ֏</span
-              >
+              <span class="text-gray-400 text-[10px] lg:text-xs uppercase">Price</span>
+              <span class="text-white text-lg lg:text-2xl font-extrabold">
+                <%= product.price %> ֏
+              </span>
             </div>
+            
             <button
               onclick="addToCart(<%= product.id %>)"
-              class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden"
+              class="w-8 h-8 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden"
             >
+              <i class="fa-solid fa-plus lg:hidden text-black group-hover:text-white text-sm"></i>
+              
               <img
                 src="https://img.icons8.com/3d-fluency/94/shopping-basket.png"
                 alt="Add"
-                class="w-9 h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6"
+                class="hidden lg:block w-9 h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6"
               />
             </button>
           </div>
         </div>
       </div>
 
-      <% }) %> <% } else { %>
-      <p class="text-gray-500 col-span-4 text-center py-10 scroll-hidden">
+      <% }) %> 
+      <% } else { %>
+      <p class="text-gray-500 col-span-2 lg:col-span-4 text-center py-10 scroll-hidden">
         No best sellers available yet.
       </p>
       <% } %>
