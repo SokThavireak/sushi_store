@@ -1,124 +1,273 @@
-<style>
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-</style>
-
-<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
-
-<div class="max-w-4xl mx-auto px-6 mt-32 mb-20">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">My Order History</h1>
-
-    <% if (orders.length === 0) { %>
-        <div class="bg-white p-12 rounded-xl text-center shadow-sm">
-            <p class="text-gray-500">No orders found.</p>
-            <a href="/menu" class="text-orange-600 font-bold hover:underline mt-2 block">Order something?</a>
-        </div>
-    <% } else { %>
-        <div class="space-y-6">
-            <% orders.forEach(order => { %>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                        <div>
-                            <span class="font-mono text-sm text-gray-400">#<%= order.id %></span>
-                            <h3 class="font-bold text-lg"><%= new Date(order.created_at).toLocaleDateString() %></h3>
-                        </div>
-                        
-                        <div>
-                            <% if(order.status === 'Cancel Requested' || order.status === 'Refund Requested') { %>
-                                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold animate-pulse">
-                                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> Request Pending
-                                </span>
-                            <% } else if(order.status === 'Completed') { %>
-                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Completed</span>
-                            <% } else if(order.status === 'Cancelled' || order.status === 'Refunded') { %>
-                                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold"><%= order.status %></span>
-                            <% } else { %>
-                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold"><%= order.status %></span>
-                            <% } %>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-end border-t pt-4">
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Total</p>
-                            <p class="text-xl font-bold text-gray-900"><%= Number(order.total_price).toFixed(2) %> ֏</p>
-                        </div>
-
-                        <div class="flex gap-3">
-                            <% if (order.status === 'Pending') { %>
-                                <button onclick="requestAction(<%= order.id %>, 'cancel')" 
-                                    class="px-4 py-2 bg-red-50 text-red-600 text-sm font-bold rounded-lg hover:bg-red-100 transition">
-                                    Request Cancel
-                                </button>
-                            <% } %>
-
-                            <% if (order.status === 'Completed') { %>
-                                <button onclick="requestAction(<%= order.id %>, 'refund')" 
-                                    class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-200 transition">
-                                    Request Refund
-                                </button>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
-        </div>
-    <% } %>
-</div>
-
-<script>
-    // 1. NOTIFICATION SYSTEM
-    function showNotification(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        const isError = type === 'error';
-        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
-        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-
-        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
-        toast.style.animation = 'slideIn 0.5s forwards';
-        
-        toast.innerHTML = `
-            <div class="text-2xl">${icon}</div>
-            <div class="font-bold text-sm">${message}</div>
-        `;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.animation = 'slideOut 0.5s forwards';
-            setTimeout(() => toast.remove(), 500);
-        }, 3000);
-    }
-
-    // 2. GENERIC REQUEST HANDLER
-    async function requestAction(orderId, type) {
-        const confirmMsg = type === 'cancel' 
-            ? "Are you sure you want to cancel this order?" 
-            : "Are you sure you want to request a refund?";
-            
-        if (!confirm(confirmMsg)) return;
-
-        const endpoint = type === 'cancel' 
-            ? `/orders/request-cancel/${orderId}` 
-            : `/orders/request-refund/${orderId}`;
-
-        try {
-            const res = await fetch(endpoint, { method: 'POST' });
-            
-            if (res.ok) {
-                const successMsg = type === 'cancel' 
-                    ? "Cancel Request Sent Successfully!" 
-                    : "Refund Request Sent Successfully!";
-                showNotification(successMsg, 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                showNotification("Error submitting request", 'error');
-            }
-        } catch (err) {
-            console.error(err);
-            showNotification("Server Connection Error", 'error');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Welcome to Opulent POS</title>
+    <style>
+        /* TOAST ANIMATIONS */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-    }
-</script>
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* BASE STYLES (Desktop) */
+        .container-box {
+            position: relative;
+            overflow: hidden;
+            width: 768px;
+            max-width: 100%;
+            min-height: 480px;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        /* Sign In Form */
+        .sign-in-container { left: 0; width: 50%; z-index: 2; }
+
+        /* Sign Up Form */
+        .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
+
+        /* DESKTOP ANIMATIONS */
+        .container-box.right-panel-active .sign-in-container { transform: translateX(100%); }
+        .container-box.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; animation: show 0.6s; }
+
+        @keyframes show {
+            0%, 49.99% { opacity: 0; z-index: 1; }
+            50%, 100% { opacity: 1; z-index: 5; }
+        }
+
+        /* OVERLAY (The Orange Slider) */
+        .overlay-container {
+            position: absolute; top: 0; left: 50%; width: 50%; height: 100%; overflow: hidden;
+            transition: transform 0.6s ease-in-out; z-index: 100;
+        }
+        .container-box.right-panel-active .overlay-container { transform: translateX(-100%); }
+
+        .overlay {
+            background: #f97316;
+            background: -webkit-linear-gradient(to right, #ea580c, #f97316); 
+            background: linear-gradient(to right, #ea580c, #f97316);
+            background-repeat: no-repeat; background-size: cover; background-position: 0 0;
+            color: #ffffff; position: relative; left: -100%; height: 100%; width: 200%;
+            transform: translateX(0); transition: transform 0.6s ease-in-out;
+        }
+        .container-box.right-panel-active .overlay { transform: translateX(50%); }
+
+        .overlay-panel {
+            position: absolute; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%;
+            transform: translateX(0); transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-left { transform: translateX(-20%); }
+        .container-box.right-panel-active .overlay-left { transform: translateX(0); }
+        .overlay-right { right: 0; transform: translateX(0); }
+        .container-box.right-panel-active .overlay-right { transform: translateX(20%); }
+
+        /* MOBILE TOGGLE LINKS (Hidden on Desktop) */
+        .mobile-toggle { display: none; }
+
+        /* MOBILE RESPONSIVENESS FIX */
+        @media (max-width: 768px) {
+            .container-box { width: 90%; min-height: 550px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+            .overlay-container { display: none; }
+            .form-container { width: 100%; position: absolute; top: 0; left: 0; padding: 0; }
+            .sign-in-container { width: 100%; transition: all 0.4s ease-in-out; opacity: 1; z-index: 5; pointer-events: all; }
+            .sign-up-container { width: 100%; transition: all 0.4s ease-in-out; opacity: 0; z-index: 1; pointer-events: none; transform: none; }
+
+            /* Mobile Active States */
+            .container-box.right-panel-active .sign-in-container { transform: none; opacity: 0; z-index: 1; pointer-events: none; }
+            .container-box.right-panel-active .sign-up-container { transform: none; opacity: 1; z-index: 5; pointer-events: all; animation: none; }
+
+            .mobile-toggle { display: block; margin-top: 20px; font-size: 14px; color: #6b7280; }
+            .mobile-toggle a { color: #f97316; font-weight: bold; cursor: pointer; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-center flex-col font-sans h-screen px-4">
+
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="container-box bg-white rounded-[20px] shadow-2xl relative <%= (typeof action !== 'undefined' && action === 'register') ? 'right-panel-active' : '' %>" id="container">
+        
+        <div class="form-container sign-up-container">
+            <form onsubmit="handleAuth(event, '/register')" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
+                <h1 class="font-bold text-3xl mb-4">Create Account</h1>
+                
+                <div class="flex gap-4 mb-4">
+                    <a href="/auth/google" class="border border-gray-200 rounded-full w-10 h-10 flex justify-center items-center hover:bg-orange-50 hover:border-orange-500 hover:text-orange-500 transition duration-300">
+                        <i class="fab fa-google text-sm"></i>
+                    </a>
+                </div>
+
+                <span class="text-xs text-gray-500 mb-4">or use your email for registration</span>
+                
+                <input type="email" name="username" placeholder="Email" required class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                <input type="password" name="password" placeholder="Password" required class="bg-gray-100 border-none px-4 py-3 mb-4 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                
+                <button type="submit" class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
+                    Sign Up
+                </button>
+
+                <p class="mobile-toggle">
+                    Already have an account? <a id="mobileSignIn">Sign In</a>
+                </p>
+            </form>
+        </div>
+
+        <div class="form-container sign-in-container">
+            <form onsubmit="handleAuth(event, '/login')" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
+                <h1 class="font-bold text-3xl mb-4">Sign in</h1>
+                
+                <div class="flex gap-4 mb-4">
+                    <a href="/auth/google" class="border border-gray-200 rounded-full w-10 h-10 flex justify-center items-center hover:bg-orange-50 hover:border-orange-500 hover:text-orange-500 transition duration-300">
+                        <i class="fab fa-google text-sm"></i>
+                    </a>
+                </div>
+
+                <span class="text-xs text-gray-500 mb-4">or use your account</span>
+                
+                <input type="email" name="username" placeholder="Email" required class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                <input type="password" name="password" placeholder="Password" required class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                
+                <a href="#" class="text-xs text-gray-400 mb-4 hover:text-orange-500 transition">Forgot your password?</a>
+                
+                <button type="submit" class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
+                    Sign In
+                </button>
+
+                <p class="mobile-toggle">
+                    Don't have an account? <a id="mobileSignUp">Sign Up</a>
+                </p>
+            </form>
+        </div>
+
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1 class="font-bold text-3xl mb-4">Welcome Back!</h1>
+                    <p class="text-sm font-thin leading-5 mb-8">To keep connected with us please login with your personal info</p>
+                    <button class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none" id="signIn">Sign In</button>
+                </div>
+
+                <div class="overlay-panel overlay-right">
+                    <h1 class="font-bold text-3xl mb-4">Hello, Friend!</h1>
+                    <p class="text-sm font-thin leading-5 mb-8">Enter your personal details and start your journey with Us</p>
+                    <button class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none" id="signUp">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========================
+           1. UI LOGIC (SLIDER) 
+           ======================== */
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const mobileSignUp = document.getElementById('mobileSignUp');
+        const mobileSignIn = document.getElementById('mobileSignIn');
+        const container = document.getElementById('container');
+
+        function activateSignUp() { container.classList.add("right-panel-active"); }
+        function activateSignIn() { container.classList.remove("right-panel-active"); }
+
+        signUpButton.addEventListener('click', activateSignUp);
+        signInButton.addEventListener('click', activateSignIn);
+        if(mobileSignUp) mobileSignUp.addEventListener('click', activateSignUp);
+        if(mobileSignIn) mobileSignIn.addEventListener('click', activateSignIn);
+
+        /* ========================
+           2. NOTIFICATION SYSTEM 
+           ======================== */
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            
+            const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+            const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+            toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[320px] border-2 border-white/20`;
+            toast.style.animation = 'slideIn 0.5s forwards';
+            
+            toast.innerHTML = `
+                <div class="text-2xl">${icon}</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm uppercase tracking-wide opacity-80">${isError ? 'Error' : 'Success'}</span>
+                    <span class="font-bold text-base">${message}</span>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        /* ========================
+           3. AUTH AJAX HANDLER 
+           ======================== */
+        async function handleAuth(event, endpoint) {
+            event.preventDefault(); 
+            
+            const form = event.target;
+            const btn = form.querySelector('button');
+            const originalText = btn.innerText;
+            
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    showNotification(result.message || 'Authentication Successful!', 'success');
+                    
+                    // REDIRECT based on server response (Staff -> /staff/menu)
+                    setTimeout(() => {
+                        window.location.href = result.redirectUrl || '/'; 
+                    }, 1000);
+
+                } else {
+                    showNotification(result.error || 'Invalid credentials', 'error');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+
+            } catch (error) {
+                console.error(error);
+                showNotification('Connection error. Please try again.', 'error');
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>
