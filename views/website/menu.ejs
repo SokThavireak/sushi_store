@@ -5,8 +5,7 @@
         to { opacity: 1; transform: translateY(0); }
     }
     .scroll-hidden {
-        opacity: 0;
-        transform: translateY(40px);
+        opacity: 0; transform: translateY(40px);
         transition: opacity 0.8s ease-out, transform 0.8s ease-out;
     }
     @media (max-width: 640px) {
@@ -15,7 +14,7 @@
     }
     .animate-fade-up { animation: fadeInUp 1s ease-out forwards; }
 
-    /* 2. POPUP ALERT STYLES */
+    /* 2. POPUP ALERT STYLES (For Toasts) */
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
@@ -25,6 +24,8 @@
         to { transform: translateX(100%); opacity: 0; }
     }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
@@ -105,7 +106,7 @@
 </div>
 
 <script>
-    // 1. CHECK LOGIN STATUS (Server-side variable passed to Client)
+    // 1. CHECK LOGIN STATUS
     const IS_LOGGED_IN = <%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>;
 
     // 2. SCROLL LOGIC
@@ -114,7 +115,7 @@
             const id = window.location.hash.substring(1);
             const element = document.getElementById(id);
             if (element) {
-                const yOffset = -140; 
+                const yOffset = -140;
                 const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
                 window.scrollTo({ top: y, behavior: 'smooth' });
             }
@@ -145,7 +146,7 @@
         });
     }
 
-    // 3. STYLED NOTIFICATION FUNCTION
+    // 3. TOAST NOTIFICATION FUNCTION (For Success messages)
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -154,17 +155,14 @@
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-
+        
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
         
-        // CSS Animation
         toast.style.animation = 'slideIn 0.5s forwards';
-        
         toast.innerHTML = `
             <div class="text-2xl">${icon}</div>
             <div class="font-bold text-sm">${message}</div>
         `;
-
         container.appendChild(toast);
 
         setTimeout(() => {
@@ -173,14 +171,28 @@
         }, 3000);
     }
 
-    // 4. ADD TO CART (With Login Check & Styled Alerts)
+    // 4. ADD TO CART (With SweetAlert2 Modal)
     async function addToCart(productId) {
-        // Step A: Check Login first
+        // Step A: Check Login with SweetAlert
         if (!IS_LOGGED_IN) {
-            showNotification('⚠️ Please Login to Order!', 'error');
-            setTimeout(() => {
-                window.location.href = '/auth'; // Redirect to login page
-            }, 1500);
+            Swal.fire({
+                title: 'Login Required',
+                text: "You must be logged in to order sushi!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316', // Orange-500 to match theme
+                cancelButtonColor: '#ef4444', // Red-500
+                confirmButtonText: 'Login Now',
+                cancelButtonText: 'Cancel',
+                background: '#fff',
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl font-sans'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/auth'; // Redirect to login
+                }
+            });
             return;
         }
 
@@ -194,15 +206,13 @@
             const data = await res.json();
             
             if(res.ok) {
-                // SUCCESS POPUP
+                // SUCCESS: Use the small Toast notification so we don't block the user
                 showNotification('Added to Cart Successfully!', 'success');
             } else {
-                // ERROR POPUP
                 showNotification(data.error || 'Could not add item', 'error');
             }
         } catch(err) {
             console.error(err);
-            // ERROR POPUP
             showNotification('Connection Error', 'error');
         }
     }
