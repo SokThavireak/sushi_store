@@ -1,170 +1,225 @@
-<div class="space-y-6">
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; transition: all 0.2s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-bold text-gray-400 uppercase">Pending Requests</p>
-        <h3 class="text-2xl font-bold text-gray-800">
-            <%= requests.filter(r => r.status === 'Pending').length %>
-        </h3>
-      </div>
-      <div class="w-12 h-12 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center text-xl">
-        <i class="fa-solid fa-clock"></i>
-      </div>
-    </div>
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-    <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-bold text-gray-400 uppercase">Completed/Received</p>
-        <h3 class="text-2xl font-bold text-gray-800">
-            <%= requests.filter(r => r.status === 'Completed' || r.status === 'Confirmed').length %>
-        </h3>
-      </div>
-      <div class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xl">
-        <i class="fa-solid fa-check"></i>
-      </div>
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-10">
+  
+  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
+    <div>
+        <h3 class="font-bold text-gray-800 text-lg">Create Stock Request</h3>
+        <p class="text-xs text-gray-500">Select items from the master menu to restock</p>
     </div>
-
-    <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-bold text-gray-400 uppercase">Total Orders</p>
-        <h3 class="text-2xl font-bold text-gray-800"><%= requests.length %></h3>
-      </div>
-      <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
-        <i class="fa-solid fa-clipboard-list"></i>
-      </div>
-    </div>
+    <a href="/admin/stock" class="text-gray-400 hover:text-gray-600 transition">
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </a>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    
-    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-      <div>
-        <h3 class="font-bold text-gray-800 text-lg">My Order History</h3>
-        <p class="text-xs text-gray-500">Track your stock replenishment requests</p>
-      </div>
-      
-      <a href="/admin/stock/create" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2 transform active:scale-95">
-        <i class="fa-solid fa-plus"></i> New Stock Request
-      </a>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-bold tracking-wider border-b border-gray-100">
-          <tr>
-            <th class="p-5">Order ID</th>
-            <th class="p-5">Date Requested</th>
-            <th class="p-5">Summary</th>
-            <th class="p-5">Status</th>
-            <th class="p-5 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <% if(requests.length > 0) { %>
-             <% requests.forEach(r => { %>
-                <tr class="hover:bg-gray-50/80 transition duration-150 group">
-                  
-                  <td class="p-5">
-                    <span class="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-                        #<%= r.id %>
-                    </span>
-                  </td>
-
-                  <td class="p-5">
-                      <div class="flex flex-col">
-                          <span class="text-sm font-bold text-gray-700">
-                              <%= new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
-                          </span>
-                          <span class="text-xs text-gray-400">
-                              <%= new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
-                          </span>
-                      </div>
-                  </td>
-
-                  <td class="p-5 text-sm text-gray-600">
-                      <span class="flex items-center gap-2">
-                        <i class="fa-solid fa-box-open text-gray-400"></i>
-                        <%= r.items ? r.items.length : 'Multiple' %> Items
-                      </span>
-                  </td>
-
-                  <td class="p-5">
-                    <% if(r.status === 'Pending') { %>
-                        <span class="inline-flex items-center gap-1.5 bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full text-xs font-bold border border-yellow-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span> Pending
-                        </span>
-                    <% } else if(r.status === 'Confirmed' || r.status === 'Approved') { %>
-                        <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold border border-blue-200">
-                            <i class="fa-solid fa-truck-fast text-[10px]"></i> On The Way
-                        </span>
-                    <% } else if(r.status === 'Completed') { %>
-                         <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-bold border border-green-200">
-                            <i class="fa-solid fa-check text-[10px]"></i> Received
-                        </span>
-                    <% } else { %>
-                        <span class="inline-flex items-center gap-1.5 bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-bold border border-red-200">
-                            <i class="fa-solid fa-ban text-[10px]"></i> Rejected
-                        </span>
-                    <% } %>
-                  </td>
-                 
-                  <td class="p-5 text-right">
-                    <div class="flex justify-end gap-2">
-                        <a href="/admin/stock/request/<%= r.id %>" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-indigo-100 hover:text-indigo-600 flex items-center justify-center transition" title="View Details">
-                            <i class="fa-solid fa-eye text-xs"></i>
-                        </a>
-
-                        <% if (r.status === 'Pending') { %>
-                            <button 
-                                onclick="cancelRequest(<%= r.id %>)" 
-                                class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition" 
-                                title="Cancel Request">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        <% } %>
+  <div class="p-8">
+    <form id="stockForm" class="space-y-6">
+        
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Requesting For Location</label>
+            
+            <% if (user.role === 'store_manager') { %>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-store text-gray-400"></i>
                     </div>
-                  </td>
-                </tr>
-             <% }) %>
-          <% } else { %>
-              <tr>
-                  <td colspan="5" class="p-12 text-center">
-                      <div class="flex flex-col items-center justify-center text-gray-400">
-                          <div class="bg-gray-50 p-4 rounded-full mb-3">
-                            <i class="fa-solid fa-clipboard text-3xl text-gray-300"></i>
-                          </div>
-                          <p class="font-bold text-gray-600">No orders found</p>
-                          <p class="text-sm text-gray-400 mb-4">You haven't made any stock requests yet.</p>
-                          <a href="/admin/stock/create" class="text-indigo-600 font-bold hover:underline text-sm">Create First Request</a>
-                      </div>
-                  </td>
-              </tr>
-          <% } %>
-        </tbody>
-      </table>
-    </div>
+                    <input type="text" value="My Assigned Store" disabled class="pl-10 w-full bg-gray-100 border border-gray-200 rounded-lg p-3 text-gray-600 font-bold">
+                    <input type="hidden" id="location_name" value=""> 
+                </div>
+            <% } else { %>
+                <div class="relative">
+                    <select id="location_name" class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <% locations.forEach(loc => { %>
+                           <option value="<%= loc.name %>"><%= loc.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="border-t border-b border-gray-100 py-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-indigo-500"></i> Items Needed
+                </h3>
+                <button type="button" onclick="addItemRow()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Add Another Line
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-12 gap-3 mb-2 px-1">
+                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Category</div>
+                <div class="col-span-5 text-[10px] font-bold text-gray-400 uppercase">Item Name</div>
+                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Quantity</div>
+                <div class="col-span-1"></div>
+            </div>
+
+            <div id="items-container" class="space-y-3"></div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="button" onclick="submitStock()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+                <span>Submit Request</span>
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </form>
   </div>
 </div>
 
 <script>
-    async function cancelRequest(id) {
-        if(!confirm("Are you sure you want to cancel this pending request?")) return;
+    // INJECT DATA
+    const masterInventory = <%- JSON.stringify(stocks || []) %>;
+
+    // NOTIFICATION SYSTEM
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.animation = 'slideOut 0.5s forwards'; setTimeout(() => toast.remove(), 500); }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', addItemRow);
+
+    function addItemRow() {
+        const container = document.getElementById('items-container');
+        const div = document.createElement('div');
+        div.className = "grid grid-cols-12 gap-3 items-center item-row bg-gray-50 p-2 rounded-lg border border-gray-100 animate-fade-in";
+        div.innerHTML = `
+            <div class="col-span-3">
+                <select onchange="filterItems(this)" class="category-select w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-medium text-gray-600 focus:border-indigo-500 focus:outline-none">
+                    <option value="" disabled selected>Select...</option>
+                    <option value="Cook">Cook</option>
+                    <option value="Drink">Drink</option>
+                    <option value="Supplies">Supplies</option>
+                    <option value="Packaging">Packaging</option>
+                </select>
+            </div>
+            <div class="col-span-5 relative">
+                <select onchange="updateUnit(this)" disabled class="item-select w-full bg-gray-100 border border-gray-200 rounded-lg p-2.5 text-sm font-bold text-gray-800 focus:border-indigo-500 focus:outline-none opacity-60 cursor-not-allowed">
+                    <option value="">-- Choose Category First --</option>
+                </select>
+            </div>
+            <div class="col-span-3 relative">
+                <input type="number" min="1" placeholder="0" class="qty-input w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-bold focus:border-indigo-500 focus:outline-none pl-3 pr-12">
+                <span class="unit-badge absolute right-3 top-2.5 text-xs font-bold text-gray-400 bg-gray-100 px-1 rounded">UNIT</span>
+            </div>
+            <div class="col-span-1 flex justify-center">
+                <button type="button" onclick="removeRow(this)" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function filterItems(categorySelect) {
+        const row = categorySelect.closest('.item-row');
+        const itemSelect = row.querySelector('.item-select');
+        const selectedCat = categorySelect.value;
+        itemSelect.innerHTML = '<option value="" disabled selected>Select Item...</option>';
+        const filteredItems = masterInventory.filter(item => item.category === selectedCat);
+        if (filteredItems.length > 0) {
+            itemSelect.disabled = false;
+            itemSelect.classList.remove('bg-gray-100', 'opacity-60', 'cursor-not-allowed');
+            itemSelect.classList.add('bg-white');
+            filteredItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.text = item.name;
+                option.setAttribute('data-unit', item.unit || 'pcs');
+                itemSelect.appendChild(option);
+            });
+        } else {
+            itemSelect.innerHTML = '<option value="">No items found</option>';
+            itemSelect.disabled = true;
+        }
+    }
+
+    function updateUnit(itemSelect) {
+        const row = itemSelect.closest('.item-row');
+        const unitBadge = row.querySelector('.unit-badge');
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+        const unit = selectedOption.getAttribute('data-unit');
+        if(unit) {
+            unitBadge.innerText = unit.toUpperCase();
+            unitBadge.classList.remove('text-gray-400');
+            unitBadge.classList.add('text-indigo-500');
+        }
+    }
+
+    function removeRow(btn) {
+        const row = btn.closest('.item-row');
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(-10px)';
+        setTimeout(() => row.remove(), 200);
+    }
+
+    async function submitStock() {
+        const locName = document.getElementById('location_name')?.value;
+        const rows = document.querySelectorAll('.item-row');
+        const items = [];
+
+        rows.forEach(row => {
+            const catSelect = row.querySelector('.category-select');
+            const itemSelect = row.querySelector('.item-select');
+            const qtyInput = row.querySelector('.qty-input');
+            if(catSelect.value && itemSelect.value && qtyInput.value > 0) {
+                items.push({ 
+                    category: catSelect.value, 
+                    name: itemSelect.value, 
+                    quantity: qtyInput.value 
+                });
+            }
+        });
+
+        if(items.length === 0) return showNotification("Please add at least one item.", "error");
 
         try {
-            // Adjust the URL to match your backend route for deleting/cancelling
-            const res = await fetch(`/admin/stock/delete/${id}`, { 
-                method: 'POST' 
+            const btn = document.querySelector('button[onclick="submitStock()"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+            const res = await fetch('/api/stock/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ location_name: locName, items: items })
             });
-            
+
             if(res.ok) {
-                window.location.reload();
+                showNotification("Request Created Successfully!", "success");
+                setTimeout(() => window.location.href = '/admin/stock', 1500);
             } else {
-                alert("Error cancelling request. It might already be processed.");
+                const err = await res.json();
+                showNotification(err.error || "Error creating request", "error");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
-        } catch(err) {
+        } catch (err) {
             console.error(err);
-            alert("Server error");
+            showNotification("Server connection error", "error");
         }
     }
 </script>

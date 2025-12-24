@@ -1,3 +1,19 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    .animate-scale-in { animation: scaleIn 0.2s ease-out; }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
   
   <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-white">
@@ -95,7 +111,7 @@
       <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
     </div>
     
-    <form action="/admin/stock/menu/add" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+    <form onsubmit="submitAdd(event)" class="p-6 space-y-4">
       <div>
         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
         <input type="text" name="name" required placeholder="e.g. Olive Oil" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
@@ -174,7 +190,7 @@
         </div>
       </div>
 
-       <div>
+      <div>
         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
         <input type="text" id="edit-image-url" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
       </div>
@@ -185,6 +201,30 @@
 </div>
 
 <script>
+  // 1. NOTIFICATION SYSTEM
+  function showNotification(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+      const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+      toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+      toast.style.animation = 'slideIn 0.5s forwards';
+      
+      toast.innerHTML = `
+          <div class="text-2xl">${icon}</div>
+          <div class="font-bold text-sm">${message}</div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+          toast.style.animation = 'slideOut 0.5s forwards';
+          setTimeout(() => toast.remove(), 500);
+      }, 3000);
+  }
+
   function toggleModal(id) {
     document.getElementById(id).classList.toggle("hidden");
   }
@@ -207,6 +247,32 @@
     toggleModal('edit-modal');
   }
 
+  // 2. ADD ITEM (AJAX with File Upload)
+  async function submitAdd(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      try {
+          const res = await fetch('/admin/stock/menu/add', {
+              method: 'POST',
+              body: formData // Fetch handles multipart/form-data boundary automatically
+          });
+
+          if(res.ok) {
+              showNotification("Item Added Successfully!", "success");
+              toggleModal('add-modal');
+              setTimeout(() => window.location.reload(), 1500);
+          } else {
+              showNotification("Error adding item", "error");
+          }
+      } catch(err) {
+          console.error(err);
+          showNotification("Server Connection Error", "error");
+      }
+  }
+
+  // 3. EDIT ITEM (AJAX JSON)
   async function submitEdit() {
     const id = document.getElementById('edit-id').value;
     const data = {
@@ -222,22 +288,35 @@
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         });
-        if(res.ok) window.location.reload();
-        else alert("Error updating item");
-    } catch(err) { console.error(err); }
+        
+        if(res.ok) {
+            showNotification("Item Updated Successfully!", "success");
+            toggleModal('edit-modal');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showNotification("Error updating item", "error");
+        }
+    } catch(err) { 
+        console.error(err);
+        showNotification("Server Error", "error");
+    }
   }
 
+  // 4. DELETE ITEM
   async function deleteItem(id, btn) {
       if(!confirm("Permanently delete this item from the master menu?")) return;
+      
       try {
           const res = await fetch(`/api/stock/menu/${id}`, { method: 'DELETE' });
-          if(res.ok) btn.closest('.item-card').remove();
-          else alert("Error deleting item");
-      } catch(err) { console.error(err); }
+          if(res.ok) {
+              btn.closest('.item-card').remove();
+              showNotification("Item Deleted", "success");
+          } else {
+              showNotification("Error deleting item", "error");
+          }
+      } catch(err) { 
+          console.error(err);
+          showNotification("Server Error", "error");
+      }
   }
 </script>
-
-<style>
-    .animate-scale-in { animation: scaleIn 0.2s ease-out; }
-    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-</style>

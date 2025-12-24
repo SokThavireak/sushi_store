@@ -3,7 +3,20 @@
         from { opacity: 0; transform: translateY(40px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    .scroll-hidden { opacity: 0; transform: translateY(40px); }
+    
+    .scroll-hidden { 
+        opacity: 0; 
+        transform: translateY(40px); 
+    }
+
+    /* CRITICAL FIX: Force visibility on mobile */
+    @media (max-width: 640px) {
+        .scroll-hidden {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+    }
+
     .animate-fade-up { animation: fadeInUp 0.8s ease-out forwards; }
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
@@ -12,7 +25,7 @@
 <div class="max-w-7xl mx-auto px-6 mt-36">
     <section id="page-locations" class="mb-6 md:mb-10">
       
-      <div class="flex flex-col md:flex-row items-center justify-between items-end mb-10 scroll-hidden">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 scroll-hidden">
         <div>
           <h1 class="text-4xl font-extrabold mb-2">Our Locations</h1>
           <p class="text-gray-500">Find the nearest Murakami kitchen.</p>
@@ -23,7 +36,7 @@
         </a>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mt-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mt-6">
         
         <% if (locations && locations.length > 0) { %>
             <% locations.forEach((loc, index) => { %>
@@ -34,7 +47,7 @@
                     </div>
                     <% if (loc.status === 'Open') { %>
                         <span class="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Open
+                           <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Open
                         </span>
                     <% } else { %>
                         <span class="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">Closed</span>

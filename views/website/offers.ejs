@@ -1,28 +1,13 @@
 <style>
-    /* Animation Keyframes */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(40px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Initial State: Hidden */
-    .scroll-hidden {
-        opacity: 0;
-        transform: translateY(40px); /* Move down slightly */
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        will-change: opacity, transform;
-    }
-
-    /* Active State: Triggered by JS */
-    .animate-fade-up {
-        animation: fadeInUp 0.8s ease-out forwards;
-    }
-
-    /* Stagger Delays */
+    /* ... keep your existing styles ... */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    .scroll-hidden { opacity: 0; transform: translateY(40px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; will-change: opacity, transform; }
+    .animate-fade-up { animation: fadeInUp 0.8s ease-out forwards; }
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
-    .delay-300 { animation-delay: 0.3s; }
 </style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-7xl mx-auto px-6 mt-36">
     <section id="page-locations" class="mb-6 md:mb-10">
@@ -39,15 +24,13 @@
           <div class="text-white max-w-lg">
             <h2 class="text-3xl md:text-5xl font-bold mb-4">50% OFF Second Set</h2>
             <p class="mb-6 opacity-90">Order any Dragon Set and get the second one half price. Perfect for sharing.</p>
-            <button class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all transform hover:translate-y-[-2px]">Order Now</button>
+            <a href="#deals" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all transform hover:translate-y-[-2px] inline-block">Order Now</a>
           </div>
         </div>
       </div>
 
-      <div class="mb-10">
-          <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-2 scroll-hidden">
-            🔥 Hot Deals & Discounts
-          </h2>
+      <div class="mb-10" id="deals">
+          <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-2 scroll-hidden">🔥 Hot Deals & Discounts</h2>
 
           <% if (products && products.length > 0) { %>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -67,11 +50,7 @@
 
                     <div class="group relative h-[450px] w-full rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-500 hover:shadow-2xl product-card border border-gray-100/50 scroll-hidden" style="animation-delay: <%= (index % 3) * 0.1 %>s">
                        <div class="absolute inset-0 w-full h-full">
-                            <% if (product.image_url) { %>
-                                <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                            <% } else { %>
-                                <div class="w-full h-full bg-gray-800 flex items-center justify-center text-6xl">🍣</div>
-                            <% } %>
+                            <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>" alt="<%= product.name %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
                        </div>
                        
@@ -94,7 +73,7 @@
                             <button onclick="addToCart(<%= product.id %>)" class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden">
                                 <img src="https://img.icons8.com/3d-fluency/94/shopping-basket.png" alt="Add" class="w-9 h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6" />
                             </button>
-                        </div>
+                       </div>
                     </div>
                 <% }) %>
             </div>
@@ -111,7 +90,7 @@
           <div>
             <h3 class="font-bold text-lg">Free Miso Soup</h3>
             <p class="text-sm text-gray-500 mb-4">On orders over $25</p>
-            <div class="inline-block bg-gray-100 border border-dashed border-gray-400 text-gray-700 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200" onclick="alert('Code Copied!')">MISO25</div>
+            <div class="inline-block bg-gray-100 border border-dashed border-gray-400 text-gray-700 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200" onclick="copyCode('MISO25')">MISO25</div>
           </div>
           <div class="h-20 w-20 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 font-bold text-xl">Free</div>
         </div>
@@ -120,7 +99,7 @@
           <div>
             <h3 class="font-bold text-lg">20% Off Lunch</h3>
             <p class="text-sm text-gray-500 mb-4">11:00 AM - 2:00 PM</p>
-            <div class="inline-block bg-gray-100 border border-dashed border-gray-400 text-gray-700 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200" onclick="alert('Code Copied!')">LUNCH20</div>
+            <div class="inline-block bg-gray-100 border border-dashed border-gray-400 text-gray-700 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200" onclick="copyCode('LUNCH20')">LUNCH20</div>
           </div>
           <div class="h-20 w-20 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 font-bold text-xl">-20%</div>
         </div>
@@ -130,30 +109,45 @@
 </div>
 
 <script>
-    // 1. Intersection Observer to Trigger Animations
+    // 1. Observer
     document.addEventListener("DOMContentLoaded", function() {
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1 // Trigger when 10% of element is visible
-        };
-
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('animate-fade-up');
                     entry.target.classList.remove('scroll-hidden');
-                    observer.unobserve(entry.target); // Run once
+                    observer.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
-
-        // Select all elements with the 'scroll-hidden' class
-        const hiddenElements = document.querySelectorAll('.scroll-hidden');
-        hiddenElements.forEach((el) => observer.observe(el));
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
 
-    // 2. Existing Cart Logic
+    // 2. NEW NOTIFICATION SYSTEM
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-check"></i>'; // Simplified icon
+
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold">${message}</div>`;
+
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
+        setTimeout(() => {
+            toast.classList.add('translate-x-full', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // 3. Updated Functions
+    function copyCode(code) {
+        navigator.clipboard.writeText(code);
+        showNotification(`Code ${code} Copied!`, 'success');
+    }
+
     async function addToCart(productId) {
         try {
             const response = await fetch('/api/cart', {
@@ -162,18 +156,14 @@
                 body: JSON.stringify({ productId: productId })
             });
             const data = await response.json();
-            
             if (response.ok) {
-                const notification = document.createElement('div');
-                notification.className = 'fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-xl z-50 font-bold animate-bounce';
-                notification.innerText = 'Added to Cart! 🛒';
-                document.body.appendChild(notification);
-                setTimeout(() => notification.remove(), 2000);
+                showNotification('Added to Cart! 🛒', 'success');
             } else {
-                alert('Error adding to cart');
+                showNotification('Error adding to cart', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
+            showNotification('Connection Error', 'error');
         }
     }
 </script>

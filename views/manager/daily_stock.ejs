@@ -1,3 +1,17 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
 <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-10">
   
   <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
@@ -76,7 +90,7 @@
         <% } }) %>
 
         <div class="flex justify-end pt-4">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center gap-2">
+            <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center gap-2">
                 <i class="fa-solid fa-save"></i> Save Today's Count
             </button>
         </div>
@@ -87,18 +101,45 @@
 </div>
 
 <script>
+    // 1. NOTIFICATION FUNCTION
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        
+        toast.innerHTML = `
+            <div class="text-2xl">${icon}</div>
+            <div class="font-bold text-sm">${message}</div>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    // 2. SUBMIT HANDLER
     async function submitDailyStock(e) {
         e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerHTML;
+        
         const form = e.target;
-        const formData = new FormData(form);
         const data = { items: [] };
 
-        // Convert weird FormData structure to clean JSON array
-        // We iterate inputs to build the array
+        // Build array from inputs
         const inputs = form.querySelectorAll('input[type="number"]');
         inputs.forEach(input => {
-            if(input.value !== '') { // Only send items that have a value entered
-                const parent = input.closest('.flex'); // Get parent container
+            if(input.value !== '') { 
+                const parent = input.closest('.flex'); 
                 data.items.push({
                     name: parent.querySelector('input[name*="[name]"]').value,
                     category: parent.querySelector('input[name*="[category]"]').value,
@@ -108,7 +149,14 @@
             }
         });
 
-        if(data.items.length === 0) return alert("Please enter at least one quantity.");
+        // Validation Alert
+        if(data.items.length === 0) {
+            return showNotification("⚠️ Please enter at least one quantity.", "error");
+        }
+
+        // Loading State
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
 
         try {
             const res = await fetch('/api/manager/daily-stock', {
@@ -116,12 +164,21 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
-            if(res.ok) window.location.reload();
-            else alert("Error saving stock count");
+
+            if(res.ok) {
+                showNotification("Stock Count Saved Successfully!", "success");
+                // Wait 1.5s before reloading so user sees the success message
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showNotification("Error saving stock count", "error");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         } catch(err) {
             console.error(err);
-            alert("Server Error");
+            showNotification("Server Connection Error", "error");
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
     }
 </script>

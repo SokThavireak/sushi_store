@@ -1,20 +1,26 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
 <div class="mb-8">
   <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-    <h2
-      class="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2"
-    >
+    <h2 class="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
       <i class="fa-solid fa-user-plus text-indigo-500"></i> Create New Account
     </h2>
 
-    <form
-      action="/admin/create-manager"
-      method="POST"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end"
-    >
+    <form onsubmit="createUser(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
       <div class="w-full">
-        <label class="block text-xs font-bold text-gray-500 mb-1"
-          >EMAIL ADDRESS</label
-        >
+        <label class="block text-xs font-bold text-gray-500 mb-1">EMAIL ADDRESS</label>
         <input
           type="email"
           name="email"
@@ -25,9 +31,7 @@
       </div>
 
       <div class="w-full">
-        <label class="block text-xs font-bold text-gray-500 mb-1"
-          >PASSWORD</label
-        >
+        <label class="block text-xs font-bold text-gray-500 mb-1">PASSWORD</label>
         <input
           type="password"
           name="password"
@@ -53,12 +57,10 @@
       </div>
 
       <div class="w-full hidden" id="newLocationDiv">
-        <label
-          class="block text-xs font-bold text-gray-500 mb-1 text-orange-600"
-          >ASSIGN STORE</label
-        >
+        <label class="block text-xs font-bold text-gray-500 mb-1 text-orange-600">ASSIGN STORE</label>
         <select
           name="assigned_location_id"
+          id="assignedLocationSelect"
           class="w-full px-4 py-2 bg-orange-50 border border-orange-200 text-orange-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
           <% locations.forEach(loc => { %>
@@ -76,12 +78,11 @@
     </form>
   </div>
 </div>
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-  <% if (typeof usersList !== 'undefined' && usersList.length > 0) { %> <%
-  usersList.forEach(function(u) { %>
-  <div
-    class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow"
-  >
+  <% if (typeof usersList !== 'undefined' && usersList.length > 0) { %> 
+  <% usersList.forEach(function(u) { %>
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
     <h3 class="font-bold text-lg text-gray-800 truncate" title="<%= u.email %>">
       <%= u.email %>
     </h3>
@@ -109,27 +110,91 @@
       </a>
 
       <% if (u.id !== user.id) { %>
-      <form
-        action="/admin/users/delete/<%= u.id %>"
-        method="POST"
-        onsubmit="return confirm('Are you sure you want to delete this user?');"
-      >
-        <button
-          type="submit"
+      <button
+          onclick="deleteUser('<%= u.id %>')"
           class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors border border-red-100"
         >
           Delete
-        </button>
-      </form>
+      </button>
       <% } %>
     </div>
   </div>
-  <% }); %> <% } else { %>
+  <% }); %> 
+  <% } else { %>
   <p class="text-gray-500 col-span-3 text-center">No users found.</p>
   <% } %>
 </div>
 
 <script>
+  // 1. NOTIFICATION SYSTEM
+  function showNotification(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+      const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+      toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+      toast.style.animation = 'slideIn 0.5s forwards';
+      
+      toast.innerHTML = `
+          <div class="text-2xl">${icon}</div>
+          <div class="font-bold text-sm">${message}</div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+          toast.style.animation = 'slideOut 0.5s forwards';
+          setTimeout(() => toast.remove(), 500);
+      }, 3000);
+  }
+
+  // 2. CREATE USER
+  async function createUser(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+          const res = await fetch('/admin/create-manager', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+          });
+
+          if(res.ok) {
+              showNotification('User Created Successfully!', 'success');
+              setTimeout(() => window.location.reload(), 1000);
+          } else {
+              const result = await res.json().catch(() => ({}));
+              showNotification(result.error || 'Error creating user', 'error');
+          }
+      } catch(err) {
+          console.error(err);
+          showNotification('Server Error', 'error');
+      }
+  }
+
+  // 3. DELETE USER
+  async function deleteUser(id) {
+      if(!confirm('Are you sure you want to delete this user?')) return;
+
+      try {
+          const res = await fetch(`/admin/users/delete/${id}`, { method: 'POST' });
+          if(res.ok) {
+              showNotification('User Deleted!', 'success');
+              setTimeout(() => window.location.reload(), 1000);
+          } else {
+              showNotification('Error deleting user', 'error');
+          }
+      } catch(err) {
+          console.error(err);
+          showNotification('Server Error', 'error');
+      }
+  }
+
   function toggleNewLocation() {
     const role = document.getElementById("newRole").value;
     const locDiv = document.getElementById("newLocationDiv");

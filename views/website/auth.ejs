@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Welcome to Opulent POS</title>
     <style>
+        /* TOAST ANIMATIONS */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
         /* BASE STYLES (Desktop) */
         .container-box {
             position: relative;
@@ -24,31 +34,14 @@
         }
 
         /* Sign In Form */
-        .sign-in-container {
-            left: 0;
-            width: 50%;
-            z-index: 2;
-        }
+        .sign-in-container { left: 0; width: 50%; z-index: 2; }
 
         /* Sign Up Form */
-        .sign-up-container {
-            left: 0;
-            width: 50%;
-            opacity: 0;
-            z-index: 1;
-        }
+        .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
 
         /* DESKTOP ANIMATIONS */
-        .container-box.right-panel-active .sign-in-container {
-            transform: translateX(100%);
-        }
-
-        .container-box.right-panel-active .sign-up-container {
-            transform: translateX(100%);
-            opacity: 1;
-            z-index: 5;
-            animation: show 0.6s;
-        }
+        .container-box.right-panel-active .sign-in-container { transform: translateX(100%); }
+        .container-box.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; animation: show 0.6s; }
 
         @keyframes show {
             0%, 49.99% { opacity: 0; z-index: 1; }
@@ -57,53 +50,25 @@
 
         /* OVERLAY (The Orange Slider) */
         .overlay-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
-            z-index: 100;
+            position: absolute; top: 0; left: 50%; width: 50%; height: 100%; overflow: hidden;
+            transition: transform 0.6s ease-in-out; z-index: 100;
         }
-
-        .container-box.right-panel-active .overlay-container {
-            transform: translateX(-100%);
-        }
+        .container-box.right-panel-active .overlay-container { transform: translateX(-100%); }
 
         .overlay {
             background: #f97316;
             background: -webkit-linear-gradient(to right, #ea580c, #f97316); 
             background: linear-gradient(to right, #ea580c, #f97316);
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: 0 0;
-            color: #ffffff;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
+            background-repeat: no-repeat; background-size: cover; background-position: 0 0;
+            color: #ffffff; position: relative; left: -100%; height: 100%; width: 200%;
+            transform: translateX(0); transition: transform 0.6s ease-in-out;
         }
-
-        .container-box.right-panel-active .overlay {
-            transform: translateX(50%);
-        }
+        .container-box.right-panel-active .overlay { transform: translateX(50%); }
 
         .overlay-panel {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
+            position: absolute; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%;
+            transform: translateX(0); transition: transform 0.6s ease-in-out;
         }
 
         .overlay-left { transform: translateX(-20%); }
@@ -114,91 +79,31 @@
         /* MOBILE TOGGLE LINKS (Hidden on Desktop) */
         .mobile-toggle { display: none; }
 
-        /* ========================================= */
-        /* MOBILE RESPONSIVENESS FIX                 */
-        /* ========================================= */
+        /* MOBILE RESPONSIVENESS FIX */
         @media (max-width: 768px) {
-            .container-box {
-                width: 90%; /* Use full width on phone */
-                min-height: 550px; /* Taller to fit content */
-                border-radius: 20px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            }
+            .container-box { width: 90%; min-height: 550px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+            .overlay-container { display: none; }
+            .form-container { width: 100%; position: absolute; top: 0; left: 0; padding: 0; }
+            .sign-in-container { width: 100%; transition: all 0.4s ease-in-out; opacity: 1; z-index: 5; pointer-events: all; }
+            .sign-up-container { width: 100%; transition: all 0.4s ease-in-out; opacity: 0; z-index: 1; pointer-events: none; transform: none; }
 
-            /* Hide the sliding overlay on mobile */
-            .overlay-container {
-                display: none;
-            }
+            /* Mobile Active States */
+            .container-box.right-panel-active .sign-in-container { transform: none; opacity: 0; z-index: 1; pointer-events: none; }
+            .container-box.right-panel-active .sign-up-container { transform: none; opacity: 1; z-index: 5; pointer-events: all; animation: none; }
 
-            /* Make forms full width */
-            .form-container {
-                width: 100%;
-                position: absolute;
-                top: 0;
-                left: 0;
-                padding: 0;
-            }
-
-            .sign-in-container {
-                width: 100%;
-                transition: all 0.4s ease-in-out;
-            }
-
-            .sign-up-container {
-                width: 100%;
-                transition: all 0.4s ease-in-out;
-            }
-
-            /* MOBILE STATE LOGIC */
-            /* Default: Show Sign In, Hide Sign Up */
-            .sign-in-container {
-                opacity: 1;
-                z-index: 5;
-                pointer-events: all;
-            }
-            .sign-up-container {
-                opacity: 0;
-                z-index: 1;
-                pointer-events: none;
-                transform: none; /* Reset desktop transform */
-            }
-
-            /* Active (Register): Show Sign Up, Hide Sign In */
-            .container-box.right-panel-active .sign-in-container {
-                transform: none; /* Reset desktop transform */
-                opacity: 0;
-                z-index: 1;
-                pointer-events: none;
-            }
-            .container-box.right-panel-active .sign-up-container {
-                transform: none; /* Reset desktop transform */
-                opacity: 1;
-                z-index: 5;
-                pointer-events: all;
-                animation: none; /* Disable desktop animation */
-            }
-
-            /* Show the Mobile Toggle Links */
-            .mobile-toggle {
-                display: block;
-                margin-top: 20px;
-                font-size: 14px;
-                color: #6b7280;
-            }
-            .mobile-toggle a {
-                color: #f97316;
-                font-weight: bold;
-                cursor: pointer;
-            }
+            .mobile-toggle { display: block; margin-top: 20px; font-size: 14px; color: #6b7280; }
+            .mobile-toggle a { color: #f97316; font-weight: bold; cursor: pointer; }
         }
     </style>
 </head>
 <body class="bg-gray-100 flex justify-center items-center flex-col font-sans h-screen px-4">
 
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
     <div class="container-box bg-white rounded-[20px] shadow-2xl relative <%= (typeof action !== 'undefined' && action === 'register') ? 'right-panel-active' : '' %>" id="container">
         
         <div class="form-container sign-up-container">
-            <form action="/register" method="POST" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
+            <form onsubmit="handleAuth(event, '/register')" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
                 <h1 class="font-bold text-3xl mb-4">Create Account</h1>
                 
                 <div class="flex gap-4 mb-4">
@@ -212,7 +117,7 @@
                 <input type="email" name="username" placeholder="Email" required class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
                 <input type="password" name="password" placeholder="Password" required class="bg-gray-100 border-none px-4 py-3 mb-4 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
                 
-                <button class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
+                <button type="submit" class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
                     Sign Up
                 </button>
 
@@ -223,7 +128,7 @@
         </div>
 
         <div class="form-container sign-in-container">
-            <form action="/login" method="POST" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
+            <form onsubmit="handleAuth(event, '/login')" class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
                 <h1 class="font-bold text-3xl mb-4">Sign in</h1>
                 
                 <div class="flex gap-4 mb-4">
@@ -239,7 +144,7 @@
                 
                 <a href="#" class="text-xs text-gray-400 mb-4 hover:text-orange-500 transition">Forgot your password?</a>
                 
-                <button class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
+                <button type="submit" class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
                     Sign In
                 </button>
 
@@ -253,54 +158,130 @@
             <div class="overlay">
                 <div class="overlay-panel overlay-left">
                     <h1 class="font-bold text-3xl mb-4">Welcome Back!</h1>
-                    <p class="text-sm font-thin leading-5 mb-8">
-                        To keep connected with us please login with your personal info
-                    </p>
-                    <button class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none" id="signIn">
-                        Sign In
-                    </button>
+                    <p class="text-sm font-thin leading-5 mb-8">To keep connected with us please login with your personal info</p>
+                    <button class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none" id="signIn">Sign In</button>
                 </div>
 
                 <div class="overlay-panel overlay-right">
                     <h1 class="font-bold text-3xl mb-4">Hello, Friend!</h1>
-                    <p class="text-sm font-thin leading-5 mb-8">
-                        Enter your personal details and start your journey with Us
-                    </p>
-                    <button class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none" id="signUp">
-                        Sign Up
-                    </button>
+                    <p class="text-sm font-thin leading-5 mb-8">Enter your personal details and start your journey with Us</p>
+                    <button class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none" id="signUp">Sign Up</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Desktop Buttons
+        /* ========================
+           1. UI LOGIC (SLIDER) 
+           ======================== */
         const signUpButton = document.getElementById('signUp');
         const signInButton = document.getElementById('signIn');
-        // Mobile Buttons
         const mobileSignUp = document.getElementById('mobileSignUp');
         const mobileSignIn = document.getElementById('mobileSignIn');
-        
         const container = document.getElementById('container');
 
-        // Function to switch to Sign Up
-        function activateSignUp() {
-            container.classList.add("right-panel-active");
-        }
+        function activateSignUp() { container.classList.add("right-panel-active"); }
+        function activateSignIn() { container.classList.remove("right-panel-active"); }
 
-        // Function to switch to Sign In
-        function activateSignIn() {
-            container.classList.remove("right-panel-active");
-        }
-
-        // Add Event Listeners
         signUpButton.addEventListener('click', activateSignUp);
         signInButton.addEventListener('click', activateSignIn);
-        
-        // Mobile Event Listeners
         if(mobileSignUp) mobileSignUp.addEventListener('click', activateSignUp);
         if(mobileSignIn) mobileSignIn.addEventListener('click', activateSignIn);
+
+        /* ========================
+           2. NOTIFICATION SYSTEM 
+           ======================== */
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            
+            // Colors & Icons
+            const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+            const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+            toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[320px] border-2 border-white/20`;
+            toast.style.animation = 'slideIn 0.5s forwards';
+            
+            toast.innerHTML = `
+                <div class="text-2xl">${icon}</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm uppercase tracking-wide opacity-80">${isError ? 'Error' : 'Success'}</span>
+                    <span class="font-bold text-base">${message}</span>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        /* ========================
+           3. AUTH AJAX HANDLER 
+           ======================== */
+        async function handleAuth(event, endpoint) {
+            event.preventDefault(); // Stop page reload
+            
+            const form = event.target;
+            // Get button to add loading state
+            const btn = form.querySelector('button');
+            const originalText = btn.innerText;
+            
+            // 1. Loading State
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            // 2. Gather Data
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                // 3. Send Request
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                // 4. Handle Response
+                const result = await response.json().catch(() => ({})); // Handle non-JSON gracefully
+
+                if (response.ok) {
+                    // SUCCESS
+                    showNotification(result.message || 'Authentication Successful!', 'success');
+                    
+                    // Redirect after 1 second
+                    setTimeout(() => {
+                        window.location.href = result.redirectUrl || '/'; 
+                    }, 1000);
+
+                } else {
+                    // ERROR (Wrong password, User not found, etc.)
+                    // Assumes backend sends: { error: "User not found" }
+                    showNotification(result.error || 'Invalid credentials', 'error');
+                    
+                    // Reset Button
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+
+            } catch (error) {
+                console.error(error);
+                showNotification('Connection error. Please try again.', 'error');
+                
+                // Reset Button
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
     </script>
 </body>
 </html>

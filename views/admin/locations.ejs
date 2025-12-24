@@ -1,3 +1,17 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
   <div class="p-6 flex justify-between items-center border-b border-gray-100">
     <h3 class="font-bold text-gray-800 text-lg">Location Management</h3>
@@ -44,15 +58,15 @@
 <div id="add-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
   <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
     <h3 class="text-xl font-bold mb-4">Add New Location</h3>
-    <form action="/api/locations" method="POST" class="space-y-4">
-      <input type="text" name="name" placeholder="Location Name" required class="w-full border p-2 rounded-lg">
-      <input type="text" name="address" placeholder="Full Address" required class="w-full border p-2 rounded-lg">
-      <input type="text" name="google_map_url" placeholder="Google Maps Link" class="w-full border p-2 rounded-lg">
+    <form onsubmit="submitAdd(event)" class="space-y-4">
+      <input type="text" id="add-name" name="name" placeholder="Location Name" required class="w-full border p-2 rounded-lg">
+      <input type="text" id="add-address" name="address" placeholder="Full Address" required class="w-full border p-2 rounded-lg">
+      <input type="text" id="add-google_map_url" name="google_map_url" placeholder="Google Maps Link" class="w-full border p-2 rounded-lg">
       <div class="grid grid-cols-2 gap-4">
-          <input type="text" name="hours_mon_fri" placeholder="Mon-Fri Hours" class="w-full border p-2 rounded-lg">
-          <input type="text" name="hours_sat_sun" placeholder="Sat-Sun Hours" class="w-full border p-2 rounded-lg">
+          <input type="text" id="add-hours_mon_fri" name="hours_mon_fri" placeholder="Mon-Fri Hours" class="w-full border p-2 rounded-lg">
+          <input type="text" id="add-hours_sat_sun" name="hours_sat_sun" placeholder="Sat-Sun Hours" class="w-full border p-2 rounded-lg">
       </div>
-      <select name="status" class="w-full border p-2 rounded-lg">
+      <select id="add-status" name="status" class="w-full border p-2 rounded-lg">
           <option value="Open">Open</option>
           <option value="Closed">Closed</option>
       </select>
@@ -89,41 +103,103 @@
 </div>
 
 <script>
-function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+    // 1. NOTIFICATION SYSTEM
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
 
-function openEditModal(loc) {
-    document.getElementById('edit-id').value = loc.id;
-    document.getElementById('edit-name').value = loc.name;
-    document.getElementById('edit-address').value = loc.address;
-    document.getElementById('edit-google_map_url').value = loc.google_map_url;
-    document.getElementById('edit-hours_mon_fri').value = loc.hours_mon_fri;
-    document.getElementById('edit-hours_sat_sun').value = loc.hours_sat_sun;
-    document.getElementById('edit-status').value = loc.status;
-    toggleModal('edit-modal');
-}
-
-async function submitEdit() {
-    const id = document.getElementById('edit-id').value;
-    const data = {
-        name: document.getElementById('edit-name').value,
-        address: document.getElementById('edit-address').value,
-        google_map_url: document.getElementById('edit-google_map_url').value,
-        hours_mon_fri: document.getElementById('edit-hours_mon_fri').value,
-        hours_sat_sun: document.getElementById('edit-hours_sat_sun').value,
-        status: document.getElementById('edit-status').value
-    };
-    await fetch(`/api/locations/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    window.location.reload();
-}
-
-async function deleteLocation(id) {
-    if(confirm('Delete this location?')) {
-        await fetch(`/api/locations/${id}`, { method: 'DELETE' });
-        window.location.reload();
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
     }
-}
+
+    function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+    function openEditModal(loc) {
+        document.getElementById('edit-id').value = loc.id;
+        document.getElementById('edit-name').value = loc.name;
+        document.getElementById('edit-address').value = loc.address;
+        document.getElementById('edit-google_map_url').value = loc.google_map_url;
+        document.getElementById('edit-hours_mon_fri').value = loc.hours_mon_fri;
+        document.getElementById('edit-hours_sat_sun').value = loc.hours_sat_sun;
+        document.getElementById('edit-status').value = loc.status;
+        toggleModal('edit-modal');
+    }
+
+    // 2. ADD LOCATION
+    async function submitAdd(e) {
+        e.preventDefault();
+        const data = {
+            name: document.getElementById('add-name').value,
+            address: document.getElementById('add-address').value,
+            google_map_url: document.getElementById('add-google_map_url').value,
+            hours_mon_fri: document.getElementById('add-hours_mon_fri').value,
+            hours_sat_sun: document.getElementById('add-hours_sat_sun').value,
+            status: document.getElementById('add-status').value
+        };
+        try {
+            const res = await fetch('/api/locations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                showNotification("Location Added Successfully!");
+                toggleModal('add-modal');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showNotification("Error adding location", 'error');
+            }
+        } catch(err) { console.error(err); showNotification("Server Error", 'error'); }
+    }
+
+    // 3. EDIT LOCATION
+    async function submitEdit() {
+        const id = document.getElementById('edit-id').value;
+        const data = {
+            name: document.getElementById('edit-name').value,
+            address: document.getElementById('edit-address').value,
+            google_map_url: document.getElementById('edit-google_map_url').value,
+            hours_mon_fri: document.getElementById('edit-hours_mon_fri').value,
+            hours_sat_sun: document.getElementById('edit-hours_sat_sun').value,
+            status: document.getElementById('edit-status').value
+        };
+        try {
+            const res = await fetch(`/api/locations/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                showNotification("Location Updated!");
+                toggleModal('edit-modal');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showNotification("Error updating location", 'error');
+            }
+        } catch(err) { console.error(err); showNotification("Server Error", 'error'); }
+    }
+
+    // 4. DELETE LOCATION
+    async function deleteLocation(id) {
+        if(confirm('Are you sure you want to delete this location?')) {
+            try {
+                const res = await fetch(`/api/locations/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showNotification("Location Deleted");
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showNotification("Error deleting location", 'error');
+                }
+            } catch(err) { console.error(err); showNotification("Server Error", 'error'); }
+        }
+    }
 </script>
