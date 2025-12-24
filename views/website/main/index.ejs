@@ -1,20 +1,38 @@
 <style>
-  /* Initial State: Hidden & Moved Down */
+  /* 1. SCROLL ANIMATION STYLES */
   .scroll-hidden {
     opacity: 0;
     transform: translateY(60px);
-    /* This transition handles the entrance */
     transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
       transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: opacity, transform; /* Optimization for smoothness */
+    will-change: opacity, transform;
   }
 
-  /* Active State: Visible & Reset Position */
   .reveal-active {
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* CRITICAL MOBILE FIX: Prevent white screen on phones if JS lags */
+  @media (max-width: 640px) {
+    .scroll-hidden {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+  }
+
+  /* 2. TOAST NOTIFICATION STYLES */
+  @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+  }
 </style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <%- include('./header.ejs') %>
 
@@ -22,7 +40,12 @@
 
 <%- include('./mostsale.ejs') %>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
 <script>
+  // 1. GSAP ANIMATIONS
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   let mm = gsap.matchMedia();
 
@@ -44,68 +67,34 @@
 
     const cards = document.querySelectorAll(".feature-card");
 
-    tl.to(cards[1], { y: 0, duration: 1, ease: "none" })
-      .to(cards[2], { y: 0, duration: 1, ease: "none" })
-      .to(cards[3], { y: 0, duration: 1, ease: "none" });
+    if(cards.length > 0) {
+        tl.to(cards[1], { y: 0, duration: 1, ease: "none" })
+          .to(cards[2], { y: 0, duration: 1, ease: "none" })
+          .to(cards[3], { y: 0, duration: 1, ease: "none" });
 
-    tl.add("zoomStart");
-    const gridWidth = 280;
-    const gridHeight = 400;
-    const gap = 24;
-    const commonGridProps = {
-      width: `${gridWidth}px`,
-      height: `${gridHeight}px`,
-      borderRadius: "1rem",
-      top: "50%",
-      y: "-50%",
-      ease: "power2.inOut",
-      duration: 1,
-    };
-    tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
-      .to(
-        ".icon-container",
-        {
-          width: "3.5rem",
-          height: "3.5rem",
-          marginBottom: "1rem",
+        tl.add("zoomStart");
+        const gridWidth = 280;
+        const gridHeight = 400;
+        const gap = 24;
+        const commonGridProps = {
+          width: `${gridWidth}px`,
+          height: `${gridHeight}px`,
+          borderRadius: "1rem",
+          top: "50%",
+          y: "-50%",
+          ease: "power2.inOut",
           duration: 1,
-        },
-        "zoomStart"
-      )
-      .to(
-        ".icon-container svg",
-        { width: "2rem", height: "2rem", duration: 1 },
-        "zoomStart"
-      );
-    tl.to(
-      cards[0],
-      {
-        ...commonGridProps,
-        left: `calc(50% - ${gridWidth * 2 + gap * 1.5}px)`,
-      },
-      "zoomStart"
-    )
-      .to(
-        cards[1],
-        {
-          ...commonGridProps,
-          left: `calc(50% - ${gridWidth * 1 + gap * 0.5}px)`,
-        },
-        "zoomStart"
-      )
-      .to(
-        cards[2],
-        { ...commonGridProps, left: `calc(50% + ${gap * 0.5}px)` },
-        "zoomStart"
-      )
-      .to(
-        cards[3],
-        {
-          ...commonGridProps,
-          left: `calc(50% + ${gridWidth * 1 + gap * 1.5}px)`,
-        },
-        "zoomStart"
-      );
+        };
+        
+        tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
+          .to(".icon-container", { width: "3.5rem", height: "3.5rem", marginBottom: "1rem", duration: 1 }, "zoomStart")
+          .to(".icon-container svg", { width: "2rem", height: "2rem", duration: 1 }, "zoomStart");
+          
+        tl.to(cards[0], { ...commonGridProps, left: `calc(50% - ${gridWidth * 2 + gap * 1.5}px)` }, "zoomStart")
+          .to(cards[1], { ...commonGridProps, left: `calc(50% - ${gridWidth * 1 + gap * 0.5}px)` }, "zoomStart")
+          .to(cards[2], { ...commonGridProps, left: `calc(50% + ${gap * 0.5}px)` }, "zoomStart")
+          .to(cards[3], { ...commonGridProps, left: `calc(50% + ${gridWidth * 1 + gap * 1.5}px)` }, "zoomStart");
+    }
   });
 
   mm.add("(max-width: 1023px)", () => {
@@ -125,46 +114,67 @@
     });
   });
 
-  // SCROLL ANIMATION OBSERVER
+  // 2. SCROLL REVEAL OBSERVER
   document.addEventListener("DOMContentLoaded", function () {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Just add the active class, don't remove scroll-hidden
-            // The CSS specificity handles the override
             entry.target.classList.add("reveal-active");
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.15 }
-    ); // Slightly higher threshold prevents accidental triggering
+      { threshold: 0.1 } 
+    );
 
-    document
-      .querySelectorAll(".scroll-hidden")
-      .forEach((el) => observer.observe(el));
+    document.querySelectorAll(".scroll-hidden").forEach((el) => observer.observe(el));
   });
 
-  // Existing Functions
+  // 3. SEARCH FUNCTION
   function filterMenu() {
-    const searchInput = document
-      .getElementById("menu-search")
-      .value.toLowerCase();
+    const searchInput = document.getElementById("menu-search").value.toLowerCase();
     const productCards = document.querySelectorAll(".product-card");
 
     productCards.forEach((card) => {
-      const productName = card
-        .querySelector(".product-name")
-        .innerText.toLowerCase();
-      if (productName.includes(searchInput)) {
-        card.style.display = "";
+      const productName = card.querySelector(".product-name").innerText.toLowerCase();
+      // Logic to handle different layout structures (grid vs flex)
+      const wrapper = card.closest('.group'); 
+      if(productName.includes(searchInput)) {
+          if(wrapper) wrapper.style.display = '';
+          else card.style.display = '';
       } else {
-        card.style.display = "none";
+          if(wrapper) wrapper.style.display = 'none';
+          else card.style.display = 'none';
       }
     });
   }
 
+  // 4. RESTORED: STYLED NOTIFICATION SYSTEM
+  function showNotification(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+      const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+      toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+      toast.style.animation = 'slideIn 0.5s forwards';
+      
+      toast.innerHTML = `
+          <div class="text-2xl">${icon}</div>
+          <div class="font-bold text-sm">${message}</div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+          toast.style.animation = 'slideOut 0.5s forwards';
+          setTimeout(() => toast.remove(), 500);
+      }, 3000);
+  }
+
+  // 5. UPDATED ADD TO CART
   async function addToCart(productId) {
     try {
       const response = await fetch("/api/cart", {
@@ -175,17 +185,13 @@
       const data = await response.json();
 
       if (response.ok) {
-        const notification = document.createElement("div");
-        notification.className =
-          "fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-xl z-50 font-bold animate-bounce";
-        notification.innerText = "Added to Cart! 🛒";
-        document.body.appendChild(notification);
-        setTimeout(() => notification.remove(), 2000);
+        showNotification("Added to Cart Successfully!", "success");
       } else {
-        alert("Error adding to cart");
+        showNotification(data.error || "Error adding to cart", "error");
       }
     } catch (error) {
       console.error("Error:", error);
+      showNotification("Connection Error", "error");
     }
   }
 </script>
