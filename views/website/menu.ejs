@@ -1,29 +1,21 @@
 <style>
-    /* 1. SCROLL ANIMATIONS */
+    /* 1. SCROLL ANIMATION */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(40px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
     .scroll-hidden {
         opacity: 0;
         transform: translateY(40px);
         transition: opacity 0.8s ease-out, transform 0.8s ease-out;
     }
-
-    /* CRITICAL FIX: Force visibility on mobile to prevent white screen if JS lags */
     @media (max-width: 640px) {
-        .scroll-hidden {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-        }
+        /* Fix for mobile: always show items if JS is slow */
+        .scroll-hidden { opacity: 1 !important; transform: translateY(0) !important; }
     }
-    
-    .animate-fade-up {
-        animation: fadeInUp 1s ease-out forwards;
-    }
+    .animate-fade-up { animation: fadeInUp 1s ease-out forwards; }
 
-    /* 2. TOAST NOTIFICATION ANIMATIONS */
+    /* 2. POPUP ALERT STYLES */
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
@@ -116,7 +108,7 @@
     // 1. CHECK LOGIN STATUS (Server-side variable passed to Client)
     const IS_LOGGED_IN = <%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>;
 
-    // 2. SCROLL TO HASH
+    // 2. SCROLL LOGIC
     function forceScrollToHash() {
         if (window.location.hash) {
             const id = window.location.hash.substring(1);
@@ -131,7 +123,6 @@
     window.addEventListener('load', forceScrollToHash);
     setTimeout(forceScrollToHash, 500);
 
-    // 3. ANIMATION OBSERVER
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -142,26 +133,19 @@
                 }
             });
         }, { threshold: 0 }); 
-
         document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
 
-    // 4. SEARCH FILTER
     function filterMenu() {
         const searchInput = document.getElementById('menu-search').value.toLowerCase();
         document.querySelectorAll('.product-card').forEach(card => {
             const name = card.querySelector('.product-name').innerText.toLowerCase();
-            const wrapper = card.closest('.group'); 
-            
-            if(name.includes(searchInput)) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
+            if(name.includes(searchInput)) card.style.display = '';
+            else card.style.display = 'none';
         });
     }
 
-    // 5. STYLED NOTIFICATION SYSTEM
+    // 3. STYLED NOTIFICATION FUNCTION
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -183,14 +167,13 @@
 
         container.appendChild(toast);
 
-        // Remove after 3 seconds
         setTimeout(() => {
             toast.style.animation = 'slideOut 0.5s forwards';
             setTimeout(() => toast.remove(), 500);
         }, 3000);
     }
 
-    // 6. ADD TO CART (With Login Check)
+    // 4. ADD TO CART (With Login Check & Styled Alerts)
     async function addToCart(productId) {
         // Step A: Check Login first
         if (!IS_LOGGED_IN) {
@@ -211,12 +194,15 @@
             const data = await res.json();
             
             if(res.ok) {
+                // SUCCESS POPUP
                 showNotification('Added to Cart Successfully!', 'success');
             } else {
+                // ERROR POPUP
                 showNotification(data.error || 'Could not add item', 'error');
             }
         } catch(err) {
             console.error(err);
+            // ERROR POPUP
             showNotification('Connection Error', 'error');
         }
     }
