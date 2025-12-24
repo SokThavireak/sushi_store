@@ -11,16 +11,22 @@ import { Strategy } from "passport-local";
 import GoogleStrategy from "passport-google-oauth2";
 import session from "express-session";
 import env from "dotenv";
-import crypto from 'crypto'; // Required for ABA Security Hash
+import crypto from 'crypto'; 
+import connectPgSimple from 'connect-pg-simple'; // REQUIRED: Import Session Store
 
 env.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Use Render's PORT or 3000
 const saltRounds = 10;
+const pgSession = connectPgSimple(session); // Initialize Session Store
+
+// Determine Environment
+const isProduction = process.env.NODE_ENV === 'production';
+const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
 
 // =========================================================
-// CONFIG: Multer Storage (Saves images to public/uploads)
+// CONFIG: Multer Storage
 // =========================================================
 const uploadDir = path.join(process.cwd(), "public/uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -37,13 +43,47 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 1. Basic Setup & Middleware
+// =========================================================
+// 2. Database Connection (FIXED: Added SSL)
+// =========================================================
+// We use DATABASE_URL if available (common in Render), otherwise fall back to individual vars
+const connectionConfig = process.env.DATABASE_URL 
+    ? { 
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false } // Fixes the "SSL/TLS required" error
+      }
+    : {
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DB_DATABASE,
+        password: process.env.DB_PASSWORD, 
+        port: process.env.DB_PORT,
+        // Only use SSL if we are in production or explicitly requested
+        ssl: isProduction ? { rejectUnauthorized: false } : false
+      };
+
+const pool = new Pool(connectionConfig);
+
+// Test Connection
+pool.connect().then(() => console.log('✅ Database connected successfully')).catch(err => console.error('❌ Database connection error:', err));
+
+// =========================================================
+// 1. Middleware Setup (FIXED: Memory Leak)
+// =========================================================
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    store: new pgSession({
+      pool: pool,                // Use our DB pool
+      tableName: 'session',      // Use the table we created in Step 2
+      createTableIfMissing: true // Tries to create table if you forgot Step 2
+    }),
+    secret: process.env.SESSION_SECRET || "fallback_secret",
     resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+    saveUninitialized: false, // Changed to false for better login handling
+    cookie: { 
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        secure: isProduction // Secure cookies in production
+    } 
   })
 );
 
@@ -53,26 +93,20 @@ app.use(expressLayouts);
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json()); 
 app.set('view engine', 'ejs'); 
+app.set('layout', 'layouts'); 
+
+// Passport MUST come after session
 app.use(passport.initialize());
 app.use(passport.session());  
 
-// 2. Database Connection
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD, 
-    port: process.env.DB_PORT,
-});
-
 app.use((req, res, next) => {
     req.pool = pool;
+    // Make user available to all views
+    res.locals.user = req.user; 
     next();
 });
 
-// 3. Layout Configuration
-app.set('layout', 'layouts'); 
-
+// Admin Layout Middleware
 app.use('/admin', (req, res, next) => {
     res.locals.layout = 'layout.ejs'; 
     next();
@@ -102,22 +136,14 @@ function checkRole(allowedRoles) {
 // PUBLIC ROUTES
 // =========================================================
 
-// Customer requests cancellation
-
 // Customer Order History Page
 app.get('/orders', checkAuthenticated, async (req, res) => {
     try {
-        // Fetch orders for the currently logged-in user
         const result = await pool.query(
             "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", 
             [req.user.id]
         );
-        
-        res.render('orders', { 
-            title: 'My Orders', 
-            orders: result.rows, 
-            user: req.user 
-        });
+        res.render('orders', { title: 'My Orders', orders: result.rows });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
@@ -126,7 +152,6 @@ app.get('/orders', checkAuthenticated, async (req, res) => {
 
 app.post('/orders/request-cancel/:id', checkAuthenticated, async (req, res) => {
     try {
-        // Only allow if currently Pending and belongs to user
         await pool.query(
             "UPDATE orders SET status = 'Cancel Requested' WHERE id = $1 AND user_id = $2 AND status = 'Pending'",
             [req.params.id, req.user.id]
@@ -138,10 +163,8 @@ app.post('/orders/request-cancel/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
-// Customer requests refund
 app.post('/orders/request-refund/:id', checkAuthenticated, async (req, res) => {
     try {
-        // Only allow if currently Completed and belongs to user
         await pool.query(
             "UPDATE orders SET status = 'Refund Requested' WHERE id = $1 AND user_id = $2 AND status = 'Completed'",
             [req.params.id, req.user.id]
@@ -162,24 +185,22 @@ app.get("/", async (req, res) => {
             ...[...new Set(products.map(p => p.category))].map(c => ({ name: c }))
         ];
         res.render("website/main/index", { 
-            title: "Home", products, categories, layout: 'layouts', user: req.user 
+            title: "Home", products, categories, layout: 'layouts'
         });
     } catch (err) {
         console.error(err);
-        res.render("website/main/index", { products: [], categories: [], user: req.user });
+        res.render("website/main/index", { products: [], categories: [] });
     }
 });
 
 app.get('/about', (req, res) => {
-    res.render('website/about', { title: 'About Us', layout: 'layouts', user: req.user});
+    res.render('website/about', { title: 'About Us', layout: 'layouts'});
 });
 
 app.get('/location', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM locations ORDER BY id ASC");
-        res.render('website/location', { 
-            title: 'Our Locations', locations: result.rows, layout: 'layouts', user: req.user 
-        });
+        res.render('website/location', { title: 'Our Locations', locations: result.rows, layout: 'layouts' });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
@@ -190,11 +211,9 @@ app.get('/offers', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM products ORDER BY id DESC");
         const discountedProducts = result.rows.filter(p => p.discount_type && p.discount_type !== 'none' && p.discount_value > 0);
-        res.render('website/offers', { 
-            title: 'Offers', products: discountedProducts, layout: 'layouts', user: req.user 
-        });
+        res.render('website/offers', { title: 'Offers', products: discountedProducts, layout: 'layouts' });
     } catch (err) {
-        res.render('website/offers', { title: 'Offers', products: [], layout: 'layouts', user: req.user });
+        res.render('website/offers', { title: 'Offers', products: [], layout: 'layouts' });
     }
 });
 
@@ -206,8 +225,7 @@ app.get("/menu", async (req, res) => {
       title: "Menu",
       layout: "layouts",
       products: productsRes.rows,
-      categories: categoriesRes.rows, 
-      user: req.user
+      categories: categoriesRes.rows
     });
   } catch (err) {
     res.status(500).send("Database Error");
@@ -282,25 +300,21 @@ app.patch("/api/cart/:id", async (req, res) => {
 // CHECKOUT & ORDERS ROUTE
 // =========================================================
 
-// 1. Checkout Page (Fetches Open Stores)
 app.get('/checkout', checkAuthenticated, async (req, res) => {
     try {
-        // Fetch cart items for THIS user
         const cartRes = await pool.query(`
             SELECT c.*, p.name, p.price 
             FROM cart c 
             JOIN products p ON c.product_id = p.id 
             WHERE c.user_id = $1`, [req.user.id]);
         
-        // Fetch Stores with 'Open' status
         const locRes = await pool.query("SELECT * FROM locations WHERE status = 'Open'");
 
         res.render('website/checkout', {
             title: 'Checkout', 
             cart: cartRes.rows, 
             locations: locRes.rows, 
-            layout: 'layouts', 
-            user: req.user
+            layout: 'layouts'
         });
     } catch (err) {
         console.error(err);
@@ -308,23 +322,12 @@ app.get('/checkout', checkAuthenticated, async (req, res) => {
     }
 });
 
-// 2. Process Order
-// 2. Process Order (Updated for Staff Fast-Track)
 app.post('/api/orders', checkAuthenticated, async (req, res) => {
     let { pickup_location, payment_method, table_number } = req.body;
     const client = await pool.connect();
     
     try {
         await client.query('BEGIN');
-
-        // Allow Cashier to use Staff Logic
-        if (req.user.role === 'staff') {
-            res.redirect('/staff/menu?status=success');
-        } else if (payment_method === 'QR') {
-            res.redirect(`/payment/${orderId}`);
-        } else {
-            res.redirect('/'); // <--- Change this to '/' to go to Home
-        }
 
         const cartRes = await client.query(`
             SELECT c.product_id, c.quantity, p.price 
@@ -338,7 +341,6 @@ app.post('/api/orders', checkAuthenticated, async (req, res) => {
 
         const total = cartRes.rows.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
-        // INSERT table_number
         const orderRes = await client.query(
             "INSERT INTO orders (user_id, total_price, payment_method, pickup_location, status, table_number) VALUES ($1, $2, $3, $4, 'Pending', $5) RETURNING id",
             [req.user.id, total, payment_method, pickup_location, table_number]
@@ -360,7 +362,7 @@ app.post('/api/orders', checkAuthenticated, async (req, res) => {
         } else if (payment_method === 'QR') {
             res.redirect(`/payment/${orderId}`);
         } else {
-            res.redirect('/profile'); 
+            res.redirect('/orders'); // Redirect to orders page instead of profile
         }
 
     } catch (err) {
@@ -372,11 +374,9 @@ app.post('/api/orders', checkAuthenticated, async (req, res) => {
     }
 });
 
-// DELETE ORDER
 app.post('/admin/orders/delete/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
     try {
         const id = req.params.id;
-        // Delete items first (Foreign Key constraint)
         await pool.query("DELETE FROM order_items WHERE order_id = $1", [id]);
         await pool.query("DELETE FROM orders WHERE id = $1", [id]);
         res.redirect('/admin/orders');
@@ -386,13 +386,10 @@ app.post('/admin/orders/delete/:id', checkAuthenticated, checkRole(['manager', '
     }
 });
 
-// EDIT ORDER PAGE (GET)
-// 1. GET: Edit Order Page (Updated to fetch Items)
 app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         const orderId = req.params.id;
 
-        // 1. Fetch Order + User Info
         const orderRes = await pool.query(`
             SELECT o.*, u.email, u.name as user_name 
             FROM orders o 
@@ -400,10 +397,7 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
             WHERE o.id = $1
         `, [orderId]);
 
-        // 2. Fetch Order Items
         const itemsRes = await pool.query("SELECT * FROM order_items WHERE order_id = $1", [orderId]);
-
-        // 3. Fetch Locations (for the dropdown)
         const locRes = await pool.query("SELECT * FROM locations");
 
         if (orderRes.rows.length === 0) {
@@ -413,8 +407,7 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
         res.render('admin/edit_order', {
             order: orderRes.rows[0],
             items: itemsRes.rows,
-            locations: locRes.rows,
-            user: req.user
+            locations: locRes.rows
         });
     } catch (err) {
         console.error(err);
@@ -422,14 +415,12 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
     }
 });
 
-// 2. POST: Delete Item from Order
 app.post('/admin/orders/items/delete/:itemId', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
     const client = await pool.connect();
     try {
         const itemId = req.params.itemId;
         await client.query('BEGIN');
 
-        // Get item details to calculate deduction
         const itemRes = await client.query("SELECT order_id, price, quantity FROM order_items WHERE id = $1", [itemId]);
         if(itemRes.rows.length === 0) {
             await client.query('ROLLBACK');
@@ -438,10 +429,7 @@ app.post('/admin/orders/items/delete/:itemId', checkAuthenticated, checkRole(['m
         const { order_id, price, quantity } = itemRes.rows[0];
         const deductAmount = price * quantity;
 
-        // Delete the Item
         await client.query("DELETE FROM order_items WHERE id = $1", [itemId]);
-
-        // Update Order Total
         await client.query("UPDATE orders SET total_price = total_price - $1 WHERE id = $2", [deductAmount, order_id]);
 
         await client.query('COMMIT');
@@ -455,20 +443,18 @@ app.post('/admin/orders/items/delete/:itemId', checkAuthenticated, checkRole(['m
     }
 });
 
-// 3. POST: Update Item Quantity
 app.post('/admin/orders/items/update/:itemId', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
     const client = await pool.connect();
     try {
         const itemId = req.params.itemId;
         const newQuantity = parseInt(req.body.quantity);
         
-        if (newQuantity < 1) { // If qty is 0 or less, treat as delete
+        if (newQuantity < 1) { 
              return res.redirect(307, `/admin/orders/items/delete/${itemId}`);
         }
 
         await client.query('BEGIN');
 
-        // Get current details
         const itemRes = await client.query("SELECT order_id, price, quantity FROM order_items WHERE id = $1", [itemId]);
         if(itemRes.rows.length === 0) {
             await client.query('ROLLBACK');
@@ -476,14 +462,10 @@ app.post('/admin/orders/items/update/:itemId', checkAuthenticated, checkRole(['m
         }
         const { order_id, price, quantity: oldQuantity } = itemRes.rows[0];
 
-        // Calculate Difference
         const qtyDiff = newQuantity - oldQuantity;
         const priceDiff = qtyDiff * price;
 
-        // Update Item
         await client.query("UPDATE order_items SET quantity = $1 WHERE id = $2", [newQuantity, itemId]);
-
-        // Update Order Total
         await client.query("UPDATE orders SET total_price = total_price + $1 WHERE id = $2", [priceDiff, order_id]);
 
         await client.query('COMMIT');
@@ -497,7 +479,6 @@ app.post('/admin/orders/items/update/:itemId', checkAuthenticated, checkRole(['m
     }
 });
 
-// UPDATE ORDER (POST)
 app.post('/admin/orders/update/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
     try {
         const id = req.params.id;
@@ -521,14 +502,8 @@ app.post('/admin/orders/update/:id', checkAuthenticated, checkRole(['manager', '
 function getAbaHash(transactionId, amount) {
     const merchantId = process.env.ABA_MERCHANT_ID;
     const apiKey = process.env.ABA_API_KEY;
-    const reqTime = Math.floor(Date.now() / 1000); // Current timestamp
+    const reqTime = Math.floor(Date.now() / 1000); 
 
-    // ABA Payway String Format: 
-    // req_time + merchant_id + tran_id + amount + items + shipping + firstname + lastname + email + phone + type + payment_option + return_url + ...
-    // Note: We leave optional fields empty for simplicity here, but order matters.
-    // This string must match EXACTLY what is sent in the form.
-    
-    // items = base64 encoded JSON (optional, we leave empty)
     const items = ""; 
     const shipping = ""; 
     const cfirstname = "Murakami"; 
@@ -536,13 +511,12 @@ function getAbaHash(transactionId, amount) {
     const cemail = "customer@example.com"; 
     const cphone = "099999999"; 
     const type = "purchase"; 
-    const payment_option = ""; // cards, abapay, alipay, wechat, ... (empty = show all)
-    const return_url = "http://localhost:3000/profile"; // Update this in production
+    const payment_option = ""; 
+    // FIXED: Use Dynamic Base URL
+    const return_url = `${baseUrl}/orders`; 
     
-    // Construct the string to hash
     const dataToHash = reqTime + merchantId + transactionId + amount + items + shipping + cfirstname + clastname + cemail + cphone + type + payment_option + return_url;
 
-    // Generate Hash (HMAC SHA512 + Base64)
     const hash = crypto.createHmac('sha512', apiKey).update(dataToHash).digest('base64');
 
     return { hash, reqTime, items, shipping, cfirstname, clastname, cemail, cphone, type, payment_option, return_url };
@@ -552,22 +526,17 @@ function getAbaHash(transactionId, amount) {
 // PAYMENT ROUTES (DEMO MODE)
 // =========================================================
 
-// 1. GET: Render the Payment Page (Simplified)
 app.get('/payment/:id', checkAuthenticated, async (req, res) => {
     try {
         const orderId = req.params.id;
-
-        // Fetch Order to get the amount
         const orderRes = await pool.query("SELECT * FROM orders WHERE id = $1", [orderId]);
         if (orderRes.rows.length === 0) return res.redirect('/');
         
         const order = orderRes.rows[0];
         const amount = parseFloat(order.total_price).toFixed(2);
 
-        // Render the new simplified page
         res.render('website/payment', { 
             title: 'Confirm Payment', 
-            user: req.user,
             layout: 'layouts',
             orderId: orderId,
             amount: amount
@@ -579,21 +548,14 @@ app.get('/payment/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
-// 2. POST: Handle "Fake" Payment Success
-// 2. POST: Handle "Fake" Payment Success
 app.post('/payment/confirm/:id', checkAuthenticated, async (req, res) => {
     try {
         const orderId = req.params.id;
-
-        // Update Order Status to 'Processing'
         await pool.query(
             "UPDATE orders SET status = 'Processing' WHERE id = $1", 
             [orderId]
         );
-
-        // Redirect user to HOME instead of profile
-        res.redirect('/'); 
-
+        res.redirect('/orders'); // Redirect to order history
     } catch (err) {
         console.error(err);
         res.status(500).send("Error confirming payment");
@@ -609,34 +571,27 @@ app.get("/staff/menu", checkAuthenticated, checkRole(['admin', 'manager', 'store
     const productsRes = await pool.query("SELECT * FROM products ORDER BY id ASC");
     const categoriesRes = await pool.query("SELECT * FROM categories ORDER BY id ASC");
     
-    res.render("website/menu_staff", { // We will create this file next
+    res.render("website/menu_staff", { 
       title: "Staff POS Menu",
       products: productsRes.rows,
       layout: "layouts",
-      categories: categoriesRes.rows, 
-      user: req.user
+      categories: categoriesRes.rows
     });
   } catch (err) {
     res.status(500).send("Database Error");
   }
 });
 
-// =========================================================
-// DAILY STOCK COUNT (Store Manager Input & Admin Viewing)
-// =========================================================
-
-// 1. GET: Show Daily Stock Form (Only Store Managers submit counts)
+// DAILY STOCK COUNT
 app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager']), async (req, res) => {
     try {
         const userId = req.user.id;
         const locId = req.user.assigned_location_id;
 
-        // 1. Get Location Name
         if (!locId) return res.send("Error: You are not assigned to a location.");
         const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [locId]);
         const locationName = locRes.rows[0].name;
 
-        // 2. Check if already submitted today
         const today = new Date().toISOString().split('T')[0];
         const checkRes = await pool.query(
             "SELECT * FROM daily_inventory_logs WHERE user_id = $1 AND report_date = $2", 
@@ -644,12 +599,10 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager'])
         );
         const alreadySubmitted = checkRes.rows.length > 0;
 
-        // 3. Fetch Master Menu (To show list of items to count)
         const masterRes = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
 
         res.render('manager/daily_stock.ejs', { 
             title: 'Daily Stock Count', 
-            user: req.user,
             layout: 'layout',
             locationName: locationName,
             masterItems: masterRes.rows,
@@ -662,28 +615,24 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager'])
     }
 });
 
-// 2. POST: Save Daily Stock Data (Only Store Managers save)
 app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager']), async (req, res) => {
     const client = await pool.connect();
     try {
-        const { items } = req.body; // Array of {name, category, quantity, unit}
+        const { items } = req.body; 
         const userId = req.user.id;
         const locId = req.user.assigned_location_id;
 
-        // Get Location Name for the log
         const locRes = await client.query("SELECT name FROM locations WHERE id = $1", [locId]);
         const locationName = locRes.rows[0].name;
 
         await client.query('BEGIN');
 
-        // 1. Create Log Entry
         const logRes = await client.query(
             "INSERT INTO daily_inventory_logs (location_name, user_id, report_date) VALUES ($1, $2, CURRENT_DATE) RETURNING id",
             [locationName, userId]
         );
         const logId = logRes.rows[0].id;
 
-        // 2. Insert Items
         for (const item of items) {
             await client.query(
                 "INSERT INTO daily_inventory_items (log_id, item_name, category, quantity, unit) VALUES ($1, $2, $3, $4, $5)",
@@ -703,38 +652,31 @@ app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manag
     }
 });
 
-// 3. GET: History Dashboard (UPDATED: Admins can view all, Managers locked to own)
 app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         const { location, date } = req.query;
         let queryParams = [];
         let whereClauses = [];
         
-        // --- 1. LOCATION PERMISSION LOGIC ---
-        // Store Manager: FORCED to their assigned location
         if (req.user.role === 'store_manager') {
              if (!req.user.assigned_location_id) return res.send("Error: No location assigned.");
              
-             // Get location name for the query
              const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
              const myLocName = locRes.rows[0].name;
              
              whereClauses.push(`location_name = $${queryParams.length + 1}`);
              queryParams.push(myLocName);
         } 
-        // Admin/Manager: OPTIONAL filter (Select as they want)
         else if (location && location !== 'All Locations') {
              whereClauses.push(`location_name = $${queryParams.length + 1}`);
              queryParams.push(location);
         }
 
-        // --- 2. DATE FILTER (Optional) ---
         if (date) {
             whereClauses.push(`report_date = $${queryParams.length + 1}`);
             queryParams.push(date);
         }
 
-        // Construct SQL
         let sql = `
             SELECT l.*, u.email 
             FROM daily_inventory_logs l
@@ -746,8 +688,6 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
         sql += " ORDER BY report_date DESC";
 
         const logsRes = await pool.query(sql, queryParams);
-        
-        // Fetch All Locations for the Admin Dropdown
         const allLocs = await pool.query("SELECT * FROM locations ORDER BY name ASC");
 
         res.render('manager/stock_history.ejs', { 
@@ -755,7 +695,6 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
             logs: logsRes.rows,
             locations: allLocs.rows,
             layout: 'layout',
-            user: req.user,
             filters: { location: location || '', date: date || '' }
         });
 
@@ -765,12 +704,10 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
     }
 });
 
-// 4. GET: View Specific Log Details (Required for the 'View' button)
 app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         const logId = req.params.id;
 
-        // Fetch Log Header
         const logRes = await pool.query(`
             SELECT l.*, u.email 
             FROM daily_inventory_logs l
@@ -781,7 +718,6 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
         if (logRes.rows.length === 0) return res.redirect('/manager/daily-stock/history');
         const log = logRes.rows[0];
 
-        // SECURITY: Store Manager can only view their own location's logs
         if (req.user.role === 'store_manager') {
              const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
              if (locRes.rows.length > 0 && log.location_name !== locRes.rows[0].name) {
@@ -789,14 +725,12 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
              }
         }
 
-        // Fetch Items in this log
         const itemsRes = await pool.query("SELECT * FROM daily_inventory_items WHERE log_id = $1 ORDER BY category, item_name", [logId]);
 
         res.render('manager/view_daily_log.ejs', {
             title: `Log #${logId}`,
             log: log,
-            items: itemsRes.rows,
-            user: req.user
+            items: itemsRes.rows
         });
 
     } catch (err) {
@@ -806,18 +740,15 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
 });
 
 // =========================================================
-// MASTER STOCK MENU (Definition of Items)
+// MASTER STOCK MENU
 // =========================================================
 
-// 1. GET: Render the Menu Page
 app.get('/admin/stock/menu', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
     try {
-        // Fetch all defined stock items
         const result = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
         res.render('admin/stock/stock_menu.ejs', { 
             title: 'Master Ingredient Menu', 
-            stocks: result.rows, // Data for the EJS loop
-            user: req.user 
+            stocks: result.rows
         });
     } catch (err) {
         console.error(err);
@@ -825,7 +756,6 @@ app.get('/admin/stock/menu', checkAuthenticated, checkRole(['manager', 'admin'])
     }
 });
 
-// 2. POST: Add New Master Item
 app.post('/admin/stock/menu/add', checkAuthenticated, checkRole(['manager', 'admin']), upload.single('image'), async (req, res) => {
     const { name, category, unit } = req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : '';
@@ -842,7 +772,6 @@ app.post('/admin/stock/menu/add', checkAuthenticated, checkRole(['manager', 'adm
     }
 });
 
-// 3. PATCH: Update Master Item
 app.patch('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
     const { id } = req.params;
     const { name, category, unit, image_url } = req.body;
@@ -857,7 +786,6 @@ app.patch('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'admi
     }
 });
 
-// 4. DELETE: Remove Master Item
 app.delete('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
     try {
         await pool.query("DELETE FROM stocks WHERE id=$1", [req.params.id]);
@@ -871,7 +799,6 @@ app.delete('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'adm
 // STOCK ORDER MANAGEMENT
 // =========================================================
 
-// 1. List Stock Requests (The "Inbox" for Managers/Admins)
 app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         let query = `
@@ -881,7 +808,6 @@ app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'stor
         `;
         let params = [];
 
-        // Store Managers only see their own store's requests
         if (req.user.role === 'store_manager' && req.user.assigned_location_id) {
             const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
             if (locRes.rows.length > 0) {
@@ -895,8 +821,7 @@ app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'stor
 
         res.render('admin/stock/stock_orders.ejs', { 
             title: 'Stock Requests', 
-            requests: result.rows, 
-            user: req.user 
+            requests: result.rows
         });
     } catch (err) {
         console.error(err);
@@ -904,22 +829,18 @@ app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'stor
     }
 });
 
-// 2. View "Create Request" OR "Master Ingredient Menu"
-// FIXED: Fetches 'stocks' so the EJS doesn't crash
 app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         const locRes = await pool.query("SELECT * FROM locations");
         const prodRes = await pool.query("SELECT * FROM products ORDER BY category, name");
         const catRes = await pool.query("SELECT * FROM categories ORDER BY id ASC");
         
-        // --- NEW: Fetch Master Ingredients for the Admin Menu ---
         let stocks = [];
         try {
-             // Ensure you have a table named 'stocks' or change this to your ingredient table name
              const stockRes = await pool.query("SELECT * FROM stocks ORDER BY category, name");
              stocks = stockRes.rows;
         } catch(e) {
-             console.log("Note: 'stocks' table might not exist yet. Using empty array.");
+             console.log("Note: 'stocks' table might not exist yet.");
         }
 
         res.render('admin/stock/create_stock.ejs', { 
@@ -927,8 +848,7 @@ app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin'
             locations: locRes.rows, 
             products: prodRes.rows,
             categories: catRes.rows,
-            stocks: stocks, // <--- THIS FIXES THE ERROR
-            user: req.user 
+            stocks: stocks
         });
     } catch (err) {
         console.error(err);
@@ -936,13 +856,11 @@ app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin'
     }
 });
 
-// 3. ADMIN: Add New Ingredient to Master Menu
 app.post("/admin/stock/add", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), upload.single("image"), async (req, res) => {
     const { name, category, quantity, unit } = req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : "";
 
     try {
-        // Ensure you have a 'stocks' table with these columns
         await pool.query(
             "INSERT INTO stocks (name, category, quantity, unit, image_url) VALUES ($1, $2, $3, $4, $5)",
             [name, category, quantity || 0, unit, image_url]
@@ -950,11 +868,10 @@ app.post("/admin/stock/add", checkAuthenticated, checkRole(['manager', 'admin', 
         res.redirect("/admin/stock/create");
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error adding stock item. Does the 'stocks' table exist?");
+        res.status(500).send("Error adding stock item.");
     }
 });
 
-// 4. ADMIN: Update Ingredient (PATCH)
 app.patch("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     const { id } = req.params;
     const { name, category, quantity, unit, image_url } = req.body;
@@ -970,7 +887,6 @@ app.patch("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', '
     }
 });
 
-// 5. ADMIN: Delete Ingredient (DELETE)
 app.delete("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         await pool.query("DELETE FROM stocks WHERE id=$1", [req.params.id]);
@@ -981,13 +897,11 @@ app.delete("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 
     }
 });
 
-// 6. STORE MANAGER: Create Stock Request (Send Request)
 app.post('/api/stock/create', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     const client = await pool.connect();
     try {
         const { location_name, items } = req.body; 
         
-        // SECURITY: If Store Manager, force the location to their assigned one
         let finalLocation = location_name;
         if (req.user.role === 'store_manager') {
             if (req.user.assigned_location_id) {
@@ -1004,14 +918,12 @@ app.post('/api/stock/create', checkAuthenticated, checkRole(['manager', 'admin',
 
         await client.query('BEGIN');
 
-        // Create Parent Request
         const reqRes = await client.query(
             "INSERT INTO stock_requests (user_id, location_name, status) VALUES ($1, $2, 'Pending') RETURNING id",
             [req.user.id, finalLocation]
         );
         const reqId = reqRes.rows[0].id;
 
-        // Insert Items
         if (items && items.length > 0) {
             for (const item of items) {
                 await client.query(
@@ -1033,59 +945,48 @@ app.post('/api/stock/create', checkAuthenticated, checkRole(['manager', 'admin',
 });
 
 // =========================================================
-// ADMIN DASHBOARD (With Chart Data)
+// ADMIN DASHBOARD
 // =========================================================
 app.get("/admin/dashboard", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async(req, res) => {
     try {
         const client = await pool.connect();
         
-        // 1. Determine Location Filter
         let filterLocationName = null;
         let locationFilterClause = "";
         let queryParams = [];
 
-        // Fetch all locations for the Dropdown (Admin/Manager only)
         const allLocationsRes = await client.query("SELECT * FROM locations ORDER BY name ASC");
         
-        // LOGIC: Set Filter based on Role
         if (req.user.role === 'store_manager') {
-            // Store Manager: Locked to their assigned store
             if (req.user.assigned_location_id) {
                 const myLoc = allLocationsRes.rows.find(l => l.id === req.user.assigned_location_id);
                 filterLocationName = myLoc ? myLoc.name : 'Unknown';
             }
         } else {
-            // Admin/Manager: Check URL param (e.g. ?location=Central)
             if (req.query.location && req.query.location !== 'All') {
                 filterLocationName = req.query.location;
             }
         }
 
-        // Helper to construct SQL WHERE clauses
-        // If filterLocationName is set, we add "AND pickup_location = $1"
         if (filterLocationName) {
             locationFilterClause = "AND pickup_location = $1";
             queryParams.push(filterLocationName);
         }
 
-        // 2. Fetch Key Metrics (Apply Filter)
-        const productCountRes = await client.query("SELECT COUNT(*) FROM products"); // Inventory is global usually
-        const userCountRes = await client.query("SELECT COUNT(*) FROM users"); // Users are global
+        const productCountRes = await client.query("SELECT COUNT(*) FROM products"); 
+        const userCountRes = await client.query("SELECT COUNT(*) FROM users"); 
         
-        // Orders Count (Filtered)
         const orderCountRes = await client.query(
             `SELECT COUNT(*) FROM orders WHERE 1=1 ${locationFilterClause}`, 
             queryParams
         );
 
-        // Revenue (Filtered, Completed only)
         const revenueRes = await client.query(
             `SELECT SUM(total_price) FROM orders WHERE status = 'Completed' ${locationFilterClause}`, 
             queryParams
         );
         const totalRevenue = revenueRes.rows[0].sum || 0;
 
-        // 3. Charts Data (Filtered)
         const chartQuery = `
             SELECT to_char(created_at, 'Mon DD') as day, SUM(total_price) as daily_sales
             FROM orders 
@@ -1095,7 +996,6 @@ app.get("/admin/dashboard", checkAuthenticated, checkRole(['manager', 'admin', '
         `;
         const chartRes = await client.query(chartQuery, queryParams);
 
-        // 4. Status Distribution (Filtered - For Donut Chart)
         const statusQuery = `
             SELECT status, COUNT(*) as count 
             FROM orders 
@@ -1108,15 +1008,12 @@ app.get("/admin/dashboard", checkAuthenticated, checkRole(['manager', 'admin', '
 
         res.render("admin/dashboard.ejs", { 
             title: "Dashboard", 
-            user: req.user, 
             productsCount: productCountRes.rows[0].count,
             userCount: userCountRes.rows[0].count,
             ordersCount: orderCountRes.rows[0].count,
             totalRevenue: parseFloat(totalRevenue).toFixed(2),
             chartData: chartRes.rows,
             statusData: statusRes.rows,
-            
-            // Location Data for Dropdown
             locations: allLocationsRes.rows,
             currentFilter: filterLocationName || 'All'
         });
@@ -1124,21 +1021,17 @@ app.get("/admin/dashboard", checkAuthenticated, checkRole(['manager', 'admin', '
     } catch (err) {
         console.error(err);
         res.render("admin/dashboard.ejs", { 
-            title: "Dashboard", user: req.user, productsCount: 0, userCount: 0, ordersCount: 0, totalRevenue: 0, chartData: [], statusData: [], locations: [], currentFilter: 'All' 
+            title: "Dashboard", productsCount: 0, userCount: 0, ordersCount: 0, totalRevenue: 0, chartData: [], statusData: [], locations: [], currentFilter: 'All' 
         });
     }
 });
 
-// =========================================================
-// REPORTS PAGE (With Date & Location Filter)
-// =========================================================
 app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         const selectedDate = req.query.date || new Date().toISOString().split('T')[0];
         
-        // 1. Determine Location Filter
         let filterLocationName = null;
-        let dbParams = [selectedDate]; // First param is always Date
+        let dbParams = [selectedDate]; 
         let locationSql = "";
 
         const allLocationsRes = await pool.query("SELECT * FROM locations ORDER BY name ASC");
@@ -1159,7 +1052,6 @@ app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'st
             dbParams.push(filterLocationName);
         }
 
-        // 2. Fetch Orders
         const ordersRes = await pool.query(`
             SELECT o.*, u.email 
             FROM orders o 
@@ -1170,7 +1062,6 @@ app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'st
 
         const orders = ordersRes.rows;
 
-        // 3. Calculate Stats
         let grossSales = 0;
         let completedCount = 0;
         orders.forEach(o => {
@@ -1182,7 +1073,6 @@ app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'st
 
         res.render('admin/reports.ejs', { 
             title: 'Sales Reports', 
-            user: req.user,
             orders: orders,
             stats: {
                 grossSales: grossSales.toFixed(2),
@@ -1201,11 +1091,8 @@ app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'st
     }
 });
 
-//Updated Order Logic
 app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
     try {
-        // FIXED: Removed 'u.name' because it doesn't exist in your users table yet.
-        // We only select o.* and u.email.
         let query = `
             SELECT o.*, u.email 
             FROM orders o 
@@ -1213,7 +1100,6 @@ app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'sto
         `;
         let params = [];
 
-        // 2. KEEP EXISTING FILTER: If User is Store Manager, Staff, or Cashier, filter by their location
         if ((req.user.role === 'store_manager' || req.user.role === 'staff' || req.user.role === 'cashier') && req.user.assigned_location_id) {
             const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
             if (locRes.rows.length > 0) {
@@ -1223,7 +1109,6 @@ app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'sto
             }
         }
 
-        // 3. UPDATE ORDER BY: Prioritize 'Requested' statuses, then date
         query += ` 
             ORDER BY 
             CASE WHEN o.status LIKE '%Requested%' THEN 0 ELSE 1 END,
@@ -1232,11 +1117,9 @@ app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'sto
 
         const result = await pool.query(query, params);
         
-        // Render the View
         res.render('admin/orders/orders', { 
             title: 'Order Management', 
-            orders: result.rows, 
-            user: req.user 
+            orders: result.rows
         });
     } catch (err) {
         console.error(err);
@@ -1253,17 +1136,16 @@ app.post('/admin/orders/:id/status', checkAuthenticated, checkRole(['manager', '
     }
 });
 
-// CHANGE: replaced 'checkAdmin' with 'checkAuthenticated, checkRole(...)'
 app.post('/admin/orders/handle-request/:id', checkAuthenticated, checkRole(['admin', 'manager', 'store_manager']), async (req, res) => {
     const { action } = req.body;
     const orderId = req.params.id;
     let newStatus = '';
 
     if (action === 'approve_cancel') newStatus = 'Cancelled';
-    if (action === 'reject_cancel') newStatus = 'Pending'; // Return to previous state
+    if (action === 'reject_cancel') newStatus = 'Pending'; 
     
     if (action === 'approve_refund') newStatus = 'Refunded';
-    if (action === 'reject_refund') newStatus = 'Completed'; // Return to previous state
+    if (action === 'reject_refund') newStatus = 'Completed'; 
 
     try {
         await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [newStatus, orderId]);
@@ -1277,7 +1159,7 @@ app.post('/admin/orders/handle-request/:id', checkAuthenticated, checkRole(['adm
 // --- INVENTORY ---
 
 app.get("/add-item", checkAuthenticated, checkRole(['manager', 'admin']), (req, res) => {
-    res.render("admin/inventory.ejs", { title: "Add Item", user: req.user });
+    res.render("admin/inventory.ejs", { title: "Add Item" });
 });
 
 app.get("/admin/inventory", checkAuthenticated, checkRole(['manager', 'admin']), async(req, res) => {
@@ -1286,7 +1168,7 @@ app.get("/admin/inventory", checkAuthenticated, checkRole(['manager', 'admin']),
     const categoryResult = await pool.query("SELECT * FROM categories ORDER BY id ASC");
     const allCategories = [{ name: "On Sale" }, ...categoryResult.rows];
     res.render("admin/inventory.ejs", { 
-        title: "Inventory Management", products: result.rows, categories: allCategories, user: req.user 
+        title: "Inventory Management", products: result.rows, categories: allCategories
     });
   } catch (err) {
     res.status(500).send("Database Error");
@@ -1347,16 +1229,12 @@ app.delete("/api/inventory/:id", async (req, res) => {
   }
 });
 
-app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', "store_manager"]), (req, res) => {
-    res.render('admin/reports.ejs', { title: 'Sales Reports & Analytics', user: req.user });
-});
-
 // --- ADMIN LOCATIONS ---
 
 app.get('/admin/locations', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM locations ORDER BY id ASC");
-        res.render('admin/locations.ejs', { title: 'Location Management', locations: result.rows, user: req.user });
+        res.render('admin/locations.ejs', { title: 'Location Management', locations: result.rows });
     } catch (err) {
         res.status(500).send("Server Error");
     }
@@ -1404,15 +1282,12 @@ app.delete('/api/locations/:id', checkAuthenticated, checkRole(['admin']), async
 app.get("/admin/users", checkAuthenticated, checkRole(['admin']), async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM users ORDER BY id ASC");
-        
-        // FETCH LOCATIONS
         const locResult = await pool.query("SELECT * FROM locations ORDER BY name ASC"); 
 
         res.render("admin/users/users.ejs", { 
             title: "User Management", 
-            user: req.user, 
             usersList: result.rows,
-            locations: locResult.rows // PASS LOCATIONS
+            locations: locResult.rows 
         });
     } catch (err) {
         console.error(err);
@@ -1436,15 +1311,13 @@ app.get("/admin/users/edit/:id", checkAuthenticated, checkRole(['admin']), async
         const id = req.params.id;
         const userResult = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
         
-        // Fetch all locations to populate the dropdown
         const locResult = await pool.query("SELECT * FROM locations");
 
         if (userResult.rows.length > 0) {
             res.render("admin/users/edit_user.ejs", { 
                 title: "Edit User", 
-                user: req.user, 
                 targetUser: userResult.rows[0],
-                locations: locResult.rows // Pass locations to the view [cite: 1]
+                locations: locResult.rows 
             });
         } else {
             res.redirect("/admin/users");
@@ -1460,7 +1333,6 @@ app.post("/admin/users/update/:id", checkAuthenticated, checkRole(['admin']), as
         const id = req.params.id;
         const { email, role, assigned_location_id } = req.body; 
 
-        // FIX: Allow location to be saved for 'store_manager', 'staff', AND 'cashier'
         const finalLocation = (role === 'store_manager' || role === 'staff' || role === 'cashier') ? assigned_location_id : null;
 
         await pool.query(
@@ -1483,12 +1355,10 @@ app.post("/admin/create-manager", checkAuthenticated, checkRole(['admin', 'manag
         return res.send(`<script>alert('Email already exists'); window.location.href='/admin/users';</script>`);
     }
     
-    // VALIDATION: Force Location for Store Manager, Staff, OR Cashier
     if ((role === 'store_manager' || role === 'staff' || role === 'cashier') && !assigned_location_id) {
         return res.send(`<script>alert('Error: Staff, Cashiers, and Store Managers must have an assigned location.'); window.location.href='/admin/users';</script>`);
     }
 
-    // Set location to NULL for other roles
     const finalLocation = (role === 'store_manager' || role === 'staff' || role === 'cashier') ? assigned_location_id : null;
 
     bcrypt.hash(password, saltRounds, async (err, hash) => {
@@ -1511,7 +1381,7 @@ app.get('/admin/category', checkAuthenticated, checkRole(['manager', 'admin']), 
     try {
         const result = await pool.query('SELECT * FROM categories ORDER BY id ASC');
         res.render('admin/category.ejs', { 
-            title: 'Category Management', layout: 'layout', categories: result.rows, user: req.user, userRole: req.user.role 
+            title: 'Category Management', layout: 'layout', categories: result.rows, userRole: req.user.role 
         });
     } catch (err) {
         res.status(500).send("Server Error");
@@ -1552,7 +1422,7 @@ app.delete('/api/category/:id', checkAuthenticated, checkRole(['admin']), async 
 // --- PROFILE ROUTES ---
 
 app.get("/profile", checkAuthenticated, (req, res) => {
-    res.render("website/profile.ejs", { title: "Manage Account", layout: "layouts", user: req.user });
+    res.render("website/profile.ejs", { title: "Manage Account", layout: "layouts" });
 });
 
 app.post("/profile/update", checkAuthenticated, async (req, res) => {
@@ -1561,7 +1431,6 @@ app.post("/profile/update", checkAuthenticated, async (req, res) => {
 
     try {
         if (password && password.length > 0) {
-            // FIX: Wait for hash to finish before updating DB
             bcrypt.hash(password, saltRounds, async (err, hash) => {
                 if (err) {
                     console.error(err);
@@ -1570,14 +1439,13 @@ app.post("/profile/update", checkAuthenticated, async (req, res) => {
                 
                 try {
                     await pool.query("UPDATE users SET email = $1, password = $2 WHERE id = $3", [email, hash, userId]);
-                    res.redirect("/profile"); // Redirect happens AFTER update
+                    res.redirect("/profile"); 
                 } catch (dbErr) {
                     console.error(dbErr);
                     res.redirect("/profile");
                 }
             });
         } else {
-            // No password change, just update email
             await pool.query("UPDATE users SET email = $1 WHERE id = $2", [email, userId]);
             res.redirect("/profile");
         }
@@ -1620,27 +1488,25 @@ app.get(
 );
 
 app.get("/login", (req, res) => {
-    res.render("website/auth.ejs", { title: "Login / Register", layout: false, user: req.user, action: 'login' });
+    res.render("website/auth.ejs", { title: "Login / Register", layout: false, action: 'login' });
 });
 
 app.get("/register", (req, res) => {
-    res.render("website/auth.ejs", { title: "Login / Register", layout: false, user: req.user, action: 'register' });
+    res.render("website/auth.ejs", { title: "Login / Register", layout: false, action: 'register' });
 });
 
 app.post("/login", passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
     const role = req.user.role;
 
     if (role === 'admin' || role === 'manager' || role === 'store_manager' || role === 'cashier') {
-        // Management roles go to Dashboard
         res.redirect("/admin/dashboard");
     } else if (role === 'staff') {
-        // Staff goes directly to the Staff Menu
         res.redirect("/staff/menu");
     } else {
-        // Regular customers go to Home
         res.redirect("/"); 
     }
 });
+
 app.post("/register", async (req, res) => {
   const email = req.body.username;
   const password = req.body.password;
@@ -1669,7 +1535,7 @@ app.post("/register", async (req, res) => {
 
 app.get("/logout", (req, res) => {
     req.logout((err) => {
-        if (err) return next(err);
+        if (err) return console.error(err);
         res.redirect("/");
     });
 });
@@ -1710,7 +1576,8 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/secrets",
+      // FIXED: Updated to use dynamic BASE_URL
+      callbackURL: `${baseUrl}/auth/google/secrets`,
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
     },
     async (accessToken, refreshToken, profile, cb) => {
