@@ -1,23 +1,36 @@
 <style>
-    /* Entrance Animation */
+    /* 1. SCROLL ANIMATIONS */
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(40px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    
     .scroll-hidden {
         opacity: 0;
         transform: translateY(40px);
         transition: opacity 0.8s ease-out, transform 0.8s ease-out;
     }
-    /* Mobile Fix */
+
+    /* CRITICAL FIX: Force visibility on mobile to prevent white screen if JS lags */
     @media (max-width: 640px) {
         .scroll-hidden {
             opacity: 1 !important;
             transform: translateY(0) !important;
         }
     }
+    
     .animate-fade-up {
         animation: fadeInUp 1s ease-out forwards;
+    }
+
+    /* 2. TOAST NOTIFICATION ANIMATIONS */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
     }
 </style>
 
@@ -72,6 +85,7 @@
                                 </div>
                                 
                                 <div class="absolute bottom-0 left-0 w-full p-3 lg:p-8 z-20 flex items-end justify-between">
+                                    
                                     <div class="flex flex-col gap-0.5 lg:gap-1 w-[75%]">
                                         <h3 class="text-white text-sm lg:text-3xl font-bold product-name leading-tight drop-shadow-md line-clamp-2">
                                             <%= product.name %>
@@ -99,7 +113,7 @@
 </div>
 
 <script>
-    // 1. SCROLL SCRIPT
+    // 1. SCROLL TO HASH (Preserves navigation from Categories page)
     function forceScrollToHash() {
         if (window.location.hash) {
             const id = window.location.hash.substring(1);
@@ -124,7 +138,8 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0 });
+        }, { threshold: 0 }); 
+
         document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
 
@@ -134,49 +149,42 @@
         document.querySelectorAll('.product-card').forEach(card => {
             const name = card.querySelector('.product-name').innerText.toLowerCase();
             const wrapper = card.closest('.group'); 
-            // Correct visibility toggling for the new grid structure
+            
             if(name.includes(searchInput)) {
-                 // Use flex/block if hidden, or remove style if default
-                card.style.display = ''; 
-                // Note: If you hide the card div, the grid cell collapses, which is what we want.
+                card.style.display = '';
             } else {
                 card.style.display = 'none';
             }
         });
     }
 
-    // 4. NEW: STYLED NOTIFICATION SYSTEM
+    // 4. NEW: STYLED NOTIFICATION SYSTEM (Consistent with Auth/Admin)
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        
-        // Icon and Color based on type
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
 
-        toast.className = `${bgClass} text-white px-4 py-3 lg:px-6 lg:py-4 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 pointer-events-auto min-w-[280px] lg:min-w-[300px] border-2 border-white/20`;
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        
+        // Use CSS Animation instead of JS transition for consistency
+        toast.style.animation = 'slideIn 0.5s forwards';
         
         toast.innerHTML = `
-            <div class="text-xl lg:text-2xl">${icon}</div>
-            <div class="font-bold text-xs lg:text-sm tracking-wide">${message}</div>
+            <div class="text-2xl">${icon}</div>
+            <div class="font-bold text-sm">${message}</div>
         `;
 
         container.appendChild(toast);
 
-        // Animate In
-        requestAnimationFrame(() => {
-            toast.classList.remove('translate-x-full', 'opacity-0');
-        });
-
-        // Remove after 3 seconds
         setTimeout(() => {
-            toast.classList.add('translate-x-full', 'opacity-0');
-            setTimeout(() => toast.remove(), 300);
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
         }, 3000);
     }
 
-    // 5. UPDATED ADD TO CART
+    // 5. ADD TO CART
     async function addToCart(productId) {
         try {
             const res = await fetch('/api/cart', {
@@ -187,18 +195,13 @@
             const data = await res.json();
             
             if(res.ok) {
-                // Success Alert
                 showNotification('Added to Cart Successfully!', 'success');
-                
-                // Optional: Update cart count icon if you have one
-                // updateCartCount(data.totalItems); 
             } else {
-                // Error Alert
                 showNotification(data.error || 'Could not add item', 'error');
             }
         } catch(err) {
             console.error(err);
-            showNotification('Something went wrong', 'error');
+            showNotification('Connection Error', 'error');
         }
     }
 </script>
