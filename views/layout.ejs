@@ -62,7 +62,7 @@
         </a>
         <% } %>
 
-        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'cashier')) { %>
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'cashier' || user.role === 'store_manager' )) { %>
         <a
           href="/admin/dashboard"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
@@ -141,7 +141,7 @@
         </a>
         <% } %>
 
-        <% if (typeof user !== 'undefined' && (user.role === 'store_manager')) { %>
+        <% if (typeof user !== 'undefined' && (user.role === 'store_manager' || user.role === 'admin' || user.role === 'manager')) { %>
         <a
           href="/manager/daily-stock"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"

@@ -1,7 +1,7 @@
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-24 lg:mt-32">
-    
+    <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
     <div class="bg-orange-600 text-white p-4 lg:p-6 rounded-xl mb-6 flex justify-between items-center shadow-lg">
         <h1 class="text-xl lg:text-2xl font-bold flex items-center gap-2">
             <i class="fa-solid fa-clipboard-list"></i> STAFF POS
@@ -10,6 +10,7 @@
             <%= typeof user !== 'undefined' ? 'Operator: ' + user.email.split('@')[0] : '' %>
         </div>
     </div>
+    <% } %>
 
     <div class="mb-6 lg:mb-10 flex flex-col items-center">
         <div class="relative w-full max-w-4xl group mb-6">
