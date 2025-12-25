@@ -1527,24 +1527,15 @@ app.get("/register", (req, res) => {
 // REPLACE your existing app.post("/login" ...) with this:
 
 app.post("/login", passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
-    // 1. Safety Check: If something went wrong with passport
-    if (!req.user) {
-        return res.redirect("/login");
-    }
-
-    // 2. CLEAN THE ROLE DATA
-    // This converts "Staff ", "STAFF", or " Staff" -> "staff"
-    const rawRole = req.user.role || ""; // Handle empty roles safely
+    // 1. Get the role and CLEAN it (remove spaces, make lowercase)
+    // This fixes issues like "Staff" vs "staff" or "staff "
+    const rawRole = req.user.role || ""; 
     const role = rawRole.trim().toLowerCase(); 
 
-    // 3. DEBUGGING (Look at your terminal when you login!)
-    console.log("================ LOGIN DEBUG ================");
-    console.log(`User Email:   ${req.user.email}`);
-    console.log(`Database Role: '${req.user.role}'`);  // Shows exact value
-    console.log(`Cleaned Role:  '${role}'`);           // Shows value we test against
-    console.log("=============================================");
+    // 2. Debugging: Check your Render logs if it still fails!
+    console.log(`Login Attempt -> Email: ${req.user.email} | Role found: '${role}'`);
 
-    // 4. ROUTING LOGIC
+    // 3. Smart Redirects
     if (['admin', 'manager', 'store_manager', 'cashier'].includes(role)) {
         res.redirect("/admin/dashboard");
     } 
@@ -1552,7 +1543,7 @@ app.post("/login", passport.authenticate("local", { failureRedirect: "/login" })
         res.redirect("/staff/menu");
     } 
     else {
-        // Default for 'user' or any unrecognized role
+        // Default for 'user' or if the role text doesn't match above
         res.redirect("/"); 
     }
 });
