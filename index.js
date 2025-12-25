@@ -609,13 +609,28 @@ app.get("/staff/menu", checkAuthenticated, checkRole(['admin', 'manager', 'store
 app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     try {
         const userId = req.user.id;
-        const locId = req.user.assigned_location_id;
+        let locId = req.user.assigned_location_id;
 
-        if (!locId) return res.send("Error: You are not assigned to a location.");
+        // FIX: Allow Admin/Manager to override location or use default
+        if (['admin', 'manager'].includes(req.user.role)) {
+            if (req.query.location) {
+                locId = req.query.location; // Use filter if provided
+            } else if (!locId) {
+                // If no assigned location, fetch the first one as default
+                const firstLoc = await pool.query("SELECT id FROM locations ORDER BY id ASC LIMIT 1");
+                if (firstLoc.rows.length > 0) locId = firstLoc.rows[0].id;
+            }
+        }
+
+        if (!locId) return res.send("Error: No location found. Please create a location first.");
+
         const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [locId]);
+        if (locRes.rows.length === 0) return res.send("Error: Invalid Location ID.");
+        
         const locationName = locRes.rows[0].name;
 
         const today = new Date().toISOString().split('T')[0];
+        // Check if THIS user submitted for THIS date (regardless of location, or strict to user)
         const checkRes = await pool.query(
             "SELECT * FROM daily_inventory_logs WHERE user_id = $1 AND report_date = $2", 
             [userId, today]
@@ -629,7 +644,9 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
             layout: 'layout',
             locationName: locationName,
             masterItems: masterRes.rows,
-            alreadySubmitted: alreadySubmitted
+            alreadySubmitted: alreadySubmitted,
+            user: req.user, // Ensure user is passed for logic
+            currentLocationId: locId // Pass this so we can use it in the form if needed
         });
 
     } catch (err) {
@@ -641,19 +658,28 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
 app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     const client = await pool.connect();
     try {
-        const { items } = req.body; 
+        const { items, location_id } = req.body; 
         const userId = req.user.id;
-        const locId = req.user.assigned_location_id;
+        let locId = req.user.assigned_location_id;
 
-        // Safety Check: Ensure the user has a location before querying
+        // FIX: Allow Admin/Manager to use passed location or default
+        if (['admin', 'manager'].includes(req.user.role)) {
+            if (location_id) {
+                locId = location_id;
+            } else if (!locId) {
+                // Fallback to first location if none provided
+                const firstLoc = await client.query("SELECT id FROM locations ORDER BY id ASC LIMIT 1");
+                if (firstLoc.rows.length > 0) locId = firstLoc.rows[0].id;
+            }
+        }
+
         if (!locId) {
             client.release();
-            return res.status(400).json({ error: "Error: You are not assigned to a location." });
+            return res.status(400).json({ error: "Error: No location specified." });
         }
 
         const locRes = await client.query("SELECT name FROM locations WHERE id = $1", [locId]);
         
-        // Double check if location exists
         if (locRes.rows.length === 0) {
             client.release();
             return res.status(400).json({ error: "Invalid location assigned." });
