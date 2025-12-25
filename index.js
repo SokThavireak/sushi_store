@@ -29,24 +29,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
 
 // =========================================================
-// CONFIG: Multer Storage
-// =========================================================
-const uploadDir = path.join(process.cwd(), "public/uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir); 
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); 
-  },
-});
-const upload = multer({ storage: storage });
-
-// =========================================================
 // 2. Database Connection (FIXED: Added SSL)
 // =========================================================
 // We use DATABASE_URL if available (common in Render), otherwise fall back to individual vars
