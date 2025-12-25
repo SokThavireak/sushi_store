@@ -186,11 +186,12 @@ app.post('/orders/request-refund/:id', checkAuthenticated, async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-    // 1. SECURITY CHECK: If user is Staff, kick them back to POS
+    // 1. SECURITY CHECK: If user is Staff, redirect AND STOP.
     if (req.user && req.user.role === 'staff') {
-        return res.redirect('/staff/menu');
+        return res.redirect('/staff/menu'); // <--- The 'return' is critical!
     }
 
+    // 2. If not staff, continue loading the home page
     try {
         const result = await pool.query("SELECT * FROM products");
         const products = result.rows;
@@ -203,23 +204,10 @@ app.get("/", async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.render("website/main/index", { products: [], categories: [] });
-    }
-    // --- FIX END ---
-
-    try {
-        const result = await pool.query("SELECT * FROM products");
-        const products = result.rows;
-        const categories = [
-            { name: "Most Sales" }, 
-            ...[...new Set(products.map(p => p.category))].map(c => ({ name: c }))
-        ];
-        res.render("website/main/index", { 
-            title: "Home", products, categories, layout: 'layouts'
-        });
-    } catch (err) {
-        console.error(err);
-        res.render("website/main/index", { products: [], categories: [] });
+        // If there is an error, we render an empty page (but only if we haven't redirected yet)
+        if (!res.headersSent) {
+            res.render("website/main/index", { products: [], categories: [] });
+        }
     }
 });
 
