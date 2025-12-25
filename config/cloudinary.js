@@ -1,7 +1,10 @@
-require('dotenv').config();
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import multer from 'multer';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,11 +15,11 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'sushi_store_uploads', // The folder name in your Cloudinary account
+    folder: 'sushi_store_uploads',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
   },
 });
 
 const upload = multer({ storage: storage });
 
-module.exports = upload;
+export default upload;
