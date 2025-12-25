@@ -611,32 +611,48 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
         const userId = req.user.id;
         let locId = req.user.assigned_location_id;
 
-        // FIX: Allow Admin/Manager to override location or use default
+        // 1. Handle Admin/Manager Location Override
         if (['admin', 'manager'].includes(req.user.role)) {
-            if (req.query.location) {
-                locId = req.query.location; // Use filter if provided
-            } else if (!locId) {
-                // If no assigned location, fetch the first one as default
+            // Check if a specific location was requested via URL query ?location=X
+            if (req.query.location && !isNaN(parseInt(req.query.location))) {
+                locId = parseInt(req.query.location); 
+            } 
+            // If no location assigned/requested, default to the first available location
+            else if (!locId || isNaN(parseInt(locId))) {
                 const firstLoc = await pool.query("SELECT id FROM locations ORDER BY id ASC LIMIT 1");
                 if (firstLoc.rows.length > 0) locId = firstLoc.rows[0].id;
             }
         }
 
-        if (!locId) return res.send("Error: No location found. Please create a location first.");
+        // 2. Safety Check: Ensure we have a valid numeric Location ID
+        if (!locId || isNaN(parseInt(locId))) {
+            return res.render('error', { message: "Error: No valid location found. Please create a location first.", user: req.user });
+        }
 
+        // 3. Fetch Location Name
         const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [locId]);
-        if (locRes.rows.length === 0) return res.send("Error: Invalid Location ID.");
-        
+        if (locRes.rows.length === 0) return res.send("Error: Location ID not found in database.");
         const locationName = locRes.rows[0].name;
 
+        // 4. Check if Stock Submitted (Handle "env-admin-0" string ID gracefully)
         const today = new Date().toISOString().split('T')[0];
-        // Check if THIS user submitted for THIS date (regardless of location, or strict to user)
-        const checkRes = await pool.query(
-            "SELECT * FROM daily_inventory_logs WHERE user_id = $1 AND report_date = $2", 
-            [userId, today]
-        );
-        const alreadySubmitted = checkRes.rows.length > 0;
+        let alreadySubmitted = false;
 
+        // Only query logs if userId is a number OR if you have updated your DB to support text IDs
+        // We wrap this in a try/catch to prevent the page from crashing if the ID type doesn't match
+        try {
+            const checkRes = await pool.query(
+                "SELECT * FROM daily_inventory_logs WHERE user_id = $1 AND report_date = $2", 
+                [userId, today] // This line causes the error if DB expects int but userId is "env-admin-0"
+            );
+            alreadySubmitted = checkRes.rows.length > 0;
+        } catch (dbErr) {
+            console.warn("Skipping log check due to ID type mismatch:", dbErr.message);
+            // Treat as not submitted if we can't check
+            alreadySubmitted = false;
+        }
+
+        // 5. Fetch Master Items
         const masterRes = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
 
         res.render('manager/daily_stock.ejs', { 
@@ -645,13 +661,14 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
             locationName: locationName,
             masterItems: masterRes.rows,
             alreadySubmitted: alreadySubmitted,
-            user: req.user, // Ensure user is passed for logic
-            currentLocationId: locId // Pass this so we can use it in the form if needed
+            user: req.user,
+            currentLocationId: locId,
+            query: req.query // Pass query params back to view
         });
 
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+        console.error("Daily Stock Error:", err);
+        res.status(500).send(`Server Error: ${err.message}`);
     }
 });
 
