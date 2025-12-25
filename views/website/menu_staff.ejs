@@ -23,6 +23,20 @@
             <div class="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg lg:text-xl">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
+            <div class="mb-8 flex flex-wrap justify-center gap-2" id="category-filters">
+        <button onclick="filterCategory('all')" 
+            class="filter-btn active px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-indigo-600 text-white hover:shadow-md">
+            All
+        </button>
+        <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+            <% categories.forEach((category) => { %>
+                <button onclick="filterCategory('<%= category.name %>')" 
+                    class="filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">
+                    <%= category.name %>
+                </button>
+            <% }) %>
+        <% } %>
+    </div>
         </div>
     </div>
 
@@ -30,7 +44,7 @@
         <% categories.forEach((category) => { %>
             <% let categoryProducts = category.name === 'Most Sales' ? products.filter(p => p.is_best_seller) : products.filter(p => p.category === category.name); %>
             <% if (categoryProducts.length > 0) { %>
-                <section class="mb-8 lg:mb-12">
+                <section class="mb-8 lg:mb-12 category-section" data-category="<%= category.name %>">
                     <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-4 lg:mb-6 border-b pb-2 flex items-center gap-2">
                         <span class="w-2 h-6 bg-orange-500 rounded-full inline-block"></span>
                         <%= category.name %>
@@ -130,5 +144,28 @@
             console.error(err);
             showNotification('Connection Error', 'error');
         }
+    }
+
+    // NEW: Category Filter Logic
+    function filterCategory(categoryName) {
+        // 1. Update Button Styles
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            const btnText = btn.innerText.trim();
+            if (btnText === categoryName || (categoryName === 'all' && btnText === 'All')) {
+                btn.className = "filter-btn active px-5 py-2 rounded-full font-bold text-sm transition-all shadow-md bg-indigo-600 text-white transform scale-105";
+            } else {
+                btn.className = "filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50";
+            }
+        });
+
+        // 2. Show/Hide Sections
+        document.querySelectorAll('.category-section').forEach(section => {
+            if (categoryName === 'all' || section.dataset.category === categoryName) {
+                section.style.display = 'block';
+                section.classList.add('animate-fade-up'); // Optional animation re-trigger
+            } else {
+                section.style.display = 'none';
+            }
+        });
     }
 </script>

@@ -19,6 +19,20 @@
       <input type="text" id="search-input" onkeyup="captureAndFilter()" placeholder="Type to search product name..."
         class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500 transition-colors" />
       <div class="absolute left-3 top-2.5 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="px-6 pb-4 bg-gray-50 border-b border-gray-100 flex flex-wrap gap-2 pt-2">
+      <button onclick="filterInventory('all')" 
+          class="inv-filter-btn px-4 py-1.5 rounded-full text-sm font-semibold transition-colors bg-blue-600 text-white shadow-sm">
+          All
+      </button>
+      <% if (displayCategories) { %>
+          <% displayCategories.forEach(function(cat) { %>
+              <button onclick="filterInventory('<%= cat.name %>')" 
+                  class="inv-filter-btn px-4 py-1.5 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 border border-gray-200 hover:bg-gray-100">
+                  <%= cat.name %>
+              </button>
+          <% }); %>
+      <% } %>
+  </div>
     </div>
   </div>
 
@@ -46,7 +60,7 @@
                 categoryProducts = products ? products.filter(p => p.category === category.name) : [];
             }
           %>
-          <div class="mb-12">
+          <div class="mb-12 inventory-section" data-category="<%= category.name %>">
             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
               <%= category.name %> <span class="text-sm font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full"><%= categoryProducts.length %> items</span>
             </h2>
@@ -316,5 +330,25 @@
       }
       else showNotification("Error updating item", 'error');
     } catch (err) { console.error(err); showNotification("Server Error", 'error'); }
+  }
+
+  function filterInventory(categoryName) {
+      // 1. Button Styles
+      document.querySelectorAll('.inv-filter-btn').forEach(btn => {
+          if (btn.innerText.trim() === categoryName || (categoryName === 'all' && btn.innerText.trim() === 'All')) {
+              btn.className = "inv-filter-btn px-4 py-1.5 rounded-full text-sm font-semibold transition-colors bg-blue-600 text-white shadow-sm";
+          } else {
+              btn.className = "inv-filter-btn px-4 py-1.5 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 border border-gray-200 hover:bg-gray-100";
+          }
+      });
+
+      // 2. Show/Hide Sections
+      document.querySelectorAll('.inventory-section').forEach(div => {
+          if (categoryName === 'all' || div.dataset.category === categoryName) {
+              div.style.display = 'block';
+          } else {
+              div.style.display = 'none';
+          }
+      });
   }
 </script>

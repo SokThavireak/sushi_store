@@ -43,6 +43,20 @@
             <div class="absolute left-5 lg:left-8 top-1/2 -translate-y-1/2 text-orange-500 text-xl lg:text-3xl">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
+            <div class="mb-10 lg:mb-16 flex flex-wrap justify-center gap-3" id="menu-filters">
+        <button onclick="filterCategory('all')" 
+            class="filter-btn active px-6 py-3 rounded-full font-bold text-base lg:text-lg transition-all shadow-lg bg-orange-500 text-white transform scale-105">
+            All
+        </button>
+        <% if (typeof categories !== 'undefined') { %>
+            <% categories.forEach((category) => { %>
+                <button onclick="filterCategory('<%= category.name %>')" 
+                    class="filter-btn px-6 py-3 rounded-full font-bold text-base lg:text-lg transition-all shadow-sm bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-500">
+                    <%= category.name %>
+                </button>
+            <% }) %>
+        <% } %>
+    </div>
         </div>
     </div>
 
@@ -55,6 +69,7 @@
                 
                 <section 
                     id="<%= category.name.trim().toLowerCase().replace(/\s+/g, '-') %>" 
+                    data-category="<%= category.name %>"
                     class="mb-12 lg:mb-24 menu-section scroll-hidden"
                     style="scroll-margin-top: 140px;" 
                 >
@@ -215,5 +230,25 @@
             console.error(err);
             showNotification('Connection Error', 'error');
         }
+    }
+
+    function filterCategory(categoryName) {
+        // 1. Visual update for buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            if (btn.innerText.trim() === categoryName || (categoryName === 'all' && btn.innerText.trim() === 'All')) {
+                btn.className = "filter-btn active px-6 py-3 rounded-full font-bold text-base lg:text-lg transition-all shadow-lg bg-orange-500 text-white transform scale-105";
+            } else {
+                btn.className = "filter-btn px-6 py-3 rounded-full font-bold text-base lg:text-lg transition-all shadow-sm bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-500";
+            }
+        });
+
+        // 2. Hide/Show sections
+        document.querySelectorAll('.menu-section').forEach(sec => {
+            if (categoryName === 'all' || sec.dataset.category === categoryName) {
+                sec.style.display = 'block';
+            } else {
+                sec.style.display = 'none';
+            }
+        });
     }
 </script>
