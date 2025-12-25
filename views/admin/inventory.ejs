@@ -3,6 +3,19 @@
     @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 </style>
 
+<% 
+  let displayCategories = categories ? JSON.parse(JSON.stringify(categories)) : []; 
+  if (!displayCategories.some(c => c.name === 'On Sale')) displayCategories.unshift({ name: 'On Sale' });
+  if (!displayCategories.some(c => c.name === 'Most Sales')) displayCategories.unshift({ name: 'Most Sales' });
+  displayCategories.sort((a, b) => {
+      if (a.name === 'On Sale') return -1;
+      if (b.name === 'On Sale') return 1;
+      if (a.name === 'Most Sales') return -1;
+      if (b.name === 'Most Sales') return 1;
+      return 0;
+  });
+%>
+
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -38,18 +51,6 @@
   </div>
 
   <div class="p-8 bg-gray-50 min-h-screen">
-      <% 
-        let displayCategories = categories ? JSON.parse(JSON.stringify(categories)) : []; 
-        if (!displayCategories.some(c => c.name === 'On Sale')) displayCategories.unshift({ name: 'On Sale' });
-        if (!displayCategories.some(c => c.name === 'Most Sales')) displayCategories.unshift({ name: 'Most Sales' });
-        displayCategories.sort((a, b) => {
-            if (a.name === 'On Sale') return -1;
-            if (b.name === 'On Sale') return 1;
-            if (a.name === 'Most Sales') return -1;
-            if (b.name === 'Most Sales') return 1;
-            return 0;
-        });
-      %>
       <% displayCategories.forEach(function(category) { %>
           <% 
             let categoryProducts = []; 
@@ -364,4 +365,4 @@
           }
       });
   }
-</script> 
+</script>
