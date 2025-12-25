@@ -13,9 +13,12 @@ import session from "express-session";
 import env from "dotenv";
 import crypto from 'crypto'; 
 import connectPgSimple from 'connect-pg-simple'; // REQUIRED: Import Session Store
+import { createRequire } from "module";
 
 env.config();
 
+const require = createRequire(import.meta.url);
+const upload = require('config/cloudinary.js');
 const app = express();
 const port = process.env.PORT || 3000; // Use Render's PORT or 3000
 const saltRounds = 10;
@@ -805,7 +808,8 @@ app.get('/admin/stock/menu', checkAuthenticated, checkRole(['manager', 'admin'])
 
 app.post('/admin/stock/menu/add', checkAuthenticated, checkRole(['manager', 'admin']), upload.single('image'), async (req, res) => {
     const { name, category, unit } = req.body;
-    const image_url = req.file ? `/uploads/${req.file.filename}` : '';
+    // USE CLOUDINARY URL
+    const image_url = req.file ? req.file.path : ''; 
     
     try {
         await pool.query(
@@ -905,7 +909,8 @@ app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin'
 
 app.post("/admin/stock/add", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), upload.single("image"), async (req, res) => {
     const { name, category, quantity, unit } = req.body;
-    const image_url = req.file ? `/uploads/${req.file.filename}` : "";
+    // USE CLOUDINARY URL
+    const image_url = req.file ? req.file.path : "";
 
     try {
         await pool.query(
@@ -1224,7 +1229,10 @@ app.get("/admin/inventory", checkAuthenticated, checkRole(['manager', 'admin']),
 
 app.post("/admin/inventory/add", checkAuthenticated, checkRole(['manager', 'admin']), upload.single("image"), async (req, res) => {
   const { name, category, price, is_best_seller, discount_type, discount_value } = req.body;
-  const image_url = req.file ? `/uploads/${req.file.filename}` : "https://via.placeholder.com/150";
+  
+  // USE CLOUDINARY URL or Placeholder
+  const image_url = req.file ? req.file.path : "https://via.placeholder.com/150";
+  
   const isBestSellerBool = is_best_seller === 'true';
   const finalType = discount_type || 'none';
   const finalValue = discount_value || 0;
@@ -1247,6 +1255,7 @@ app.post("/admin/inventory/add", checkAuthenticated, checkRole(['manager', 'admi
 
     res.redirect("/admin/inventory"); 
   } catch (err) {
+    console.error(err);
     res.status(500).send("Error adding item");
   }
 });
