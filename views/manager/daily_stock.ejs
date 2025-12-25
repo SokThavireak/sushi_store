@@ -57,9 +57,13 @@
                     <% catItems.forEach(item => { %>
                         <div class="p-4 flex items-center justify-between group hover:bg-gray-50 transition">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden">
+                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden relative">
                                     <% if(item.image_url) { %>
-                                        <img src="<%= item.image_url %>" class="w-full h-full object-cover">
+                                        <img 
+                                            src="<%= item.image_url %>" 
+                                            class="w-full h-full object-cover"
+                                            onerror="this.onerror=null; this.src='https://via.placeholder.com/100?text=No+Img';"
+                                        >
                                     <% } else { %>
                                         <i class="fa-solid fa-box text-xs"></i>
                                     <% } %>
@@ -108,7 +112,6 @@
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
         toast.style.animation = 'slideIn 0.5s forwards';
         
@@ -116,7 +119,6 @@
             <div class="text-2xl">${icon}</div>
             <div class="font-bold text-sm">${message}</div>
         `;
-
         container.appendChild(toast);
 
         setTimeout(() => {
@@ -128,13 +130,11 @@
     // 2. SUBMIT HANDLER
     async function submitDailyStock(e) {
         e.preventDefault();
-        
         const btn = document.getElementById('submitBtn');
         const originalText = btn.innerHTML;
         
         const form = e.target;
         const data = { items: [] };
-
         // Build array from inputs
         const inputs = form.querySelectorAll('input[type="number"]');
         inputs.forEach(input => {
@@ -148,7 +148,6 @@
                 });
             }
         });
-
         // Validation Alert
         if(data.items.length === 0) {
             return showNotification("⚠️ Please enter at least one quantity.", "error");
@@ -164,7 +163,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
             if(res.ok) {
                 showNotification("Stock Count Saved Successfully!", "success");
                 // Wait 1.5s before reloading so user sees the success message
