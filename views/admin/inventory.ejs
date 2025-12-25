@@ -81,39 +81,150 @@
 </div>
 
 <div id="add-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-        <h3 class="text-lg font-bold mb-4">Add Product</h3>
-        <form onsubmit="submitAdd(event)" class="space-y-4">
-            <input type="text" name="name" placeholder="Name" required class="w-full border p-2 rounded">
-            <input type="number" name="price" placeholder="Price" required class="w-full border p-2 rounded">
-            <select name="category" class="w-full border p-2 rounded">
-                <% categories.forEach(c => { %><option value="<%= c.name %>"><%= c.name %></option><% }) %>
-            </select>
-            <button class="w-full bg-blue-600 text-white py-2 rounded font-bold">Save</button>
-        </form>
-        <button onclick="toggleModal('add-modal')" class="mt-2 text-gray-500 w-full">Cancel</button>
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+      <h3 class="text-lg font-bold text-gray-800">Add New Product</h3>
+      <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
+    <form action="/admin/inventory/add" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Name</label>
+        <input type="text" name="name" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+          <select name="category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => {
+                // Skip virtual categories in the dropdown
+                if(cat.name !== 'On Sale' && cat.name !== 'Most Sales') { %>
+                  <option value="<%= cat.name %>">
+                    <%= cat.name %>
+                  </option>
+                <% } 
+              }) %>
+            <% } else { %>
+              <option value="" disabled>No Categories Found</option>
+            <% } %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price</label>
+          <input type="number" name="price" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Discount Type</label>
+          <select name="discount_type" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            <option value="none">No Discount</option>
+            <option value="percentage">Percentage (%)</option>
+            <option value="subtract">Subtract Amount ($)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Discount Value</label>
+          <input type="number" name="discount_value" value="0" step="0.01"
+            class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image</label>
+          <input type="file" name="image" class="w-full text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Is Best Seller?</label>
+          <select name="is_best_seller" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            <option value="false">No (Normal Product)</option>
+            <option value="true">Yes (Add to Most Sales)</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold mt-2">
+        Save Product
+      </button>
+    </form>
+  </div>
 </div>
 
 <div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
-        <h3 class="text-lg font-bold mb-4">Edit Product</h3>
-        <div class="space-y-4">
-            <input type="hidden" id="edit-id">
-            <input type="text" id="edit-name" class="w-full border p-2 rounded">
-            <input type="number" id="edit-price" class="w-full border p-2 rounded">
-            <select id="edit-category" class="w-full border p-2 rounded">
-                 <% categories.forEach(c => { %><option value="<%= c.name %>"><%= c.name %></option><% }) %>
-            </select>
-            <input type="hidden" id="edit-discount_type">
-             <input type="hidden" id="edit-discount_value">
-             <input type="hidden" id="edit-image_url">
-             <input type="hidden" id="edit-is_best_seller">
-
-            <button onclick="submitEdit()" class="w-full bg-green-600 text-white py-2 rounded font-bold">Update</button>
-        </div>
-        <button onclick="toggleModal('edit-modal')" class="mt-2 text-gray-500 w-full">Cancel</button>
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+      <h3 class="text-lg font-bold text-gray-800">Edit Product</h3>
+      <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
+    <div class="p-6 space-y-4">
+      <input type="hidden" id="edit-id" />
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Name</label>
+        <input type="text" id="edit-name" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+          <select id="edit-category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => {
+                if(cat.name !== 'On Sale' && cat.name !== 'Most Sales') { %>
+                  <option value="<%= cat.name %>">
+                    <%= cat.name %>
+                  </option>
+                <% } 
+              }) %>
+            <% } %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Price</label>
+          <input type="number" id="edit-price" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Discount Type</label>
+          <select id="edit-discount_type" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            <option value="none">No Discount</option>
+            <option value="percentage">Percentage (%)</option>
+            <option value="subtract">Subtract Amount ($)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Discount Value</label>
+          <input type="number" id="edit-discount_value" step="0.01"
+            class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
+          <input type="text" id="edit-image_url" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Is Best Seller?</label>
+          <select id="edit-is_best_seller" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <button onclick="submitEdit()" class="w-full py-3 bg-green-600 text-white rounded-xl font-bold mt-2">
+        Update Product
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
