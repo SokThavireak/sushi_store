@@ -613,62 +613,57 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
 
         // 1. Handle Admin/Manager Location Override
         if (['admin', 'manager'].includes(req.user.role)) {
-            // Check if a specific location was requested via URL query ?location=X
             if (req.query.location && !isNaN(parseInt(req.query.location))) {
                 locId = parseInt(req.query.location); 
-            } 
-            // If no location assigned/requested, default to the first available location
-            else if (!locId || isNaN(parseInt(locId))) {
+            } else if (!locId || isNaN(parseInt(locId))) {
                 const firstLoc = await pool.query("SELECT id FROM locations ORDER BY id ASC LIMIT 1");
                 if (firstLoc.rows.length > 0) locId = firstLoc.rows[0].id;
             }
         }
 
-        // 2. Safety Check: Ensure we have a valid numeric Location ID
         if (!locId || isNaN(parseInt(locId))) {
-            return res.render('error', { message: "Error: No valid location found. Please create a location first.", user: req.user });
+            return res.render('error', { message: "Error: No valid location found.", user: req.user });
         }
 
-        // 3. Fetch Location Name
+        // 2. Fetch Current Location Name
         const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [locId]);
-        if (locRes.rows.length === 0) return res.send("Error: Location ID not found in database.");
+        if (locRes.rows.length === 0) return res.send("Error: Location ID not found.");
         const locationName = locRes.rows[0].name;
 
-        // 4. Check if Stock Submitted (Handle "env-admin-0" string ID gracefully)
+        // 3. NEW: Fetch ALL Locations for the dropdown
+        const allLocs = await pool.query("SELECT * FROM locations ORDER BY id ASC");
+
+        // 4. Check if Stock Submitted
         const today = new Date().toISOString().split('T')[0];
         let alreadySubmitted = false;
-
-        // Only query logs if userId is a number OR if you have updated your DB to support text IDs
-        // We wrap this in a try/catch to prevent the page from crashing if the ID type doesn't match
         try {
+            // Check based on Location AND Date (so multiple locations can submit on same day)
             const checkRes = await pool.query(
-                "SELECT * FROM daily_inventory_logs WHERE user_id = $1 AND report_date = $2", 
-                [userId, today] // This line causes the error if DB expects int but userId is "env-admin-0"
+                "SELECT * FROM daily_inventory_logs WHERE location_name = $1 AND report_date = $2", 
+                [locationName, today]
             );
             alreadySubmitted = checkRes.rows.length > 0;
         } catch (dbErr) {
-            console.warn("Skipping log check due to ID type mismatch:", dbErr.message);
-            // Treat as not submitted if we can't check
             alreadySubmitted = false;
         }
 
-        // 5. Fetch Master Items
         const masterRes = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
 
         res.render('manager/daily_stock.ejs', { 
             title: 'Daily Stock Count', 
             layout: 'layout',
             locationName: locationName,
+            locations: allLocs.rows, // <--- THIS WAS MISSING
             masterItems: masterRes.rows,
             alreadySubmitted: alreadySubmitted,
             user: req.user,
             currentLocationId: locId,
-            query: req.query // Pass query params back to view
+            query: req.query
         });
 
     } catch (err) {
-        console.error("Daily Stock Error:", err);
-        res.status(500).send(`Server Error: ${err.message}`);
+        console.error(err);
+        res.status(500).send("Server Error");
     }
 });
 
