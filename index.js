@@ -609,42 +609,45 @@ app.get("/staff/menu", checkAuthenticated, checkRole(['admin', 'manager', 'store
 app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     try {
         const userId = req.user.id;
-        let locId = req.user.assigned_location_id;
+        // Treat locId as a string, do not use parseInt
+        let locId = req.user.assigned_location_id ? String(req.user.assigned_location_id) : null;
 
         // 1. Handle Admin/Manager Location Override
         if (['admin', 'manager'].includes(req.user.role)) {
-            if (req.query.location && !isNaN(parseInt(req.query.location))) {
-                locId = parseInt(req.query.location); 
-            } else if (!locId || isNaN(parseInt(locId))) {
+            if (req.query.location) {
+                locId = String(req.query.location); // Keep as string
+            } else if (!locId) {
+                // Default to first location if none assigned
                 const firstLoc = await pool.query("SELECT id FROM locations ORDER BY id ASC LIMIT 1");
-                if (firstLoc.rows.length > 0) locId = firstLoc.rows[0].id;
+                if (firstLoc.rows.length > 0) locId = String(firstLoc.rows[0].id);
             }
         }
 
-        if (!locId || isNaN(parseInt(locId))) {
+        if (!locId) {
             return res.render('error', { message: "Error: No valid location found.", user: req.user });
         }
 
-        // 2. Fetch Current Location Name
+        // 2. Fetch Location Name (Query works for string or int now)
         const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [locId]);
         if (locRes.rows.length === 0) return res.send("Error: Location ID not found.");
         const locationName = locRes.rows[0].name;
 
-        // 3. NEW: Fetch ALL Locations for the dropdown
+        // 3. Fetch ALL Locations for dropdown
         const allLocs = await pool.query("SELECT * FROM locations ORDER BY id ASC");
 
         // 4. Check if Stock Submitted
-        const today = new Date().toISOString().split('T')[0];
+        // We use query parameters to allow "viewing" other dates/locations
+        const dateQuery = req.query.date || new Date().toISOString().split('T')[0];
+        
         let alreadySubmitted = false;
         try {
-            // Check based on Location AND Date (so multiple locations can submit on same day)
             const checkRes = await pool.query(
                 "SELECT * FROM daily_inventory_logs WHERE location_name = $1 AND report_date = $2", 
-                [locationName, today]
+                [locationName, dateQuery]
             );
             alreadySubmitted = checkRes.rows.length > 0;
         } catch (dbErr) {
-            alreadySubmitted = false;
+            console.error("Check Submitted Error:", dbErr.message);
         }
 
         const masterRes = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
@@ -653,17 +656,17 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
             title: 'Daily Stock Count', 
             layout: 'layout',
             locationName: locationName,
-            locations: allLocs.rows, // <--- THIS WAS MISSING
+            locations: allLocs.rows,
             masterItems: masterRes.rows,
             alreadySubmitted: alreadySubmitted,
             user: req.user,
             currentLocationId: locId,
-            query: req.query
+            query: { date: dateQuery, location: locId }
         });
 
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error");
+        res.status(500).send("Server Error: " + err.message);
     }
 });
 
@@ -726,64 +729,74 @@ app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manag
     }
 });
 
-app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     try {
-        const { location, date } = req.query;
         let queryParams = [];
-        let whereClauses = [];
+        let queryConditions = [];
         
-        let locationName = "All Locations"; 
-
-        // 1. Handle Location Filter Logic
-        if (req.user.role === 'store_manager') {
-             if (!req.user.assigned_location_id) return res.send("Error: No location assigned.");
-             const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
-             locationName = locRes.rows[0].name; 
-             whereClauses.push(`location_name = $${queryParams.length + 1}`);
-             queryParams.push(locationName);
-        } 
-        else if (location && location !== 'All Locations') {
-             whereClauses.push(`location_name = $${queryParams.length + 1}`);
-             queryParams.push(location);
-             locationName = location; 
+        // Handle Location Filter
+        // If Admin/Manager -> Allow filtering by query.location
+        // If Store Manager -> Force their assigned_location_id
+        if (['admin', 'manager'].includes(req.user.role)) {
+            if (req.query.location) {
+                queryConditions.push(`l.id = $${queryParams.length + 1}`); // Compare ID, not name
+                queryParams.push(String(req.query.location)); // Push as string
+            }
+        } else {
+            // Force assigned location
+            if (req.user.assigned_location_id) {
+                // Assuming locations table has id, and logs store location_name... 
+                // It is safer to filter logs by location_name if that is what you stored, 
+                // OR join tables. simpler here is to join or look up name first.
+                
+                // Let's look up the name for the user's ID to be safe
+                const userLoc = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
+                if(userLoc.rows.length > 0) {
+                    queryConditions.push(`dil.location_name = $${queryParams.length + 1}`);
+                    queryParams.push(userLoc.rows[0].name);
+                }
+            }
         }
 
-        if (date) {
-            whereClauses.push(`report_date = $${queryParams.length + 1}`);
-            queryParams.push(date);
+        // Handle Date Filter
+        if (req.query.date) {
+            queryConditions.push(`dil.report_date = $${queryParams.length + 1}`);
+            queryParams.push(req.query.date);
         }
 
-        // 2. Query Logs
+        // Construct Query
+        // We join locations table just in case we need to filter by ID above, 
+        // OR we just query logs directly. 
+        // Best approach given your setup (logs store location_name):
+        
         let sql = `
-            SELECT l.*, u.email 
-            FROM daily_inventory_logs l
-            LEFT JOIN users u ON l.user_id = u.id
-        `;
-        if (whereClauses.length > 0) {
-            sql += " WHERE " + whereClauses.join(" AND ");
+            SELECT dil.*, u.email 
+            FROM daily_inventory_logs dil
+            LEFT JOIN users u ON dil.user_id = u.id::varchar 
+            LEFT JOIN locations l ON dil.location_name = l.name 
+        `; // Added cast ::varchar for user_id join just in case
+
+        if (queryConditions.length > 0) {
+            sql += " WHERE " + queryConditions.join(" AND ");
         }
-        sql += " ORDER BY report_date DESC";
+
+        sql += " ORDER BY dil.report_date DESC, dil.created_at DESC";
 
         const logsRes = await pool.query(sql, queryParams);
-        
-        // 3. FETCH MISSING DATA (Fixes the crashes)
-        const allLocs = await pool.query("SELECT * FROM locations ORDER BY name ASC");
-        const masterRes = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC"); // <--- Added this
+        const locRes = await pool.query("SELECT * FROM locations ORDER BY id ASC");
 
-        res.render('manager/stock_history.ejs', { 
+        res.render('manager/stock_history.ejs', {
             title: 'Stock Count History',
-            logs: logsRes.rows,
-            locations: allLocs.rows,
             layout: 'layout',
-            filters: { location: location || '', date: date || '' },
-            locationName: locationName,
-            alreadySubmitted: false,
-            masterItems: masterRes.rows  // <--- Pass the missing variable here!
+            logs: logsRes.rows,
+            locations: locRes.rows,
+            query: req.query,
+            user: req.user
         });
 
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error");
+        res.status(500).send("Server Error: " + err.message);
     }
 });
 
