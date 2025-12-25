@@ -1,258 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      };
-      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      
-    </script>
-    <style>
-    /* --- CUSTOM SCROLLBAR --- */
-    
-    /* 1. Set the width of the scrollbar */
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= title %>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    };
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+  </script>
+  <style>
+    /* 1. FOR CHROME, SAFARI, EDGE */
+
+    /* Must define width for style to activate */
     ::-webkit-scrollbar {
-        width: 10px;
+      width: 8px;
+      height: 8px;
     }
 
-    /* 2. Style the background (Track) */
     ::-webkit-scrollbar-track {
-        background: #f5f5f5; /* Matches your 'murakami-gray' color */
+      background: #111827;
+      /* Matches Tailwind gray-900 (Dark) */
     }
 
-    /* 3. Style the draggable handle (Thumb) */
     ::-webkit-scrollbar-thumb {
-        background-color: #d1d5db; /* A neutral light gray */
-        border-radius: 20px;
-        border: 2px solid #f5f5f5; /* Creates a padding effect */
+      background-color: #4b5563;
+      /* Gray-600 color */
+      border-radius: 10px;
+      border: 2px solid #111827;
+      /* Creates space around the thumb */
     }
 
-    /* 4. Change handle color on hover to your brand orange */
     ::-webkit-scrollbar-thumb:hover {
-        background-color: #FF4500; /* Matches your 'murakami-red' */
+      background-color: #f97316;
+      /* Orange-500 on hover */
     }
-    
-    /* Firefox Support */
+
+    /* 2. FOR FIREFOX */
     * {
-        scrollbar-width: thin;
-        scrollbar-color: #d1d5db #f5f5f5;
+      scrollbar-width: thin;
+      scrollbar-color: #4b5563 #111827;
+      /* Thumb color / Track color */
     }
 
-    /* Custom thin scrollbar for the sidebar */
-  .custom-scroll::-webkit-scrollbar {
-    width: 5px;
-  }
-  .custom-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scroll::-webkit-scrollbar-thumb {
-    background: #4b5563; /* gray-600 */
-    border-radius: 10px;
-  }
-  .custom-scroll::-webkit-scrollbar-thumb:hover {
-    background: #f97316; /* orange-500 */
-  }
-</style>
-  </head>
-  <body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden relative transition-colors duration-300">
-    
-    <div 
-        id="sidebar-overlay" 
-        onclick="toggleSidebar()" 
-        class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden transition-opacity duration-300 opacity-0"
-    ></div>
+    /* 3. TARGET THE SIDEBAR SPECIFICALLY */
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0f112e;
+      /* Matches your specific sidebar blue */
+    }
+  </style>
+</head>
 
-    <aside 
-    id="sidebar" 
-    class="absolute inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 text-gray-400 flex flex-col flex-shrink-0 transform -translate-x-full transition-transform 
-    duration-300 lg:relative lg:translate-x-0 lg:inset-auto shadow-2xl lg:shadow-none"
->
-      <div class="p-6 text-white font-bold text-xl flex items-center gap-3 justify-between lg:justify-start">
-        <div class="flex items-center gap-3">
-            <i class="fa-solid fa-layer-group text-blue-500"></i>Murakami<span class="text-orange-500">.</span>
-        </div>
-        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
+<body
+  class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden relative transition-colors duration-300">
+
+  <div id="sidebar-overlay" onclick="toggleSidebar()"
+    class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden transition-opacity duration-300 opacity-0"></div>
+
+  <aside id="sidebar" class="absolute inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 text-gray-400 flex flex-col flex-shrink-0 transform -translate-x-full transition-transform 
+    duration-300 lg:relative lg:translate-x-0 lg:inset-auto shadow-2xl lg:shadow-none">
+    <div class="p-6 text-white font-bold text-xl flex items-center gap-3 justify-between lg:justify-start">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-layer-group text-blue-500"></i>Murakami<span class="text-orange-500">.</span>
       </div>
+      <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-2xl"></i>
+      </button>
+    </div>
 
-      <div class="px-6 mb-6">
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-sm"></i>
-          <input
-            type="text"
-            placeholder="Search..."
-            class="w-full bg-[#1e204a] text-sm text-white rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
-          />
-        </div>
+    <div class="px-6 mb-6">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-sm"></i>
+        <input type="text" placeholder="Search..."
+          class="w-full bg-[#1e204a] text-sm text-white rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500" />
       </div>
+    </div>
 
-      <nav class="flex-1 overflow-y-auto px-4 space-y-2 custom-scroll">
-    <a href="/" class="flex items-center gap-3 px-4 py-3 bg-orange-600 text-white hover:bg-orange-700 rounded-xl transition-all duration-200 mb-6 shadow-lg shadow-orange-900/20 group">
-       <i class="fa-solid fa-globe w-5 text-center group-hover:rotate-12 transition-transform"></i> 
-       <span class="font-semibold">Website Home</span>
-    </a>
+    <nav class="flex-1 overflow-y-auto px-4 space-y-2 custom-scroll">
+      <a href="/"
+        class="flex items-center gap-3 px-4 py-3 bg-orange-600 text-white hover:bg-orange-700 rounded-xl transition-all duration-200 mb-6 shadow-lg shadow-orange-900/20 group">
+        <i class="fa-solid fa-globe w-5 text-center group-hover:rotate-12 transition-transform"></i>
+        <span class="font-semibold">Website Home</span>
+      </a>
 
-    <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
-    <a href="/staff/menu" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-utensils w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Menu Staff</span>
-    </a>
-    <% } %>
-
-    <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'cashier' || user.role === 'store_manager' )) { %>
-    <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-chart-pie w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Dashboard</span>
-    </a>
-    <% } %> 
-
-    <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin')) { %>
-    <a href="/admin/inventory" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-box w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Inventory</span>
-    </a>
-    <% } %> 
-
-    <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin')) { %>
-    <a href="/admin/category" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-tags w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Category</span>
-    </a>
-    <% } %> 
-
-    <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
-    <a href="/admin/locations" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-map-location-dot w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Locations</span>
-    </a>
-    <% } %> 
-
-    <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
-    <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-users w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Users</span>
-    </a>
-    <% } %>
-
-    <a href="/admin/orders" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-cart-shopping w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Orders</span>
-    </a>
-
-    <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
-    <a href="/admin/reports" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-file-invoice w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Reports</span>
-    </a>
-    <% } %>
-
-    <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
-    <a href="/admin/stock" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-boxes-stacked w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Stock Orders</span>
-    </a>
-    <% } %>
-
-    <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
-    <a href="/admin/stock/menu" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-clipboard-list w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Stock Menu</span>
-    </a>
-    <% } %>
-
-    <% if (typeof user !== 'undefined' && (user.role === 'store_manager' || user.role === 'admin' || user.role === 'manager')) { %>
-    <a href="/manager/daily-stock" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-clipboard-check w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Daily Stock</span>
-    </a>
-    <% } %>
-
-    <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
-    <a href="/manager/daily-stock/history" class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-      <i class="fa-solid fa-clock-rotate-left w-5 text-center group-hover:scale-110 transition-transform"></i> 
-      <span>Stock History</span>
-    </a>
-    <% } %>
-</nav>
-
-      <div class="p-4 border-t border-[#1e204a]">
-        <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-900/20 hover:text-red-300 rounded-lg transition">
-          <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Logout
+      <% if (typeof user !=='undefined' && (user.role==='manager' || user.role==='admin' || user.role==='store_manager'
+        || user.role==='cashier' )) { %>
+        <a href="/staff/menu"
+          class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+          <i class="fa-solid fa-utensils w-5 text-center group-hover:scale-110 transition-transform"></i>
+          <span>Menu Staff</span>
         </a>
-      </div>
-    </aside>
+        <% } %>
 
-    <main class="flex-1 flex flex-col overflow-hidden w-full bg-gray-100 dark:bg-gray-900 transition-colors">
-      <header class="h-16 lg:h-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-8 transition-colors duration-300">
-        <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="lg:hidden text-gray-700 dark:text-gray-200 hover:text-blue-600 focus:outline-none transition-transform active:scale-95">
-                <i class="fa-solid fa-bars text-2xl"></i>
-            </button>
-            <h2 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white"><%= title %></h2>
-        </div>
+          <% if (typeof user !=='undefined' && (user.role==='manager' || user.role==='admin' || user.role==='cashier' ||
+            user.role==='store_manager' )) { %>
+            <a href="/admin/dashboard"
+              class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+              <i class="fa-solid fa-chart-pie w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <span>Dashboard</span>
+            </a>
+            <% } %>
 
-        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors focus:outline-none">
-            <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+              <% if (typeof user !=='undefined' && (user.role==='manager' || user.role==='admin' )) { %>
+                <a href="/admin/inventory"
+                  class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                  <i class="fa-solid fa-box w-5 text-center group-hover:scale-110 transition-transform"></i>
+                  <span>Inventory</span>
+                </a>
+                <% } %>
+
+                  <% if (typeof user !=='undefined' && (user.role==='manager' || user.role==='admin' )) { %>
+                    <a href="/admin/category"
+                      class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                      <i class="fa-solid fa-tags w-5 text-center group-hover:scale-110 transition-transform"></i>
+                      <span>Category</span>
+                    </a>
+                    <% } %>
+
+                      <% if (typeof user !=='undefined' && user.role==='admin' ) { %>
+                        <a href="/admin/locations"
+                          class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                          <i
+                            class="fa-solid fa-map-location-dot w-5 text-center group-hover:scale-110 transition-transform"></i>
+                          <span>Locations</span>
+                        </a>
+                        <% } %>
+
+                          <% if (typeof user !=='undefined' && user.role==='admin' ) { %>
+                            <a href="/admin/users"
+                              class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                              <i
+                                class="fa-solid fa-users w-5 text-center group-hover:scale-110 transition-transform"></i>
+                              <span>Users</span>
+                            </a>
+                            <% } %>
+
+                              <a href="/admin/orders"
+                                class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                                <i
+                                  class="fa-solid fa-cart-shopping w-5 text-center group-hover:scale-110 transition-transform"></i>
+                                <span>Orders</span>
+                              </a>
+
+                              <% if (typeof user !=='undefined' && (user.role==='admin' || user.role==='manager' ||
+                                user.role==='store_manager' )) { %>
+                                <a href="/admin/reports"
+                                  class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                                  <i
+                                    class="fa-solid fa-file-invoice w-5 text-center group-hover:scale-110 transition-transform"></i>
+                                  <span>Reports</span>
+                                </a>
+                                <% } %>
+
+                                  <% if (typeof user !=='undefined' && (user.role==='admin' || user.role==='manager' ||
+                                    user.role==='store_manager' )) { %>
+                                    <a href="/admin/stock"
+                                      class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                                      <i
+                                        class="fa-solid fa-boxes-stacked w-5 text-center group-hover:scale-110 transition-transform"></i>
+                                      <span>Stock Orders</span>
+                                    </a>
+                                    <% } %>
+
+                                      <% if (typeof user !=='undefined' && (user.role==='admin' || user.role==='manager'
+                                        )) { %>
+                                        <a href="/admin/stock/menu"
+                                          class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                                          <i
+                                            class="fa-solid fa-clipboard-list w-5 text-center group-hover:scale-110 transition-transform"></i>
+                                          <span>Stock Menu</span>
+                                        </a>
+                                        <% } %>
+
+                                          <% if (typeof user !=='undefined' && (user.role==='store_manager' ||
+                                            user.role==='admin' || user.role==='manager' )) { %>
+                                            <a href="/manager/daily-stock"
+                                              class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                                              <i
+                                                class="fa-solid fa-clipboard-check w-5 text-center group-hover:scale-110 transition-transform"></i>
+                                              <span>Daily Stock</span>
+                                            </a>
+                                            <% } %>
+
+                                              <% if (typeof user !=='undefined' && (user.role==='admin' ||
+                                                user.role==='manager' )) { %>
+                                                <a href="/manager/daily-stock/history"
+                                                  class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
+                                                  <i
+                                                    class="fa-solid fa-clock-rotate-left w-5 text-center group-hover:scale-110 transition-transform"></i>
+                                                  <span>Stock History</span>
+                                                </a>
+                                                <% } %>
+    </nav>
+
+    <div class="p-4 border-t border-[#1e204a]">
+      <a href="/logout"
+        class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-900/20 hover:text-red-300 rounded-lg transition">
+        <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="flex-1 flex flex-col overflow-hidden w-full bg-gray-100 dark:bg-gray-900 transition-colors">
+    <header
+      class="h-16 lg:h-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-8 transition-colors duration-300">
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSidebar()"
+          class="lg:hidden text-gray-700 dark:text-gray-200 hover:text-blue-600 focus:outline-none transition-transform active:scale-95">
+          <i class="fa-solid fa-bars text-2xl"></i>
         </button>
-      </header>
-
-      <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-          <%- body %>
+        <h2 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white">
+          <%= title %>
+        </h2>
       </div>
-    </main>
 
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            const isClosed = sidebar.classList.contains('-translate-x-full');
-            if (isClosed) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        }
+      <button onclick="toggleTheme()"
+        class="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors focus:outline-none">
+        <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+      </button>
+    </header>
 
-        function toggleTheme() {
-            const html = document.documentElement;
-            const icon = document.getElementById('theme-icon');
-            
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                if(icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
-            } else {
-                html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                if(icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
-            }
-        }
+    <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+      <%- body %>
+    </div>
+  </main>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const icon = document.getElementById('theme-icon');
-            if (document.documentElement.classList.contains('dark') && icon) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
-        });
-    </script>
-  </body>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        if (icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        if (icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const icon = document.getElementById('theme-icon');
+      if (document.documentElement.classList.contains('dark') && icon) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      }
+    });
+  </script>
+</body>
+
 </html>
