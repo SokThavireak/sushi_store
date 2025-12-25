@@ -3,10 +3,11 @@
     onclick="toggleCart()"></div>
 
 <div id="cart-drawer"
-    class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white z-[70] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col font-sans">
+    class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white dark:bg-gray-900 z-[70] transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col font-sans">
 
-    <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
-        <h2 class="text-xl font-bold text-gray-900">Your Order</h2>
+    <div
+        class="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Your Order</h2>
         <button onclick="toggleCart()"
             class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100">
             <i class="fa-solid fa-xmark text-xl"></i>
@@ -17,9 +18,9 @@
         <p class="text-center text-gray-500 mt-10">Loading cart...</p>
     </div>
 
-    <div class="border-t border-gray-100 p-6 bg-gray-50/50">
+    <div class="border-t border-gray-100 dark:border-gray-800 p-6 bg-gray-50/50 dark:bg-gray-800/50">
         <div class="flex justify-between font-bold text-lg mb-6">
-            <span>Total</span>
+            <span class="dark:text-white">Total</span>
             <span id="cart-total-price" class="text-orange-500">0 ֏</span>
         </div>
 
@@ -103,23 +104,27 @@
         items.forEach(item => {
             total += (item.price * item.quantity);
             totalQty += item.quantity;
+            // Inside renderCart function
             const html = `
-                <div class="flex gap-4 border-b border-gray-50 pb-4 last:border-0">
-                    <div class="h-20 w-20 flex-shrink-0 rounded-xl bg-gray-100 overflow-hidden">
-                        <img src="${item.image_url}" class="h-full w-full object-cover">
-                    </div>
-                    <div class="flex-1 flex flex-col justify-between">
-                        <div><h3 class="font-bold text-gray-900">${item.name}</h3><p class="text-xs text-gray-500">Unit: ${item.price} ֏</p></div>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="font-bold text-gray-900">${item.price * item.quantity} ֏</span>
-                            <div class="flex items-center gap-3 bg-gray-100 rounded-full px-2 py-1">
-                                <button onclick="updateQty(${item.cart_id}, 'decrement')" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-orange-500 font-bold transition">-</button>
-                                <span class="text-sm font-semibold text-gray-900 w-4 text-center">${item.quantity}</span>
-                                <button onclick="updateQty(${item.cart_id}, 'increment')" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-orange-500 font-bold transition">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+    <div class="flex gap-4 border-b border-gray-50 dark:border-gray-800 pb-4 last:border-0">
+        <div class="h-20 w-20 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden">
+            <img src="${item.image_url}" class="h-full w-full object-cover">
+        </div>
+        <div class="flex-1 flex flex-col justify-between">
+            <div>
+                <h3 class="font-bold text-gray-900 dark:text-white">${item.name}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Unit: ${item.price} ֏</p>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+                <span class="font-bold text-gray-900 dark:text-white">${item.price * item.quantity} ֏</span>
+                <div class="flex items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1">
+                    <button onclick="updateQty(${item.cart_id}, 'decrement')" class="w-6 h-6 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:text-orange-500 font-bold transition">-</button>
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white w-4 text-center">${item.quantity}</span>
+                    <button onclick="updateQty(${item.cart_id}, 'increment')" class="w-6 h-6 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:text-orange-500 font-bold transition">+</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
             container.innerHTML += html;
         });
 
