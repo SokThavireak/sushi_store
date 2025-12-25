@@ -1718,32 +1718,56 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      // FIXED: Updated to use dynamic BASE_URL
-      callbackURL: `${baseUrl}/auth/google/secrets`,
+      callbackURL: `${baseUrl}/auth/google/secrets`, // Ensure this matches Google Console exactly
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
     },
     async (accessToken, refreshToken, profile, cb) => {
       try {
+        // 1. Check if user already exists in DB
         const result = await pool.query("SELECT * FROM users WHERE email = $1", [profile.email]);
+        
         if (result.rows.length === 0) {
+          // 2. REGISTER: User doesn't exist, create new record
           const newUser = await pool.query(
             "INSERT INTO users (email, password, role) VALUES ($1, $2, 'user') RETURNING *",
-            [profile.email, "google"]
+            [profile.email, "google"] // Placeholder password for OAuth users
           );
           return cb(null, newUser.rows[0]);
         } else {
+          // 3. LOGIN: Existing user found
           const existingUser = result.rows[0];
-          if (existingUser.role === 'user') {
-            return cb(null, existingUser);
-          } else {
-            return cb(null, false, { message: "Admins/Managers must log in with password." });
-          }
+          
+          // Optional: Update record with Google ID if needed
+          return cb(null, existingUser);
         }
       } catch (err) {
         return cb(err);
       }
     }
   )
+);
+
+// Trigger Google Login
+app.get("/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+// Google Callback Handler
+app.get("/auth/google/secrets",
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+  }),
+  (req, res) => {
+    // Redirect based on role after successful login
+    const role = req.user.role;
+    if (['admin', 'manager', 'store_manager'].includes(role)) {
+      res.redirect("/admin/dashboard");
+    } else {
+      res.redirect("/");
+    }
+  }
 );
 
 passport.serializeUser((user, cb) => {
