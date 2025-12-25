@@ -834,6 +834,7 @@ app.delete('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'adm
 
 app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
+        // 1. Fetch the Stock Requests (Existing code)
         let query = `
             SELECT s.*, u.email 
             FROM stock_requests s 
@@ -852,10 +853,20 @@ app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'stor
         query += ` ORDER BY s.created_at DESC`;
         const result = await pool.query(query, params);
 
+        // 2. FETCH LOCATIONS (For the dropdown)
+        const locResult = await pool.query("SELECT * FROM locations");
+
+        // 3. FETCH THE MISSING STOCKS (This is the fix!)
+        const stockResult = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
+
+        // 4. Render with ALL data
         res.render('admin/stock/stock_orders.ejs', { 
             title: 'Stock Requests', 
-            requests: result.rows
+            requests: result.rows,
+            locations: locResult.rows,      // Pass locations
+            stocks: stockResult.rows        // <--- PASS THIS VARIABLE!
         });
+
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");

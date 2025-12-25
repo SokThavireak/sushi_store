@@ -1,234 +1,311 @@
 <style>
-    /* Toast Animation Keyframes */
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-    .animate-fade-in { animation: fadeIn 0.3s ease-out; transition: all 0.2s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    /* Custom Scrollbar for the grid */
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+
+    /* Cart Animation */
+    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .cart-item-anim { animation: slideInRight 0.3s ease-out; }
 </style>
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-10">
-  
-  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
-    <div>
-        <h3 class="font-bold text-gray-800 text-lg">Create Stock Request</h3>
-        <p class="text-xs text-gray-500">Select items from the master menu to restock</p>
-    </div>
-    <a href="/admin/stock" class="text-gray-400 hover:text-gray-600 transition">
-      <i class="fa-solid fa-xmark text-xl"></i>
-    </a>
-  </div>
-
-  <div class="p-8">
-    <form id="stockForm" class="space-y-6">
+<div class="flex flex-col lg:flex-row h-[calc(100vh-100px)] gap-4 overflow-hidden">
+    
+    <div class="w-full lg:w-[70%] bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
         
-        <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Requesting For Location</label>
-            
-            <% if (typeof user !== 'undefined' && user.role === 'store_manager') { %>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-store text-gray-400"></i>
-                    </div>
-                    <input type="text" value="My Assigned Store" disabled class="pl-10 w-full bg-gray-100 border border-gray-200 rounded-lg p-3 text-gray-600 font-bold">
-                    <input type="hidden" id="location_name" value=""> 
-                </div>
-            <% } else { %>
-                <div class="relative">
-                    <select id="location_name" class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        
-                        <% /* --- FIX STARTS HERE: Safety Check for Locations --- */ %>
-                        <% if (typeof locations !== 'undefined' && locations && locations.length > 0) { %>
-                            <% locations.forEach(loc => { %>
-                               <option value="<%= loc.name %>"><%= loc.name %></option>
-                            <% }) %>
-                        <% } else { %>
-                            <option value="" disabled selected>No locations available</option>
-                        <% } %>
-                        <% /* --- FIX ENDS HERE --- */ %>
-
-                    </select>
-                </div>
-            <% } %>
-        </div>
-
-        <div class="border-t border-b border-gray-100 py-6">
+        <div class="p-5 border-b border-gray-100 bg-white z-10">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-indigo-500"></i> Items Needed
-                </h3>
-                <button type="button" onclick="addItemRow()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Add Another Line
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-12 gap-3 mb-2 px-1">
-                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Category</div>
-                <div class="col-span-5 text-[10px] font-bold text-gray-400 uppercase">Item Name</div>
-                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Quantity</div>
-                <div class="col-span-1"></div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Master Inventory</h2>
+                    <p class="text-xs text-gray-500">Select items to request from the warehouse</p>
+                </div>
+                <div class="w-64">
+                    <% if (typeof user !== 'undefined' && user.role === 'store_manager') { %>
+                        <div class="relative">
+                            <i class="fa-solid fa-store absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" value="My Store" disabled class="pl-9 w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm font-bold text-gray-600">
+                            <input type="hidden" id="location_name" value=""> 
+                        </div>
+                    <% } else { %>
+                        <select id="location_name" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="" disabled selected>Select Target Location...</option>
+                            <% if (typeof locations !== 'undefined') { %>
+                                <% locations.forEach(loc => { %>
+                                   <option value="<%= loc.name %>"><%= loc.name %></option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    <% } %>
+                </div>
             </div>
 
-            <div id="items-container" class="space-y-3"></div>
+            <div class="relative">
+                <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search ingredients (e.g. Salmon, Cup, Rice)..." 
+                    class="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl font-medium focus:ring-2 focus:ring-indigo-100 outline-none transition-all">
+            </div>
+
+            <div class="flex gap-2 mt-4 overflow-x-auto pb-2 no-scrollbar">
+                <button onclick="filterCategory('All')" class="cat-btn active bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">All</button>
+                <button onclick="filterCategory('Cook')" class="cat-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Cook</button>
+                <button onclick="filterCategory('Drink')" class="cat-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Drink</button>
+                <button onclick="filterCategory('Supplies')" class="cat-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Supplies</button>
+                <button onclick="filterCategory('Packaging')" class="cat-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Packaging</button>
+            </div>
         </div>
 
-        <div class="flex justify-end">
-            <button type="button" onclick="submitStock()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+        <div class="flex-1 overflow-y-auto p-5 custom-scroll bg-gray-50/50">
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" id="inventoryGrid">
+                <% if (typeof stocks !== 'undefined' && stocks.length > 0) { %>
+                    <% stocks.forEach(item => { %>
+                        <div class="product-card bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition group relative"
+                             data-category="<%= item.category %>" 
+                             data-name="<%= item.name.toLowerCase() %>">
+                            
+                            <div class="h-28 w-full bg-gray-50 rounded-lg mb-3 overflow-hidden relative">
+                                <img src="<%= item.image_url || 'https://via.placeholder.com/150?text=No+Img' %>" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                     onerror="this.src='https://via.placeholder.com/150?text=No+Img'">
+                                <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold text-gray-500 shadow-sm">
+                                    <%= item.category %>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-gray-800 text-sm truncate mb-1"><%= item.name %></h4>
+                            
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="text-xs text-gray-500">
+                                    Available: 
+                                    <span class="font-bold <%= item.quantity > 0 ? 'text-green-600' : 'text-red-500' %>">
+                                        <%= item.quantity %> <%= item.unit %>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <input type="number" min="1" max="<%= item.quantity %>" placeholder="Qty" id="qty-<%= item.id %>" 
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-2 text-center text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                                
+                                <button onclick="addToCart(<%= JSON.stringify(item) %>)" 
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition shadow-lg shadow-indigo-200 flex-shrink-0">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-span-full text-center py-10 text-gray-400">
+                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                        <p>No items in Master Inventory.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full lg:w-[30%] bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
+        <div class="p-5 border-b border-gray-100">
+            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Request Cart
+                <span id="cartCount" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+            </h3>
+        </div>
+
+        <div id="emptyCart" class="flex-1 flex flex-col items-center justify-center text-gray-300 p-10">
+            <i class="fa-solid fa-basket-shopping text-5xl mb-4 text-gray-200"></i>
+            <p class="text-sm">Cart is empty</p>
+            <p class="text-xs">Add items from the left to start.</p>
+        </div>
+
+        <div id="cartItemsList" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scroll hidden">
+            </div>
+
+        <div class="p-5 border-t border-gray-100 bg-gray-50">
+            <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-600">
+                <span>Total Items:</span>
+                <span id="totalItems" class="text-indigo-600">0</span>
+            </div>
+            <button onclick="submitRequest()" id="submitBtn" disabled class="w-full py-3 bg-gray-300 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 cursor-not-allowed">
                 <span>Submit Request</span>
                 <i class="fa-solid fa-paper-plane"></i>
             </button>
         </div>
-    </form>
-  </div>
+    </div>
+
 </div>
 
 <script>
-    // INJECT DATA (Handle empty stocks case safely)
-    const masterInventory = <%- JSON.stringify(typeof stocks !== 'undefined' ? stocks : []) %>;
+    // State
+    let cart = [];
 
-    // NOTIFICATION SYSTEM
+    // Notification
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        const isError = type === 'error';
-        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
-        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+        const bgClass = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+        const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
-        toast.style.animation = 'slideIn 0.5s forwards';
         toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
         container.appendChild(toast);
-        setTimeout(() => { toast.style.animation = 'slideOut 0.5s forwards'; setTimeout(() => toast.remove(), 500); }, 3000);
+        setTimeout(() => toast.remove(), 3000);
     }
 
-    document.addEventListener('DOMContentLoaded', addItemRow);
+    // --- ADD TO CART FUNCTION ---
+    function addToCart(item) {
+        const inputId = `qty-${item.id}`;
+        const input = document.getElementById(inputId);
+        const qty = parseInt(input.value);
 
-    function addItemRow() {
-        const container = document.getElementById('items-container');
-        const div = document.createElement('div');
-        div.className = "grid grid-cols-12 gap-3 items-center item-row bg-gray-50 p-2 rounded-lg border border-gray-100 animate-fade-in";
-        div.innerHTML = `
-            <div class="col-span-3">
-                <select onchange="filterItems(this)" class="category-select w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-medium text-gray-600 focus:border-indigo-500 focus:outline-none">
-                    <option value="" disabled selected>Select...</option>
-                    <option value="Cook">Cook</option>
-                    <option value="Drink">Drink</option>
-                    <option value="Supplies">Supplies</option>
-                    <option value="Packaging">Packaging</option>
-                </select>
-            </div>
-            <div class="col-span-5 relative">
-                <select onchange="updateUnit(this)" disabled class="item-select w-full bg-gray-100 border border-gray-200 rounded-lg p-2.5 text-sm font-bold text-gray-800 focus:border-indigo-500 focus:outline-none opacity-60 cursor-not-allowed">
-                    <option value="">-- Choose Category First --</option>
-                </select>
-            </div>
-            <div class="col-span-3 relative">
-                <input type="number" min="1" placeholder="0" class="qty-input w-full bg-white border border-gray-200 rounded-lg p-2.5 text-sm font-bold focus:border-indigo-500 focus:outline-none pl-3 pr-12">
-                <span class="unit-badge absolute right-3 top-2.5 text-xs font-bold text-gray-400 bg-gray-100 px-1 rounded">UNIT</span>
-            </div>
-            <div class="col-span-1 flex justify-center">
-                <button type="button" onclick="removeRow(this)" class="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition flex items-center justify-center shadow-sm">
-                    <i class="fa-solid fa-trash text-xs"></i>
-                </button>
-            </div>
-        `;
-        container.appendChild(div);
-    }
-
-    function filterItems(categorySelect) {
-        const row = categorySelect.closest('.item-row');
-        const itemSelect = row.querySelector('.item-select');
-        const selectedCat = categorySelect.value;
-        itemSelect.innerHTML = '<option value="" disabled selected>Select Item...</option>';
-        
-        const filteredItems = masterInventory.filter(item => item.category === selectedCat);
-        
-        if (filteredItems.length > 0) {
-            itemSelect.disabled = false;
-            itemSelect.classList.remove('bg-gray-100', 'opacity-60', 'cursor-not-allowed');
-            itemSelect.classList.add('bg-white');
-            filteredItems.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.name;
-                option.text = item.name;
-                option.setAttribute('data-unit', item.unit || 'pcs');
-                itemSelect.appendChild(option);
-            });
-        } else {
-            itemSelect.innerHTML = '<option value="">No items found</option>';
-            itemSelect.disabled = true;
+        // 1. VALIDATION: Check if input is valid
+        if (!qty || qty <= 0) {
+            return showNotification("Please enter a valid quantity", "error");
         }
-    }
 
-    function updateUnit(itemSelect) {
-        const row = itemSelect.closest('.item-row');
-        const unitBadge = row.querySelector('.unit-badge');
-        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-        const unit = selectedOption.getAttribute('data-unit');
-        if(unit) {
-            unitBadge.innerText = unit.toUpperCase();
-            unitBadge.classList.remove('text-gray-400');
-            unitBadge.classList.add('text-indigo-500');
+        // 2. CHECK: Is there Enough Stock? (The "Enough thinking" part)
+        if (qty > item.quantity) {
+            return showNotification(`Not enough stock! Only ${item.quantity} available.`, "error");
         }
-    }
 
-    function removeRow(btn) {
-        const row = btn.closest('.item-row');
-        row.style.opacity = '0';
-        row.style.transform = 'translateY(-10px)';
-        setTimeout(() => row.remove(), 200);
-    }
-
-    async function submitStock() {
-        const locName = document.getElementById('location_name')?.value;
-        const rows = document.querySelectorAll('.item-row');
-        const items = [];
-
-        rows.forEach(row => {
-            const catSelect = row.querySelector('.category-select');
-            const itemSelect = row.querySelector('.item-select');
-            const qtyInput = row.querySelector('.qty-input');
-            if(catSelect.value && itemSelect.value && qtyInput.value > 0) {
-                items.push({ 
-                    category: catSelect.value, 
-                    name: itemSelect.value, 
-                    quantity: qtyInput.value 
-                });
+        // 3. Add to Cart Logic
+        const existing = cart.find(c => c.id === item.id);
+        if (existing) {
+            // Check if adding more exceeds limit
+            if (existing.quantity + qty > item.quantity) {
+                return showNotification("Total quantity exceeds available stock.", "error");
             }
-        });
+            existing.quantity += qty;
+        } else {
+            cart.push({ ...item, quantity: qty });
+        }
 
-        if(items.length === 0) return showNotification("Please add at least one item.", "error");
+        // Reset input and update UI
+        input.value = '';
+        renderCart();
+        showNotification("Added to Cart!", "success");
+    }
+
+    // --- RENDER CART UI ---
+    function renderCart() {
+        const list = document.getElementById('cartItemsList');
+        const empty = document.getElementById('emptyCart');
+        const countBadge = document.getElementById('cartCount');
+        const totalText = document.getElementById('totalItems');
+        const btn = document.getElementById('submitBtn');
+
+        if (cart.length === 0) {
+            list.classList.add('hidden');
+            empty.classList.remove('hidden');
+            btn.disabled = true;
+            btn.classList.add('bg-gray-300', 'cursor-not-allowed');
+            btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'shadow-lg');
+        } else {
+            list.classList.remove('hidden');
+            empty.classList.add('hidden');
+            btn.disabled = false;
+            btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'shadow-lg');
+        }
+
+        countBadge.innerText = cart.length;
+        totalText.innerText = cart.length;
+
+        list.innerHTML = cart.map((item, index) => `
+            <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex items-center justify-between cart-item-anim">
+                <div class="flex items-center gap-3">
+                    <img src="${item.image_url || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded-md object-cover bg-gray-100">
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-800">${item.name}</h4>
+                        <p class="text-[10px] text-gray-500">${item.category}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold text-indigo-600">${item.quantity} ${item.unit}</span>
+                    <button onclick="removeFromCart(${index})" class="text-gray-400 hover:text-red-500 transition">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    // --- SUBMIT REQUEST ---
+    async function submitRequest() {
+        const locName = document.getElementById('location_name')?.value;
+
+        if (!locName) return showNotification("Please select a location first", "error");
+        if (cart.length === 0) return showNotification("Cart is empty", "error");
+
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
         try {
-            const btn = document.querySelector('button[onclick="submitStock()"]');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-
             const res = await fetch('/api/stock/create', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ location_name: locName, items: items })
+                body: JSON.stringify({ 
+                    location_name: locName, 
+                    items: cart.map(i => ({ 
+                        name: i.name, 
+                        category: i.category, 
+                        quantity: i.quantity 
+                    })) 
+                })
             });
 
-            if(res.ok) {
-                showNotification("Request Created Successfully!", "success");
-                setTimeout(() => window.location.href = '/admin/stock', 1500);
+            if (res.ok) {
+                showNotification("Request Sent Successfully!", "success");
+                cart = [];
+                renderCart();
+                // Optional: Redirect
+                // setTimeout(() => window.location.href = '/admin/stock', 1500);
             } else {
-                const err = await res.json();
-                showNotification(err.error || "Error creating request", "error");
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+                const data = await res.json();
+                showNotification(data.error || "Failed to send", "error");
             }
         } catch (err) {
-            console.error(err);
-            showNotification("Server connection error", "error");
+            showNotification("Server Error", "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
+    }
+
+    // --- FILTERS ---
+    function filterProducts() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+            const name = card.getAttribute('data-name');
+            if (name.includes(term)) card.style.display = 'block';
+            else card.style.display = 'none';
+        });
+    }
+
+    function filterCategory(cat) {
+        // Highlight Button
+        document.querySelectorAll('.cat-btn').forEach(b => {
+            if(b.innerText === cat) {
+                b.classList.remove('bg-gray-100', 'text-gray-600');
+                b.classList.add('bg-indigo-600', 'text-white');
+            } else {
+                b.classList.add('bg-gray-100', 'text-gray-600');
+                b.classList.remove('bg-indigo-600', 'text-white');
+            }
+        });
+
+        document.querySelectorAll('.product-card').forEach(card => {
+            const category = card.getAttribute('data-category');
+            if (cat === 'All' || category === cat) card.style.display = 'block';
+            else card.style.display = 'none';
+        });
     }
 </script>
