@@ -696,15 +696,12 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
         let queryParams = [];
         let whereClauses = [];
         
-        // --- FIX START: Define default locationName ---
         let locationName = "All Locations"; 
 
         if (req.user.role === 'store_manager') {
              if (!req.user.assigned_location_id) return res.send("Error: No location assigned.");
              
              const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
-             
-             // Update locationName for Store Manager
              locationName = locRes.rows[0].name; 
              
              whereClauses.push(`location_name = $${queryParams.length + 1}`);
@@ -713,11 +710,8 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
         else if (location && location !== 'All Locations') {
              whereClauses.push(`location_name = $${queryParams.length + 1}`);
              queryParams.push(location);
-             
-             // Update locationName if Admin selected a filter
              locationName = location; 
         }
-        // --- FIX END ---
 
         if (date) {
             whereClauses.push(`report_date = $${queryParams.length + 1}`);
@@ -743,7 +737,8 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
             locations: allLocs.rows,
             layout: 'layout',
             filters: { location: location || '', date: date || '' },
-            locationName: locationName // <--- Pass the missing variable here!
+            locationName: locationName,
+            alreadySubmitted: false // <--- ADD THIS LINE TO FIX THE ERROR
         });
 
     } catch (err) {
