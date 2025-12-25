@@ -52,14 +52,15 @@
           <i class="fa-solid fa-globe w-5 text-center"></i> Website Home
         </a>
 
-        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' ||
+        user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
         <a
           href="/staff/menu"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
         >
-          <i class="fa-solid fa-chart-pie w-5 text-center"></i> Menu Staff
+          <i class="fa-solid fa-utensils w-5 text-center"></i> Menu Staff
         </a>
-        <% } %> 
+        <% } %>
 
         <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'cashier')) { %>
         <a
