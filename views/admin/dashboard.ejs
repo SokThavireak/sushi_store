@@ -6,7 +6,7 @@
         <p class="text-gray-500 dark:text-gray-400">Welcome back, <%= user.email.split('@')[0] %>!</p>
     </div>
 
-    <form action="/admin/dashboard" method="GET" class="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-2">
+    <form action="/admin/dashboard" method="GET" class="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-2 transition-colors">
         <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase px-2">Store:</label>
         
         <% if (user.role === 'store_manager') { %>
@@ -72,7 +72,7 @@
     <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
         <div class="flex justify-between items-center mb-6">
             <h3 class="font-bold text-gray-800 dark:text-white">Sales Analytics</h3>
-            <span class="text-sm text-gray-400">Last 7 Days (<%= currentFilter %>)</span>
+            <span class="text-sm text-gray-400 dark:text-gray-500">Last 7 Days (<%= currentFilter %>)</span>
         </div>
         <div class="h-64">
             <canvas id="salesChart"></canvas>
@@ -90,29 +90,16 @@
     </div>
 </div>
 
-<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
-    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
-    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
-</button>
-
 <script>
-    // --- DARK MODE LOGIC ---
-    const themeBtn = document.getElementById('theme-toggle');
-    themeBtn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
+    // Check dark mode
+    const isDark = document.documentElement.classList.contains('dark');
+    const labelColor = isDark ? '#9ca3af' : '#4b5563'; // gray-400 vs gray-600
+    const gridColor = isDark ? '#374151' : '#e5e7eb'; // gray-700 vs gray-200
 
     // 1. Bar Chart Data
     const rawSales = <%- JSON.stringify(chartData) %>;
     const salesLabels = rawSales.map(d => d.day);
     const salesValues = rawSales.map(d => d.daily_sales);
-    
-    // Check if Dark Mode is active for Chart colors
-    const isDark = document.documentElement.classList.contains('dark');
-    const labelColor = isDark ? '#9ca3af' : '#4b5563';
-    const gridColor = isDark ? '#374151' : '#e5e7eb';
 
     new Chart(document.getElementById('salesChart'), {
         type: 'bar',
