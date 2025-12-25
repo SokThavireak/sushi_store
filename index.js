@@ -638,14 +638,27 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
     }
 });
 
-app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager']), async (req, res) => {
+app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     const client = await pool.connect();
     try {
         const { items } = req.body; 
         const userId = req.user.id;
         const locId = req.user.assigned_location_id;
 
+        // Safety Check: Ensure the user has a location before querying
+        if (!locId) {
+            client.release();
+            return res.status(400).json({ error: "Error: You are not assigned to a location." });
+        }
+
         const locRes = await client.query("SELECT name FROM locations WHERE id = $1", [locId]);
+        
+        // Double check if location exists
+        if (locRes.rows.length === 0) {
+            client.release();
+            return res.status(400).json({ error: "Invalid location assigned." });
+        }
+
         const locationName = locRes.rows[0].name;
 
         await client.query('BEGIN');
