@@ -26,7 +26,7 @@ const pgSession = connectPgSimple(session); // Initialize Session Store
 
 // Determine Environment
 const isProduction = process.env.NODE_ENV === 'production';
-const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
+const baseUrl = process.env.BASE_URL || `https://sushi-store-zplg.onrender.com/auth/google/callback`;
 
 // =========================================================
 // 2. Database Connection (FIXED: Added SSL)
