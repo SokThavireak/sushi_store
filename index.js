@@ -186,6 +186,27 @@ app.post('/orders/request-refund/:id', checkAuthenticated, async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
+    // 1. SECURITY CHECK: If user is Staff, kick them back to POS
+    if (req.user && req.user.role === 'staff') {
+        return res.redirect('/staff/menu');
+    }
+
+    try {
+        const result = await pool.query("SELECT * FROM products");
+        const products = result.rows;
+        const categories = [
+            { name: "Most Sales" }, 
+            ...[...new Set(products.map(p => p.category))].map(c => ({ name: c }))
+        ];
+        res.render("website/main/index", { 
+            title: "Home", products, categories, layout: 'layouts'
+        });
+    } catch (err) {
+        console.error(err);
+        res.render("website/main/index", { products: [], categories: [] });
+    }
+    // --- FIX END ---
+
     try {
         const result = await pool.query("SELECT * FROM products");
         const products = result.rows;
