@@ -1,89 +1,131 @@
 <style>
     /* Toast Animation Keyframes */
     @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
+
     @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
     }
-    .animate-fade-in { animation: fadeIn 0.3s ease-out; transition: all 0.2s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+        transition: all 0.2s;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-10">
-  
-  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
-    <div>
-        <h3 class="font-bold text-gray-800 text-lg">Create Stock Request</h3>
-        <p class="text-xs text-gray-500">Select items from the master menu to restock</p>
-    </div>
-    <a href="/admin/stock" class="text-gray-400 hover:text-gray-600 transition">
-      <i class="fa-solid fa-xmark text-xl"></i>
-    </a>
-  </div>
 
-  <div class="p-8">
-    <form id="stockForm" class="space-y-6">
-        
+    <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
         <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Requesting For Location</label>
-            
-            <% if (user.role === 'store_manager') { %>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-store text-gray-400"></i>
-                    </div>
-                    <input type="text" value="My Assigned Store" disabled class="pl-10 w-full bg-gray-100 border border-gray-200 rounded-lg p-3 text-gray-600 font-bold">
-                    <input type="hidden" id="location_name" value=""> 
-                </div>
-            <% } else { %>
-                <div class="relative">
-                    <select id="location_name" class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <% locations.forEach(loc => { %>
-                           <option value="<%= loc.name %>"><%= loc.name %></option>
-                        <% }) %>
-                    </select>
-                </div>
-            <% } %>
+            <h3 class="font-bold text-gray-800 text-lg">Create Stock Request</h3>
+            <p class="text-xs text-gray-500">Select items from the master menu to restock</p>
         </div>
+        <a href="/admin/stock" class="text-gray-400 hover:text-gray-600 transition">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </a>
+    </div>
 
-        <div class="border-t border-b border-gray-100 py-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-indigo-500"></i> Items Needed
-                </h3>
-                <button type="button" onclick="addItemRow()" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-plus"></i> Add Another Line
+    <div class="p-8">
+        <form id="stockForm" class="space-y-6">
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Requesting For Location</label>
+
+                <% if (user.role==='store_manager' ) { %>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-store text-gray-400"></i>
+                        </div>
+                        <input type="text" value="My Assigned Store" disabled
+                            class="pl-10 w-full bg-gray-100 border border-gray-200 rounded-lg p-3 text-gray-600 font-bold">
+                        <input type="hidden" id="location_name" value="">
+                    </div>
+                    <% } else { %>
+                        <div class="relative">
+                            <select id="location_name"
+                                class="w-full bg-white border border-gray-200 rounded-lg p-3 text-gray-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                <% /* SAFETY CHECK: Only loop if locations exists */ %>
+                                    <% if (typeof locations !=='undefined' && locations && locations.length> 0) { %>
+                                        <% locations.forEach(loc=> { %>
+                                            <option value="<%= loc.name %>">
+                                                <%= loc.name %>
+                                            </option>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <option value="" disabled selected>No locations available (DB
+                                                        Offline)</option>
+                                                    <% } %>
+                            </select>
+                        </div>
+                        <% } %>
+            </div>
+
+            <div class="border-t border-b border-gray-100 py-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-500"></i> Items Needed
+                    </h3>
+                    <button type="button" onclick="addItemRow()"
+                        class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Add Another Line
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-12 gap-3 mb-2 px-1">
+                    <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Category</div>
+                    <div class="col-span-5 text-[10px] font-bold text-gray-400 uppercase">Item Name</div>
+                    <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Quantity</div>
+                    <div class="col-span-1"></div>
+                </div>
+
+                <div id="items-container" class="space-y-3"></div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" onclick="submitStock()"
+                    class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+                    <span>Submit Request</span>
+                    <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
-            
-            <div class="grid grid-cols-12 gap-3 mb-2 px-1">
-                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Category</div>
-                <div class="col-span-5 text-[10px] font-bold text-gray-400 uppercase">Item Name</div>
-                <div class="col-span-3 text-[10px] font-bold text-gray-400 uppercase">Quantity</div>
-                <div class="col-span-1"></div>
-            </div>
-
-            <div id="items-container" class="space-y-3"></div>
-        </div>
-
-        <div class="flex justify-end">
-            <button type="button" onclick="submitStock()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
-                <span>Submit Request</span>
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
-    </form>
-  </div>
+        </form>
+    </div>
 </div>
 
 <script>
     // INJECT DATA
-    const masterInventory = <%- JSON.stringify(stocks || []) %>;
+    const masterInventory = <% - JSON.stringify(stocks || []) %>;
 
     // NOTIFICATION SYSTEM
     function showNotification(message, type = 'success') {
@@ -162,7 +204,7 @@
         const unitBadge = row.querySelector('.unit-badge');
         const selectedOption = itemSelect.options[itemSelect.selectedIndex];
         const unit = selectedOption.getAttribute('data-unit');
-        if(unit) {
+        if (unit) {
             unitBadge.innerText = unit.toUpperCase();
             unitBadge.classList.remove('text-gray-400');
             unitBadge.classList.add('text-indigo-500');
@@ -185,16 +227,16 @@
             const catSelect = row.querySelector('.category-select');
             const itemSelect = row.querySelector('.item-select');
             const qtyInput = row.querySelector('.qty-input');
-            if(catSelect.value && itemSelect.value && qtyInput.value > 0) {
-                items.push({ 
-                    category: catSelect.value, 
-                    name: itemSelect.value, 
-                    quantity: qtyInput.value 
+            if (catSelect.value && itemSelect.value && qtyInput.value > 0) {
+                items.push({
+                    category: catSelect.value,
+                    name: itemSelect.value,
+                    quantity: qtyInput.value
                 });
             }
         });
 
-        if(items.length === 0) return showNotification("Please add at least one item.", "error");
+        if (items.length === 0) return showNotification("Please add at least one item.", "error");
 
         try {
             const btn = document.querySelector('button[onclick="submitStock()"]');
@@ -204,11 +246,11 @@
 
             const res = await fetch('/api/stock/create', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ location_name: locName, items: items })
             });
 
-            if(res.ok) {
+            if (res.ok) {
                 showNotification("Request Created Successfully!", "success");
                 setTimeout(() => window.location.href = '/admin/stock', 1500);
             } else {
