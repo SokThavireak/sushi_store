@@ -34,15 +34,16 @@
                 <option value="user" <%= targetUser.role === 'user' ? 'selected' : '' %>>User (Standard)</option>
                 <option value="manager" <%= targetUser.role === 'manager' ? 'selected' : '' %>>Head Manager (All Access)</option>
                 <option value="staff" <%= targetUser.role === 'staff' ? 'selected' : '' %>>Staff (POS Access)</option>
+                <option value="cashier" <%= targetUser.role === 'cashier' ? 'selected' : '' %>>Cashier (Payment)</option>
                 <option value="store_manager" <%= targetUser.role === 'store_manager' ? 'selected' : '' %>>Local Store Manager</option>
             </select>
         </div>
 
-        <div id="locationDiv" class="<%= (targetUser.role === 'store_manager' || targetUser.role === 'staff') ? '' : 'hidden' %>">
+        <div id="locationDiv" class="<%= (targetUser.role === 'store_manager' || targetUser.role === 'staff' || targetUser.role === 'cashier') ? '' : 'hidden' %>">
             <label class="block text-xs font-bold text-gray-500 mb-1 uppercase text-orange-600">Assign Store Location</label>
             <select name="assigned_location_id" id="assignedLocationSelect" 
                 class="w-full px-4 py-3 bg-orange-50 border border-orange-200 text-orange-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                <%= (targetUser.role === 'store_manager' || targetUser.role === 'staff') ? 'required' : '' %>>
+                <%= (targetUser.role === 'store_manager' || targetUser.role === 'staff' || targetUser.role === 'cashier') ? 'required' : '' %>>
                 
                 <option value="">-- Select Location --</option>
                 <% locations.forEach(loc => { %>
@@ -69,7 +70,6 @@
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
         toast.style.animation = 'slideIn 0.5s forwards';
         
@@ -77,7 +77,6 @@
             <div class="text-2xl">${icon}</div>
             <div class="font-bold text-sm">${message}</div>
         `;
-
         container.appendChild(toast);
 
         setTimeout(() => {
@@ -93,14 +92,12 @@
         const form = e.target;
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
-
         try {
             const res = await fetch(`/admin/users/update/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
             if(res.ok) {
                 showNotification('User Details Updated!', 'success');
                 // Redirect back to user list after 1s
@@ -119,8 +116,8 @@
         const locDiv = document.getElementById('locationDiv');
         const locSelect = document.getElementById('assignedLocationSelect');
 
-        // Check for BOTH roles
-        if (role === 'store_manager' || role === 'staff') {
+        // Check for Store Manager, Staff, AND Cashier
+        if (role === 'store_manager' || role === 'staff' || role === 'cashier') {
             locDiv.classList.remove('hidden');
             locSelect.setAttribute('required', 'true'); 
         } else {
