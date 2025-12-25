@@ -1,41 +1,36 @@
 <style>
     /* Toast Animation Keyframes */
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
     .animate-scale-in { animation: scaleIn 0.2s ease-out; }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 </style>
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
   
-  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-white">
+  <div class="p-6 flex justify-between items-center border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
     <div>
-      <h3 class="font-bold text-gray-800 text-lg">Master Ingredient List</h3>
-      <p class="text-xs text-gray-500">Define items available for stock requests</p>
+      <h3 class="font-bold text-gray-800 dark:text-white text-lg">Master Ingredient List</h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400">Define items available for stock requests</p>
     </div>
     <button onclick="toggleModal('add-modal')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
       <i class="fa-solid fa-plus"></i> Add New Item
     </button>
   </div>
 
-  <div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+  <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 transition-colors">
     <div class="relative">
-      <input type="text" id="search-input" onkeyup="captureAndFilter()" placeholder="Search ingredients (e.g. Salmon, Cup, Napkin)..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-indigo-500 transition-colors bg-white shadow-sm" />
+      <input type="text" id="search-input" onkeyup="captureAndFilter()" placeholder="Search ingredients (e.g. Salmon, Cup, Napkin)..." 
+             class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-indigo-500 transition-colors bg-white dark:bg-gray-800 dark:text-white shadow-sm placeholder-gray-400" />
       <div class="absolute left-3 top-3 text-gray-400">
         <i class="fa-solid fa-magnifying-glass"></i>
       </div>
     </div>
   </div>
 
-  <div class="p-8 bg-gray-50 min-h-screen">
+  <div class="p-8 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
     
     <% 
        // Define Categories you want to manage
@@ -51,7 +46,7 @@
         
         <div class="mb-10 group-section" id="section-<%= catName %>">
   
-          <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
             <% if (catName === 'Cook') { %> <i class="fa-solid fa-utensils text-orange-500"></i> <% } %>
             <% if (catName === 'Drink') { %> <i class="fa-solid fa-glass-water text-blue-500"></i> <% } %>
             <% if (catName === 'Supplies') { %> <i class="fa-solid fa-boxes-stacked text-purple-500"></i> <% } %>
@@ -59,50 +54,50 @@
             
             <%= catName %>
             
-            <span class="category-count text-xs font-normal text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-full"><%= items.length %></span>
+            <span class="category-count text-xs font-normal text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded-full"><%= items.length %></span>
           </h2>
 
           <% if (items.length > 0) { %>
               <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                   <% items.forEach(function(item) { %>
-                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition duration-300 relative group item-card">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition duration-300 relative group item-card">
                         
                         <div class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition duration-200 z-10">
-                            <button onclick="openEditModal(this)" data-stock="<%= JSON.stringify(item) %>" class="w-7 h-7 rounded bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center">
+                            <button onclick="openEditModal(this)" data-stock="<%= JSON.stringify(item) %>" class="w-7 h-7 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center">
                                 <i class="fa-solid fa-pen text-[10px]"></i>
                             </button>
-                            <button onclick="deleteItem(<%= item.id %>, this)" class="w-7 h-7 rounded bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 flex items-center justify-center">
+                            <button onclick="deleteItem(<%= item.id %>, this)" class="w-7 h-7 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/50 hover:text-red-600 dark:hover:text-red-400 flex items-center justify-center">
                                 <i class="fa-solid fa-trash text-[10px]"></i>
                             </button>
                         </div>
 
-                        <div class="h-32 w-full rounded-lg bg-gray-50 mb-3 overflow-hidden flex items-center justify-center">
+                        <div class="h-32 w-full rounded-lg bg-gray-50 dark:bg-gray-700 mb-3 overflow-hidden flex items-center justify-center">
                             <% if (item.image_url) { %>
                                  <img 
                                     src="<%= item.image_url %>" 
                                     class="w-full h-full object-cover"
                                     onerror="this.onerror=null;this.src='https://via.placeholder.com/150?text=No+Image';"
-                                 >
+                                  >
                             <% } else { %>
-                                <i class="fa-solid fa-box text-3xl text-gray-300"></i>
+                                <i class="fa-solid fa-box text-3xl text-gray-300 dark:text-gray-600"></i>
                             <% } %>
                         </div>
 
                         <div>
-                            <h4 class="font-bold text-gray-800 text-sm mb-1 truncate"><%= item.name %></h4>
+                            <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-1 truncate"><%= item.name %></h4>
                             <div class="flex justify-between items-center">
-                                <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded">
-                                      <%= item.unit || 'Unit' %>
+                                <span class="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">
+                                    <%= item.unit || 'Unit' %>
                                 </span>
-                                <span class="text-xs text-indigo-600 font-medium">ID: <%= item.id %></span>
+                                <span class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">ID: <%= item.id %></span>
                             </div>
                         </div>
                     </div>
                  <% }); %>
              </div>
           <% } else { %>
-              <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
-                  <p class="text-gray-400 text-sm">No items defined for <%= catName %> yet.</p>
+              <div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                  <p class="text-gray-400 dark:text-gray-500 text-sm">No items defined for <%= catName %> yet.</p>
               </div>
           <% } %>
         </div>
@@ -112,22 +107,23 @@
 </div>
 
 <div id="add-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
-      <h3 class="text-lg font-bold text-gray-800">Add Master Item</h3>
-      <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md animate-scale-in border dark:border-gray-700 transition-colors">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-2xl">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white">Add Master Item</h3>
+      <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
     </div>
     
     <form onsubmit="submitAdd(event)" class="p-6 space-y-4">
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
-        <input type="text" name="name" required placeholder="e.g. Olive Oil" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Item Name</label>
+        <input type="text" name="name" required placeholder="e.g. Olive Oil" 
+               class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
       </div>
       
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-          <select name="category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Category</label>
+          <select name="category" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
             <option value="Cook">Cook</option>
             <option value="Drink">Drink</option>
             <option value="Supplies">Supplies</option>
@@ -135,8 +131,8 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Unit</label>
-          <select name="unit" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Unit</label>
+          <select name="unit" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
             <option value="kg">kg</option>
             <option value="g">g</option>
             <option value="liter">Liter</option>
@@ -149,8 +145,8 @@
       </div>
 
       <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image (Optional)</label>
-          <input type="file" name="image" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Image (Optional)</label>
+          <input type="file" name="image" class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/50 file:text-indigo-700 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/70"/>
       </div>
 
       <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">Save Item</button>
@@ -159,24 +155,25 @@
 </div>
 
 <div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
-      <h3 class="text-lg font-bold text-gray-800">Edit Item</h3>
-      <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md animate-scale-in border dark:border-gray-700 transition-colors">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-2xl">
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white">Edit Item</h3>
+      <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
     </div>
     
     <div class="p-6 space-y-4">
       <input type="hidden" id="edit-id" />
       
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
-        <input type="text" id="edit-name" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Item Name</label>
+        <input type="text" id="edit-name" 
+               class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-          <select id="edit-category" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Category</label>
+          <select id="edit-category" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
             <option value="Cook">Cook</option>
             <option value="Drink">Drink</option>
             <option value="Supplies">Supplies</option>
@@ -184,8 +181,8 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Unit</label>
-          <select id="edit-unit" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Unit</label>
+          <select id="edit-unit" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none">
             <option value="kg">kg</option>
             <option value="g">g</option>
             <option value="liter">Liter</option>
@@ -198,8 +195,8 @@
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image URL</label>
-        <input type="text" id="edit-image-url" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Image URL</label>
+        <input type="text" id="edit-image-url" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 focus:border-indigo-500 focus:outline-none" />
       </div>
 
       <button onclick="submitEdit()" class="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition">Update Item</button>
@@ -207,7 +204,20 @@
   </div>
 </div>
 
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
 <script>
+  // --- DARK MODE LOGIC ---
+  const themeBtn = document.getElementById('theme-toggle');
+  themeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+
   // 1. NOTIFICATION SYSTEM
   function showNotification(message, type = 'success') {
       const container = document.getElementById('toast-container');
@@ -217,13 +227,8 @@
       const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
       toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
       toast.style.animation = 'slideIn 0.5s forwards';
-      
-      toast.innerHTML = `
-          <div class="text-2xl">${icon}</div>
-          <div class="font-bold text-sm">${message}</div>
-      `;
+      toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
       container.appendChild(toast);
-
       setTimeout(() => {
           toast.style.animation = 'slideOut 0.5s forwards';
           setTimeout(() => toast.remove(), 500);
@@ -261,7 +266,7 @@
       try {
           const res = await fetch('/admin/stock/menu/add', {
               method: 'POST',
-              body: formData // Fetch handles multipart/form-data boundary automatically
+              body: formData 
           });
           if(res.ok) {
               showNotification("Item Added Successfully!", "success");
@@ -307,10 +312,8 @@
   // 4. DELETE ITEM (FIXED: Updates number immediately)
   async function deleteItem(id, btn) {
       if(!confirm("Permanently delete this item from the master menu?")) return;
-      
       try {
           const res = await fetch(`/api/stock/menu/${id}`, { method: 'DELETE' });
-          
           if(res.ok) {
               // 1. Find elements
               const card = btn.closest('.item-card');
@@ -319,7 +322,6 @@
 
               // 2. Remove card
               card.remove();
-
               // 3. Update count
               if (countSpan) {
                   let currentCount = parseInt(countSpan.innerText);

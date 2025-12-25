@@ -7,23 +7,23 @@
 
 <div class="max-w-3xl mx-auto space-y-6">
 
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
         <form action="/admin/stock" method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
             
             <div class="w-full sm:w-auto">
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Date</label>
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Select Date</label>
                 <input 
                     type="date" 
                     name="date" 
                     value="<%= typeof query !== 'undefined' ? query.date : '' %>"
-                    class="w-full sm:w-48 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors"
+                    class="w-full sm:w-48 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors"
                 />
             </div>
 
             <div class="w-full sm:w-auto flex-1">
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Location</label>
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Select Location</label>
                 <div class="relative">
-                    <select name="location" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
+                    <select name="location" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
                         <option value="">All Locations</option>
                         <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
                             <% locations.forEach(function(loc) { %>
@@ -49,47 +49,47 @@
         </form>
     </div>
 
-    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex justify-between items-start mb-6 border-b pb-4">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+        <div class="flex justify-between items-start mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
                     Request #<%= request.id %>
                     <% if (request.created_at) { %>
-                        <span class="text-xs font-normal bg-gray-100 text-gray-500 px-2 py-1 rounded-full border border-gray-200">
+                        <span class="text-xs font-normal bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-2 py-1 rounded-full border border-gray-200 dark:border-gray-600">
                             <i class="fa-regular fa-calendar mr-1"></i>
                             <%= new Date(request.created_at).toLocaleDateString() %>
                         </span>
                     <% } %>
                 </h2>
-                <p class="text-gray-500 mt-1">Location: <span class="font-bold text-indigo-600"><%= request.location_name %></span></p>
+                <p class="text-gray-500 dark:text-gray-400 mt-1">Location: <span class="font-bold text-indigo-600 dark:text-indigo-400"><%= request.location_name %></span></p>
                 <p class="text-xs text-gray-400 mt-1">Status: <span class="font-bold"><%= request.status %></span></p>
             </div>
-            <a href="/admin/stock" class="text-gray-500 hover:text-gray-800 text-sm font-medium flex items-center gap-1">
+            <a href="/admin/stock" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-sm font-medium flex items-center gap-1">
                 <i class="fa-solid fa-arrow-left"></i> Back to List
             </a>
         </div>
 
         <div class="mb-8">
-            <h3 class="font-bold text-gray-700 mb-3">Requested Items</h3>
+            <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-3">Requested Items</h3>
             <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500">
+                <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
                     <tr>
                         <th class="p-3">Category</th>
                         <th class="p-3">Item Name</th>
                         <th class="p-3 text-right">Quantity</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                     <% items.forEach(item => { %>
-                        <tr>
+                        <tr class="dark:text-gray-300">
                             <td class="p-3">
                                 <% if(item.category === 'Cook') { %>
-                                    <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">Cook</span>
+                                    <span class="bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 px-2 py-1 rounded text-xs font-bold">Cook</span>
                                 <% } else { %>
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Drink</span>
+                                    <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-xs font-bold">Drink</span>
                                 <% } %>
                             </td>
-                            <td class="p-3 font-medium text-gray-800"><%= item.item_name %></td>
+                            <td class="p-3 font-medium text-gray-800 dark:text-gray-200"><%= item.item_name %></td>
                             <td class="p-3 text-right font-bold"><%= item.quantity %></td>
                         </tr>
                     <% }) %>
@@ -98,7 +98,7 @@
         </div>
 
         <% if ((user.role === 'admin' || user.role === 'manager') && request.status === 'Pending') { %>
-            <div class="flex gap-4 border-t pt-6">
+            <div class="flex gap-4 border-t border-gray-100 dark:border-gray-700 pt-6">
                 <form onsubmit="handleStatusUpdate(event, 'Confirmed')" class="flex-1">
                     <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition transform active:scale-95">
                         <i class="fa-solid fa-check mr-2"></i> Approve Request
@@ -106,7 +106,7 @@
                 </form>
 
                 <form onsubmit="handleStatusUpdate(event, 'Rejected')" class="flex-1">
-                    <button type="submit" class="w-full py-3 bg-red-100 hover:bg-red-200 text-red-600 font-bold rounded-lg transition transform active:scale-95">
+                    <button type="submit" class="w-full py-3 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-lg transition transform active:scale-95">
                         <i class="fa-solid fa-xmark mr-2"></i> Reject
                     </button>
                 </form>
@@ -115,7 +115,20 @@
     </div>
 </div>
 
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
 <script>
+    // --- DARK MODE LOGIC ---
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');

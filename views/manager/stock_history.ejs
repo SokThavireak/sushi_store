@@ -14,10 +14,10 @@
 
 <div class="max-w-6xl mx-auto my-10 space-y-6">
 
-  <div class="flex flex-col md:flex-row gap-4 items-end justify-between bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+  <div class="flex flex-col md:flex-row gap-4 items-end justify-between bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
     <div>
-      <h1 class="text-2xl font-bold text-gray-800">Stock Count History</h1>
-      <p class="text-sm text-gray-500">View and manage past daily inventory logs</p>
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Stock Count History</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">View and manage past daily inventory logs</p>
     </div>
 
     <form method="GET" action="/manager/daily-stock/history" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -28,13 +28,13 @@
           type="date" 
           name="date" 
           value="<%= typeof query !== 'undefined' ? query.date : '' %>"
-          class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
+          class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
         >
       </div>
 
       <div class="flex flex-col">
         <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Location</label>
-        <select name="location" class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 min-w-[150px]">
+        <select name="location" class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 min-w-[150px]">
           <option value="">All Locations</option>
           <% if (typeof locations !== 'undefined') { %>
             <% locations.forEach(loc => { %>
@@ -54,7 +54,7 @@
       
       <% if (typeof query !== 'undefined' && (query.date || query.location)) { %>
         <div class="flex items-end">
-            <a href="/manager/daily-stock/history" class="text-gray-500 bg-gray-100 hover:bg-gray-200 font-bold rounded-lg text-sm px-4 py-2.5 transition-all">
+            <a href="/manager/daily-stock/history" class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 font-bold rounded-lg text-sm px-4 py-2.5 transition-all">
                 Clear
             </a>
         </div>
@@ -63,10 +63,10 @@
     </form>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-gray-500">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-100">
+      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
           <tr>
             <th scope="col" class="px-6 py-4">Report Date</th>
             <th scope="col" class="px-6 py-4">Location</th>
@@ -78,21 +78,21 @@
         <tbody>
           <% if (typeof logs !== 'undefined' && logs.length > 0) { %>
             <% logs.forEach(log => { %>
-              <tr class="bg-white border-b border-gray-50 hover:bg-gray-50 transition">
+              <tr class="bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                 
-                <td class="px-6 py-4 font-bold text-gray-900">
+                <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">
                   <%= new Date(log.report_date).toLocaleDateString() %>
                 </td>
                 
                 <td class="px-6 py-4">
-                  <span class="bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-bold border border-indigo-100">
+                  <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-1 px-3 rounded-full text-xs font-bold border border-indigo-100 dark:border-indigo-800">
                     <%= log.location_name %>
                   </span>
                 </td>
                 
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-300">
                             <i class="fa-solid fa-user"></i>
                         </div>
                         <%= log.email ? log.email.split('@')[0] : 'Unknown' %>
@@ -100,11 +100,11 @@
                 </td>
 
                 <td class="px-6 py-4 text-center">
-                   <span class="font-mono text-gray-400">#<%= log.id %></span>
+                   <span class="font-mono text-gray-400 dark:text-gray-500">#<%= log.id %></span>
                 </td>
 
                 <td class="px-6 py-4 text-right">
-                  <a href="/manager/daily-stock/history/<%= log.id %>" class="font-bold text-indigo-600 hover:underline hover:text-indigo-800 transition">
+                  <a href="/manager/daily-stock/history/<%= log.id %>" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline hover:text-indigo-800 dark:hover:text-indigo-300 transition">
                     View Report <i class="fa-solid fa-arrow-right ml-1"></i>
                   </a>
                 </td>
@@ -112,7 +112,7 @@
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+              <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark:text-gray-500">
                 <div class="flex flex-col items-center gap-2">
                     <i class="fa-regular fa-folder-open text-3xl opacity-50"></i>
                     <p>No stock history found for this selection.</p>
@@ -124,9 +124,9 @@
       </table>
     </div>
     
-    <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-        <span class="text-xs text-gray-500">Showing recent logs</span>
-        </div>
+    <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+        <span class="text-xs text-gray-500 dark:text-gray-400">Showing recent logs</span>
+    </div>
   </div>
 
 </div>
@@ -139,7 +139,6 @@
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
         toast.style.animation = 'slideIn 0.5s forwards';
         
@@ -147,7 +146,6 @@
             <div class="text-2xl">${icon}</div>
             <div class="font-bold text-sm">${message}</div>
         `;
-
         container.appendChild(toast);
 
         setTimeout(() => {
@@ -159,13 +157,11 @@
     // 2. SUBMIT HANDLER
     async function submitDailyStock(e) {
         e.preventDefault();
-        
         const btn = document.getElementById('submitBtn');
         const originalText = btn.innerHTML;
         
         const form = e.target;
         const data = { items: [] };
-
         // Build array from inputs
         const inputs = form.querySelectorAll('input[type="number"]');
         inputs.forEach(input => {
@@ -179,7 +175,6 @@
                 });
             }
         });
-
         // Validation Alert
         if(data.items.length === 0) {
             return showNotification("⚠️ Please enter at least one quantity.", "error");
@@ -195,7 +190,6 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
             if(res.ok) {
                 showNotification("Stock Count Saved Successfully!", "success");
                 // Wait 1.5s before reloading so user sees the success message

@@ -2,22 +2,22 @@
 
 <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
     <div>
-        <h1 class="text-3xl font-bold text-gray-800">Overview</h1>
-        <p class="text-gray-500">Welcome back, <%= user.email.split('@')[0] %>!</p>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Overview</h1>
+        <p class="text-gray-500 dark:text-gray-400">Welcome back, <%= user.email.split('@')[0] %>!</p>
     </div>
 
-    <form action="/admin/dashboard" method="GET" class="bg-white p-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
-        <label class="text-xs font-bold text-gray-500 uppercase px-2">Store:</label>
+    <form action="/admin/dashboard" method="GET" class="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-2">
+        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase px-2">Store:</label>
         
         <% if (user.role === 'store_manager') { %>
-            <span class="font-bold text-indigo-600 px-2 py-1 bg-indigo-50 rounded">
+            <span class="font-bold text-indigo-600 dark:text-indigo-400 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 rounded">
                 <i class="fa-solid fa-store mr-1"></i> <%= currentFilter %>
             </span>
         <% } else { %>
-            <select name="location" onchange="this.form.submit()" class="bg-transparent font-bold text-gray-700 outline-none cursor-pointer">
-                <option value="All" <%= currentFilter === 'All' ? 'selected' : '' %>>All Locations</option>
+            <select name="location" onchange="this.form.submit()" class="bg-transparent font-bold text-gray-700 dark:text-gray-200 outline-none cursor-pointer">
+                <option value="All" <%= currentFilter === 'All' ? 'selected' : '' %> class="dark:bg-gray-800">All Locations</option>
                 <% locations.forEach(loc => { %>
-                    <option value="<%= loc.name %>" <%= currentFilter === loc.name ? 'selected' : '' %>>
+                    <option value="<%= loc.name %>" <%= currentFilter === loc.name ? 'selected' : '' %> class="dark:bg-gray-800">
                         <%= loc.name %>
                     </option>
                 <% }) %>
@@ -27,51 +27,51 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between transition-colors">
         <div>
-            <p class="text-xs font-bold text-gray-400 uppercase">Revenue (<%= currentFilter %>)</p>
-            <h3 class="text-2xl font-bold text-indigo-900">$<%= totalRevenue %></h3>
+            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">Revenue (<%= currentFilter %>)</p>
+            <h3 class="text-2xl font-bold text-indigo-900 dark:text-indigo-300">$<%= totalRevenue %></h3>
         </div>
-        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+        <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
             <i class="fa-solid fa-dollar-sign"></i>
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between transition-colors">
         <div>
-            <p class="text-xs font-bold text-gray-400 uppercase">Total Orders</p>
-            <h3 class="text-2xl font-bold text-gray-800"><%= ordersCount %></h3>
+            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">Total Orders</p>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white"><%= ordersCount %></h3>
         </div>
-        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+        <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
             <i class="fa-solid fa-cart-shopping"></i>
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between transition-colors">
         <div>
-            <p class="text-xs font-bold text-gray-400 uppercase">Active Users</p>
-            <h3 class="text-2xl font-bold text-gray-800"><%= userCount %></h3>
+            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">Active Users</p>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white"><%= userCount %></h3>
         </div>
-        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+        <div class="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-900/50 flex items-center justify-center text-purple-600 dark:text-purple-400">
             <i class="fa-solid fa-users"></i>
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between transition-colors">
         <div>
-            <p class="text-xs font-bold text-gray-400 uppercase">Inventory</p>
-            <h3 class="text-2xl font-bold text-gray-800"><%= productsCount %></h3>
+            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">Inventory</p>
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white"><%= productsCount %></h3>
         </div>
-        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
+        <div class="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-900/50 flex items-center justify-center text-orange-600 dark:text-orange-400">
             <i class="fa-solid fa-box"></i>
         </div>
     </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-    <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+    <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-gray-800">Sales Analytics</h3>
+            <h3 class="font-bold text-gray-800 dark:text-white">Sales Analytics</h3>
             <span class="text-sm text-gray-400">Last 7 Days (<%= currentFilter %>)</span>
         </div>
         <div class="h-64">
@@ -79,22 +79,40 @@
         </div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <h3 class="font-bold text-gray-800 mb-6">Order Status</h3>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-colors">
+        <h3 class="font-bold text-gray-800 dark:text-white mb-6">Order Status</h3>
         <div class="h-48 flex justify-center">
             <canvas id="statusChart"></canvas>
         </div>
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-500">Based on filtered selection</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Based on filtered selection</p>
         </div>
     </div>
 </div>
 
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
 <script>
+    // --- DARK MODE LOGIC ---
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
     // 1. Bar Chart Data
     const rawSales = <%- JSON.stringify(chartData) %>;
     const salesLabels = rawSales.map(d => d.day);
     const salesValues = rawSales.map(d => d.daily_sales);
+    
+    // Check if Dark Mode is active for Chart colors
+    const isDark = document.documentElement.classList.contains('dark');
+    const labelColor = isDark ? '#9ca3af' : '#4b5563';
+    const gridColor = isDark ? '#374151' : '#e5e7eb';
 
     new Chart(document.getElementById('salesChart'), {
         type: 'bar',
@@ -107,12 +125,28 @@
                 borderRadius: 4
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            scales: { 
+                y: { 
+                    beginAtZero: true,
+                    ticks: { color: labelColor },
+                    grid: { color: gridColor }
+                }, 
+                x: { 
+                    grid: { display: false },
+                    ticks: { color: labelColor }
+                } 
+            },
+            plugins: {
+                legend: { labels: { color: labelColor } }
+            }
+        }
     });
 
     // 2. Donut Chart Data (Dynamic Status)
     const rawStatus = <%- JSON.stringify(statusData) %>;
-    // Map DB status to counts (default 0 if missing)
     const getCount = (status) => {
         const found = rawStatus.find(s => s.status === status);
         return found ? found.count : 0;
@@ -128,6 +162,15 @@
                 borderWidth: 0
             }]
         },
-        options: { cutout: '70%', responsive: true, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } } }
+        options: { 
+            cutout: '70%', 
+            responsive: true, 
+            plugins: { 
+                legend: { 
+                    position: 'bottom', 
+                    labels: { usePointStyle: true, color: labelColor } 
+                } 
+            } 
+        }
     });
 </script>

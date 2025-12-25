@@ -1,19 +1,19 @@
 <div class="max-w-4xl mx-auto space-y-6 my-10">
     
-    <a href="/manager/daily-stock/history" class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-800 font-bold text-sm transition">
+    <a href="/manager/daily-stock/history" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white font-bold text-sm transition">
         <i class="fa-solid fa-arrow-left"></i> Back to History
     </a>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         
-        <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-start">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-start">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800 mb-1">Daily Stock Report</h1>
-                <p class="text-sm text-gray-500">
-                    Date: <span class="font-bold text-gray-700"><%= new Date(log.report_date).toLocaleDateString() %></span>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">Daily Stock Report</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Date: <span class="font-bold text-gray-700 dark:text-gray-200"><%= new Date(log.report_date).toLocaleDateString() %></span>
                 </p>
-                <p class="text-sm text-gray-500">
-                    Submitted By: <span class="font-bold text-gray-700"><%= log.email %></span>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Submitted By: <span class="font-bold text-gray-700 dark:text-gray-200"><%= log.email %></span>
                 </p>
             </div>
             <div class="text-right">
@@ -36,15 +36,15 @@
                     hasItems = true;
             %>
                 <div class="mb-8 last:mb-0">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 border-b border-gray-100 pb-2">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">
                         <%= cat %> Section
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <% catItems.forEach(item => { %>
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                <span class="font-bold text-gray-700 text-sm"><%= item.item_name %></span>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+                                <span class="font-bold text-gray-700 dark:text-gray-200 text-sm"><%= item.item_name %></span>
                                 <div class="flex items-center gap-1">
-                                    <span class="text-lg font-bold text-indigo-600"><%= item.quantity %></span>
+                                    <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400"><%= item.quantity %></span>
                                     <span class="text-[10px] text-gray-400 font-bold uppercase pt-1"><%= item.unit %></span>
                                 </div>
                             </div>

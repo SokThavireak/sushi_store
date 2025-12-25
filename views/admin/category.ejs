@@ -5,13 +5,13 @@
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-    <div class="p-6 flex justify-between items-center border-b border-gray-100">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-6 transition-colors">
+    <div class="p-6 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
         <div>
-            <h3 class="font-bold text-gray-800 text-xl">Category Management</h3>
-            <p class="text-xs text-gray-400 mt-1">
+            <h3 class="font-bold text-gray-800 dark:text-white text-xl">Category Management</h3>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 Current Access: 
-                <span class="<%= userRole === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' %> px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">
+                <span class="<%= userRole === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' %> px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">
                     <%= userRole %>
                 </span>
             </p>
@@ -25,42 +25,46 @@
 <% if (categories && categories.length > 0) { %>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <% categories.forEach(category => { %>
-            <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center text-center relative group">
-                <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-2xl mb-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center relative group">
+                
+                <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 flex items-center justify-center text-2xl mb-4">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <h3 class="font-bold text-gray-900 text-lg mb-1"><%= category.name %></h3>
-                <p class="text-xs text-gray-400 mb-4">ID: #<%= category.id %></p>
-                <div class="flex gap-2 w-full justify-center mt-auto pt-4 border-t border-gray-50">
-                    <button onclick="openEditModal(<%= JSON.stringify(category) %>)" class="px-3 py-1.5 bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-600 rounded-lg text-sm font-medium transition">
+                <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-1"><%= category.name %></h3>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">ID: #<%= category.id %></p>
+        
+                <div class="flex gap-2 w-full justify-center mt-auto pt-4 border-t border-gray-50 dark:border-gray-700">
+                    <button onclick="openEditModal(<%= JSON.stringify(category) %>)" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg text-sm font-medium transition">
                         <i class="fa-solid fa-pen"></i> Edit
                     </button>
+    
                     <% if (userRole === 'admin') { %>
-                        <button onclick="deleteCategory(<%= category.id %>)" class="px-3 py-1.5 bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 rounded-lg text-sm font-medium transition">
+                        <button onclick="deleteCategory(<%= category.id %>)" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/50 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-lg text-sm font-medium transition">
                             <i class="fa-solid fa-trash"></i>
-                        </button>
+                         </button>
                     <% } %>
                 </div>
             </div>
         <% }) %>
     </div>
 <% } else { %>
-    <div class="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-        <div class="text-gray-300 text-4xl mb-3"><i class="fa-solid fa-box-open"></i></div>
-        <h3 class="text-lg font-medium text-gray-900">No Categories Found</h3>
+    <div class="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 transition-colors">
+        <div class="text-gray-300 dark:text-gray-600 text-4xl mb-3"><i class="fa-solid fa-box-open"></i></div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200">No Categories Found</h3>
     </div>
 <% } %>
 
 <div id="add-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="text-lg font-bold text-gray-800">New Category</h3>
-            <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
-        </div>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md border dark:border-gray-700 transition-colors">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-2xl">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white">New Category</h3>
+            <button onclick="toggleModal('add-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
+         </div>
         <form onsubmit="createCategory(event)" class="p-6 space-y-4">
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category Name</label>
-                <input type="text" id="add-name" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Category Name</label>
+                <input type="text" id="add-name" required 
+                       class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
             </div>
             <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold mt-2">Create Category</button>
         </form>
@@ -68,25 +72,38 @@
 </div>
 
 <div id="edit-modal" class="fixed inset-0 bg-black/50 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="text-lg font-bold text-gray-800">Edit Category</h3>
-            <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md border dark:border-gray-700 transition-colors">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-2xl">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white">Edit Category</h3>
+            <button onclick="toggleModal('edit-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form onsubmit="updateCategory(event)" class="p-6 space-y-4">
             <input type="hidden" id="edit-id">
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category Name</label>
-                <input type="text" id="edit-name" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Category Name</label>
+                <input type="text" id="edit-name" required 
+                       class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
             </div>
             <button type="submit" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold mt-2">Save Changes</button>
         </form>
     </div>
 </div>
 
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
 <script>
+    // --- DARK MODE LOGIC ---
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
     const currentUserRole = "<%= userRole %>";
-    
     // NOTIFICATION LOGIC
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -122,8 +139,10 @@
                 showNotification("Category Created!");
                 toggleModal('add-modal');
                 setTimeout(() => window.location.reload(), 1000);
-            } else { showNotification('Error creating category', 'error'); }
-        } catch (err) { console.error(err); showNotification("Server Error", 'error'); }
+            } else { showNotification('Error creating category', 'error');
+            }
+        } catch (err) { console.error(err); showNotification("Server Error", 'error');
+        }
     }
 
     async function updateCategory(e) {
@@ -140,8 +159,10 @@
                 showNotification("Category Updated!");
                 toggleModal('edit-modal');
                 setTimeout(() => window.location.reload(), 1000);
-            } else { showNotification('Error updating category', 'error'); }
-        } catch (err) { console.error(err); showNotification("Server Error", 'error'); }
+            } else { showNotification('Error updating category', 'error');
+            }
+        } catch (err) { console.error(err); showNotification("Server Error", 'error');
+        }
     }
 
     async function deleteCategory(id) {
@@ -152,7 +173,9 @@
             if (res.ok) {
                 showNotification("Category Deleted");
                 setTimeout(() => window.location.reload(), 1000);
-            } else { showNotification('Error deleting category', 'error'); }
-        } catch (err) { console.error(err); showNotification("Server Error", 'error'); }
+            } else { showNotification('Error deleting category', 'error');
+            }
+        } catch (err) { console.error(err); showNotification("Server Error", 'error');
+        }
     }
 </script>
