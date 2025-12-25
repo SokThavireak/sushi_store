@@ -12,92 +12,123 @@
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-<div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-10">
-  
-  <div class="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50">
+<div class="max-w-6xl mx-auto my-10 space-y-6">
+
+  <div class="flex flex-col md:flex-row gap-4 items-end justify-between bg-white p-6 rounded-xl shadow-sm border border-gray-100">
     <div>
-        <h3 class="font-bold text-gray-800 text-lg">Daily Stock Count</h3>
-        <p class="text-xs text-gray-500">Log physical inventory for <%= new Date().toLocaleDateString() %></p>
+      <h1 class="text-2xl font-bold text-gray-800">Stock Count History</h1>
+      <p class="text-sm text-gray-500">View and manage past daily inventory logs</p>
     </div>
-    <div class="text-right">
-        <span class="block text-xs font-bold text-gray-400 uppercase">Location</span>
-        <span class="font-bold text-indigo-600"><%= locationName %></span>
-    </div>
-  </div>
 
-  <div class="p-8">
-    
-    <% if (alreadySubmitted) { %>
-        <div class="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
-            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Stock Count Submitted</h3>
-            <p class="text-gray-500 mb-6">You have already submitted the stock count for <b><%= new Date().toLocaleDateString() %></b>.</p>
-            <a href="/manager/daily-stock/history" class="text-indigo-600 font-bold hover:underline">View History</a>
+    <form method="GET" action="/manager/daily-stock/history" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+      
+      <div class="flex flex-col">
+        <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Date</label>
+        <input 
+          type="date" 
+          name="date" 
+          value="<%= typeof query !== 'undefined' ? query.date : '' %>"
+          class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
+        >
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Location</label>
+        <select name="location" class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 min-w-[150px]">
+          <option value="">All Locations</option>
+          <% if (typeof locations !== 'undefined') { %>
+            <% locations.forEach(loc => { %>
+              <option value="<%= loc.id %>" <%= (typeof query !== 'undefined' && query.location == loc.id) ? 'selected' : '' %>>
+                <%= loc.name %>
+              </option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="flex items-end">
+        <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-bold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center flex items-center gap-2 shadow-md transition-all">
+          <i class="fa-solid fa-filter"></i> Filter
+        </button>
+      </div>
+      
+      <% if (typeof query !== 'undefined' && (query.date || query.location)) { %>
+        <div class="flex items-end">
+            <a href="/manager/daily-stock/history" class="text-gray-500 bg-gray-100 hover:bg-gray-200 font-bold rounded-lg text-sm px-4 py-2.5 transition-all">
+                Clear
+            </a>
         </div>
-    <% } else { %>
+      <% } %>
 
-    <form id="dailyStockForm" onsubmit="submitDailyStock(event)" class="space-y-8">
-        
-        <% const categories = ['Cook', 'Drink', 'Supplies', 'Packaging']; %>
-        
-        <% categories.forEach(cat => { 
-             const catItems = masterItems.filter(i => i.category === cat);
-             if (catItems.length > 0) {
-        %>
-            <div class="border border-gray-200 rounded-xl overflow-hidden">
-                <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center gap-2">
-                    <% if (cat === 'Cook') { %> <i class="fa-solid fa-utensils text-gray-400"></i> <% } %>
-                    <% if (cat === 'Drink') { %> <i class="fa-solid fa-glass-water text-gray-400"></i> <% } %>
-                    <h4 class="font-bold text-gray-700"><%= cat %> Inventory</h4>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100 bg-white">
-                    <% catItems.forEach(item => { %>
-                        <div class="p-4 flex items-center justify-between group hover:bg-gray-50 transition">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden">
-                                    <% if(item.image_url) { %>
-                                        <img src="<%= item.image_url %>" class="w-full h-full object-cover">
-                                    <% } else { %>
-                                        <i class="fa-solid fa-box text-xs"></i>
-                                    <% } %>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-gray-800"><%= item.name %></p>
-                                    <p class="text-[10px] text-gray-400 uppercase"><%= item.unit || 'Unit' %></p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <input type="hidden" name="items[<%= item.id %>][name]" value="<%= item.name %>">
-                                <input type="hidden" name="items[<%= item.id %>][category]" value="<%= item.category %>">
-                                <input type="hidden" name="items[<%= item.id %>][unit]" value="<%= item.unit %>">
-                                
-                                <input 
-                                    type="number" 
-                                    name="items[<%= item.id %>][quantity]" 
-                                    min="0" 
-                                    placeholder="0" 
-                                    class="w-20 text-center bg-gray-50 border border-gray-200 rounded-lg p-2 font-bold focus:border-indigo-500 focus:outline-none"
-                                >
-                            </div>
-                        </div>
-                    <% }) %>
-                </div>
-            </div>
-        <% } }) %>
-
-        <div class="flex justify-end pt-4">
-            <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 transition flex items-center gap-2">
-                <i class="fa-solid fa-save"></i> Save Today's Count
-            </button>
-        </div>
     </form>
-    
-    <% } %>
   </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th scope="col" class="px-6 py-4">Report Date</th>
+            <th scope="col" class="px-6 py-4">Location</th>
+            <th scope="col" class="px-6 py-4">Submitted By</th>
+            <th scope="col" class="px-6 py-4 text-center">Items Counted</th>
+            <th scope="col" class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (typeof logs !== 'undefined' && logs.length > 0) { %>
+            <% logs.forEach(log => { %>
+              <tr class="bg-white border-b border-gray-50 hover:bg-gray-50 transition">
+                
+                <td class="px-6 py-4 font-bold text-gray-900">
+                  <%= new Date(log.report_date).toLocaleDateString() %>
+                </td>
+                
+                <td class="px-6 py-4">
+                  <span class="bg-indigo-50 text-indigo-600 py-1 px-3 rounded-full text-xs font-bold border border-indigo-100">
+                    <%= log.location_name %>
+                  </span>
+                </td>
+                
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <%= log.email ? log.email.split('@')[0] : 'Unknown' %>
+                    </div>
+                </td>
+
+                <td class="px-6 py-4 text-center">
+                   <span class="font-mono text-gray-400">#<%= log.id %></span>
+                </td>
+
+                <td class="px-6 py-4 text-right">
+                  <a href="/manager/daily-stock/history/<%= log.id %>" class="font-bold text-indigo-600 hover:underline hover:text-indigo-800 transition">
+                    View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                <div class="flex flex-col items-center gap-2">
+                    <i class="fa-regular fa-folder-open text-3xl opacity-50"></i>
+                    <p>No stock history found for this selection.</p>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+        <span class="text-xs text-gray-500">Showing recent logs</span>
+        </div>
+  </div>
+
 </div>
 
 <script>
