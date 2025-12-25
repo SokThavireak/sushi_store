@@ -1,159 +1,131 @@
-<nav class="fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md bg-white/90 border-b border-gray-100/50 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 py-3 lg:px-8 lg:py-4">
-    <div class="flex justify-between items-center">
-      
-      <div class="text-2xl lg:text-3xl font-extrabold tracking-tight z-50">
-        <a href="<%= (typeof user !== 'undefined' && user.role === 'staff') ? '/staff/menu' : '/' %>" class="text-gray-900">
-          Murakami<span class="text-orange-500">.</span>
-        </a>
-      </div>
+<div 
+    id="sidebar-overlay" 
+    onclick="toggleSidebar()" 
+    class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden transition-opacity duration-300 opacity-0"
+></div>
 
-      <div class="hidden lg:flex items-center gap-8 text-sm font-bold text-gray-800">
-        <% if (typeof user === 'undefined' || user.role !== 'staff') { %>
-          <a href="/" class="hover:text-orange-500 transition-colors">Home</a>
-          <a href="/menu" class="hover:text-orange-500 transition-colors">Menu</a>
-          <a href="/about" class="hover:text-orange-500 transition-colors">About</a>
-          <a href="/offers" class="hover:text-orange-500 transition-colors">Offers</a>
-          <a href="/location" class="hover:text-orange-500 transition-colors">Locations</a>
-        <% } %>
-      </div>
-
-      <div class="flex items-center gap-3 lg:gap-6">
-        
-        <% if (typeof user !== 'undefined' && user) { %> 
-            <% if (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier') { %>
-              <a href="/admin/dashboard" class="hidden lg:block text-sm font-bold hover:text-orange-500">Dashboard</a>
-            <% } %>
-
-            <% if (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'staff' || user.role === 'cashier') { %>
-              <a href="/staff/menu" class="hidden lg:block text-sm font-bold hover:text-orange-500">Menu Staff</a>
-            <% } %>
-
-            <div class="relative">
-              <button onclick="toggleProfileMenu()" class="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full hover:bg-orange-100 text-gray-700 transition-all focus:outline-none">
-                <i class="fa-solid fa-user"></i>
-              </button>
-
-              <div id="profile-menu" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-fade-in-down">
-                <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                  <p class="text-xs text-gray-500">Signed in as</p>
-                  <p class="text-sm font-bold text-gray-800 truncate"><%= user.email.split('@')[0] %></p>
-                </div>
-                <a href="/profile" class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 transition-colors">
-                  <i class="fa-solid fa-gear mr-2 text-gray-400"></i> Manage Account
-                </a>
-                <a href="/orders" class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 transition-colors">
-                  <i class="fa-solid fa-receipt mr-2 text-gray-400"></i> Orders
-                </a>
-                <a href="/logout" class="block px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100">
-                  <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
-                </a>
-              </div>
-            </div>
-
-        <% } else { %>
-            <a href="/login" class="px-4 py-2 text-sm font-bold text-white bg-gray-900 rounded-full hover:bg-orange-500 transition-all shadow-md">
-              Login
-            </a>
-        <% } %>
-
-        <button onclick="toggleCart()" class="relative w-10 h-10 flex items-center justify-center text-gray-700 hover:text-orange-500 transition">
-          <i class="fa-solid fa-shopping-bag text-xl"></i>
-          <span id="cart-count" class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">0</span>
+<aside 
+    id="sidebar" 
+    class="absolute inset-y-0 left-0 z-50 w-64 bg-[#0f112e] text-gray-400 flex flex-col flex-shrink-0 transform -translate-x-full transition-transform duration-300 lg:relative lg:translate-x-0 lg:inset-auto shadow-2xl lg:shadow-none"
+>
+    <div class="p-6 text-white font-bold text-xl flex items-center gap-3 justify-between lg:justify-start">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-layer-group text-blue-500"></i> OPULENT
+        </div>
+        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-2xl"></i>
         </button>
-
-        <button onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 flex items-center justify-center text-gray-800 hover:bg-gray-100 rounded-full transition-colors focus:outline-none">
-          <i id="menu-icon" class="fa-solid fa-bars text-xl"></i>
-        </button>
-      </div>
     </div>
-  </div>
 
-  <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-lg">
-    <div class="flex flex-col p-4 space-y-2">
-      <% if (typeof user === 'undefined' || user.role !== 'staff') { %>
-        <a href="/" class="mobile-link">
-          <i class="fa-solid fa-house w-6 text-center text-gray-400"></i> Home
-        </a>
-        <a href="/menu" class="mobile-link">
-          <i class="fa-solid fa-utensils w-6 text-center text-gray-400"></i> Menu
-        </a>
-        <a href="/about" class="mobile-link">
-          <i class="fa-solid fa-circle-info w-6 text-center text-gray-400"></i> About
-        </a>
-        <a href="/offers" class="mobile-link">
-          <i class="fa-solid fa-tag w-6 text-center text-gray-400"></i> Offers
-        </a>
-        <a href="/location" class="mobile-link">
-          <i class="fa-solid fa-map-location-dot w-6 text-center text-gray-400"></i> Locations
-        </a>
-      <% } %>
-
-      <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager')) { %>
-        <div class="border-t border-gray-100 my-2 pt-2"></div>
-        <a href="/admin/dashboard" class="mobile-link text-blue-600 bg-blue-50">
-          <i class="fa-solid fa-chart-pie w-6 text-center"></i> Dashboard
-        </a>
-      <% } %>
+    <div class="px-6 mb-6">
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-sm"></i>
+            <input
+                type="text"
+                placeholder="Search..."
+                class="w-full bg-[#1e204a] text-sm text-white rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+        </div>
     </div>
-  </div>
-</nav>
 
-<style>
-  .mobile-link {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    color: #374151; /* gray-700 */
-    font-weight: 600;
-    border-radius: 0.5rem; /* rounded-lg */
-    transition: all 0.2s;
-  }
-  .mobile-link:hover {
-    background-color: #f3f4f6; /* gray-100 */
-    color: #f97316; /* orange-500 */
-  }
-  .animate-fade-in-down {
-    animation: fadeInDown 0.2s ease-out;
-  }
-  @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
+    <nav class="flex-1 overflow-y-auto px-4 space-y-1">
+        <a href="/" class="flex items-center gap-3 px-4 py-3 text-orange-400 hover:bg-[#1e204a] hover:text-orange-300 rounded-lg transition mb-4 border border-[#1e204a]">
+            <i class="fa-solid fa-globe w-5 text-center"></i> Website Home
+        </a>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
+        <a href="/staff/menu" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-utensils w-5 text-center"></i> Menu Staff
+        </a>
+        <% } %> 
+
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin' || user.role === 'cashier')) { %>
+        <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
+        </a>
+        <% } %> 
+
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin')) { %>
+        <a href="/admin/inventory" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-box w-5 text-center"></i> Inventory
+        </a>
+        <% } %> 
+
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin')) { %>
+        <a href="/admin/category" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-tags w-5 text-center"></i> Category
+        </a>
+        <% } %> 
+
+        <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
+        <a href="/admin/locations" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-map-location-dot w-5 text-center"></i> Locations
+        </a>
+        <% } %> 
+
+        <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
+        <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-users w-5 text-center"></i> Users
+        </a>
+        <% } %>
+
+        <a href="/admin/orders" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Orders
+        </a>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
+        <a href="/admin/reports" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-file-invoice w-5 text-center"></i> Reports
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
+        <a href="/admin/stock" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> Stock Orders
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
+        <a href="/admin/stock/menu" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-clipboard-list w-5 text-center"></i> Stock Menu
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'store_manager')) { %>
+        <a href="/manager/daily-stock" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-clipboard-check w-5 text-center"></i> Daily Stock
+        </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
+        <a href="/manager/daily-stock/history" class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition">
+            <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Stock History
+        </a>
+        <% } %>
+    </nav>
+
+    <div class="p-4 border-t border-[#1e204a]">
+        <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-900/20 hover:text-red-300 rounded-lg transition">
+            <i class="fa-solid fa-right-from-bracket w-5 text-center"></i> Logout
+        </a>
+    </div>
+</aside>
 
 <script>
-  // Toggle Mobile Menu
-  function toggleMobileMenu() {
-    const menu = document.getElementById("mobile-menu");
-    const icon = document.getElementById("menu-icon");
-    
-    // Toggle Visibility
-    menu.classList.toggle("hidden");
+    // Script to control Sidebar Toggling
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isClosed = sidebar.classList.contains('-translate-x-full');
 
-    // Toggle Icon (Bars <-> X)
-    if (menu.classList.contains("hidden")) {
-      icon.classList.remove("fa-xmark");
-      icon.classList.add("fa-bars");
-    } else {
-      icon.classList.remove("fa-bars");
-      icon.classList.add("fa-xmark");
+        if (isClosed) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            setTimeout(() => { overlay.classList.remove('opacity-0'); }, 10);
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => { overlay.classList.add('hidden'); }, 300);
+        }
     }
-  }
-
-  // Toggle Profile Menu (Desktop)
-  function toggleProfileMenu() {
-    const menu = document.getElementById("profile-menu");
-    menu.classList.toggle("hidden");
-  }
-
-  // Close menus when clicking outside
-  window.addEventListener("click", function (e) {
-    // Close Profile Menu
-    const profileBtn = document.querySelector('button[onclick="toggleProfileMenu()"]');
-    const profileMenu = document.getElementById("profile-menu");
-    if (profileBtn && profileMenu && !profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
-      profileMenu.classList.add("hidden");
-    }
-  });
 </script>
