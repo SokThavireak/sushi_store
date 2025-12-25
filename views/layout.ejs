@@ -9,8 +9,20 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      };
+    </script>
+    <script>
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
   </head>
-  <body class="bg-gray-100 flex h-screen overflow-hidden relative">
+  <body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden relative transition-colors duration-300">
     
     <div 
         id="sidebar-overlay" 
@@ -53,7 +65,7 @@
         </a>
 
         <% if (typeof user !== 'undefined' && (user.role === 'manager' ||
-        user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
+          user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier')) { %>
         <a
           href="/staff/menu"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
@@ -80,7 +92,8 @@
         </a>
         <% } %> 
 
-        <% if (typeof user !== 'undefined' && (user.role === 'manager' || user.role === 'admin')) { %>
+        <% if (typeof user !== 'undefined' && (user.role === 'manager' ||
+          user.role === 'admin')) { %>
         <a
           href="/admin/category"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
@@ -114,7 +127,8 @@
           <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Orders
         </a>
 
-        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
+        <% if (typeof user !== 'undefined' && (user.role === 'admin' ||
+          user.role === 'manager' || user.role === 'store_manager')) { %>
         <a
           href="/admin/reports"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
@@ -123,7 +137,8 @@
         </a>
         <% } %>
 
-        <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
+        <% if (typeof user !== 'undefined' && 
+          (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
         <a
           href="/admin/stock"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
@@ -141,7 +156,8 @@
         </a>
         <% } %>
 
-        <% if (typeof user !== 'undefined' && (user.role === 'store_manager' || user.role === 'admin' || user.role === 'manager')) { %>
+        <% if (typeof user !== 'undefined' && (user.role === 'store_manager' || user.role === 'admin' ||
+          user.role === 'manager')) { %>
         <a
           href="/manager/daily-stock"
           class="flex items-center gap-3 px-4 py-3 hover:bg-[#1e204a] hover:text-white rounded-lg transition"
@@ -171,13 +187,17 @@
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden w-full">
-      <header class="h-16 lg:h-20 bg-white border-b flex items-center justify-between px-4 lg:px-8">
+      <header class="h-16 lg:h-20 bg-white dark:bg-gray-800 dark:border-gray-700 border-b flex items-center justify-between px-4 lg:px-8 transition-colors duration-300">
         <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="lg:hidden text-gray-700 hover:text-blue-600 focus:outline-none transition-transform active:scale-95">
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-700 dark:text-gray-200 hover:text-blue-600 focus:outline-none transition-transform active:scale-95">
                 <i class="fa-solid fa-bars text-2xl"></i>
             </button>
-            <h2 class="text-xl lg:text-2xl font-bold text-gray-800"><%= title %></h2>
+            <h2 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white"><%= title %></h2>
         </div>
+
+        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors focus:outline-none">
+            <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+        </button>
       </header>
 
       <div class="flex-1 overflow-y-auto p-4 lg:p-8">
@@ -192,7 +212,6 @@
             
             // Check current state (is hidden?)
             const isClosed = sidebar.classList.contains('-translate-x-full');
-
             if (isClosed) {
                 // Open Sidebar
                 sidebar.classList.remove('-translate-x-full');
@@ -211,6 +230,31 @@
                 }, 300);
             }
         }
+
+        // 5. Theme Toggle Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if(icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if(icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
+            }
+        }
+
+        // Set initial icon on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const icon = document.getElementById('theme-icon');
+            if (document.documentElement.classList.contains('dark') && icon) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
     </script>
   </body>
 </html>
