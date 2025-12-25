@@ -21,8 +21,12 @@
       <div class="flex items-center gap-3 lg:gap-6">
         
         <% if (typeof user !== 'undefined' && user) { %> 
-            <% if (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager') { %>
+            <% if (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'cashier') { %>
               <a href="/admin/dashboard" class="hidden lg:block text-sm font-bold hover:text-orange-500">Dashboard</a>
+            <% } %>
+
+            <% if (user.role === 'manager' || user.role === 'admin' || user.role === 'store_manager' || user.role === 'staff' || user.role === 'cashier') { %>
+              <a href="/staff/menu" class="hidden lg:block text-sm font-bold hover:text-orange-500">Menu Staff</a>
             <% } %>
 
             <div class="relative">
