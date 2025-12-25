@@ -140,6 +140,13 @@ function checkRole(allowedRoles) {
 
 // Customer Order History Page
 app.get('/orders', checkAuthenticated, async (req, res) => {
+    // --- FIX START ---
+    if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
+        // Render empty orders for super admin to prevent DB crash
+        return res.render('orders', { title: 'My Orders', orders: [] });
+    }
+    // --- FIX END ---
+
     try {
         const result = await pool.query(
             "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", 
@@ -240,6 +247,14 @@ app.get("/menu", async (req, res) => {
 
 app.get("/api/cart", async (req, res) => {
   if (!req.user) return res.json([]); 
+
+  // --- FIX START: Prevent crash for Env Admins ---
+  // Environment admins have string IDs ("env-admin-0"), but DB expects Numbers.
+  if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
+      return res.json([]); // Return empty cart for super admins
+  }
+  // --- FIX END ---
+
   try {
     const result = await pool.query(`
       SELECT c.id as cart_id, c.quantity, p.id as product_id, p.name, p.price, p.image_url 
@@ -257,6 +272,12 @@ app.get("/api/cart", async (req, res) => {
 
 app.post("/api/cart", async (req, res) => {
   if (!req.user) return res.status(401).json({ error: "Please login to add items" });
+
+  // --- FIX START ---
+  if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
+      return res.status(403).json({ error: "Super Admins cannot use the shopping cart." });
+  }
+  // --- FIX END ---
 
   const { productId } = req.body;
   const userId = req.user.id;
@@ -303,6 +324,12 @@ app.patch("/api/cart/:id", async (req, res) => {
 // =========================================================
 
 app.get('/checkout', checkAuthenticated, async (req, res) => {
+    // --- FIX START ---
+    if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
+         return res.redirect('/'); // Admins cannot checkout
+    }
+    // --- FIX END ---
+
     try {
         const cartRes = await pool.query(`
             SELECT c.*, p.name, p.price 
