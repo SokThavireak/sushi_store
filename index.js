@@ -1526,26 +1526,43 @@ app.get("/register", (req, res) => {
 
 // REPLACE your existing app.post("/login" ...) with this:
 
-app.post("/login", passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
-    // 1. Get the role and CLEAN it (remove spaces, make lowercase)
-    // This fixes issues like "Staff" vs "staff" or "staff "
-    const rawRole = req.user.role || ""; 
-    const role = rawRole.trim().toLowerCase(); 
+// REPLACE THE OLD app.post("/login"...) WITH THIS:
 
-    // 2. Debugging: Check your Render logs if it still fails!
-    console.log(`Login Attempt -> Email: ${req.user.email} | Role found: '${role}'`);
+// REPLACE THE OLD app.post("/login"...) WITH THIS:
 
-    // 3. Smart Redirects
-    if (['admin', 'manager', 'store_manager', 'cashier'].includes(role)) {
-        res.redirect("/admin/dashboard");
-    } 
-    else if (role === 'staff') {
-        res.redirect("/staff/menu");
-    } 
-    else {
-        // Default for 'user' or if the role text doesn't match above
-        res.redirect("/"); 
-    }
+app.post("/login", (req, res, next) => {
+    // We use a custom callback to handle JSON responses properly
+    passport.authenticate("local", (err, user, info) => {
+        if (err) return next(err);
+        
+        // 1. Handle Login Failure (Send JSON error)
+        if (!user) {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        req.logIn(user, (err) => {
+            if (err) return next(err);
+
+            // 2. Clean the Role
+            const rawRole = user.role || "";
+            const role = rawRole.trim().toLowerCase();
+
+            // 3. Determine the Destination URL
+            let targetUrl = "/";
+            if (['admin', 'manager', 'store_manager', 'cashier'].includes(role)) {
+                targetUrl = "/admin/dashboard";
+            } else if (role === 'staff') {
+                targetUrl = "/staff/menu";
+            }
+
+            // 4. Send JSON Success (The Client will read this!)
+            return res.json({ 
+                message: "Login Successful", 
+                role: role, 
+                targetUrl: targetUrl 
+            });
+        });
+    })(req, res, next);
 });
 
 app.post("/register", async (req, res) => {
