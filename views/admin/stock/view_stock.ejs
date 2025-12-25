@@ -7,58 +7,65 @@
 
 <div class="max-w-3xl mx-auto space-y-6">
 
-    <form action="/admin/stock" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-4 items-end">
-        
-        <div class="w-full sm:w-auto">
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Date</label>
-            <input 
-                type="date" 
-                name="date"
-                class="w-full sm:w-48 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-        </div>
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <form action="/admin/stock" method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
+            
+            <div class="w-full sm:w-auto">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Date</label>
+                <input 
+                    type="date" 
+                    name="date" 
+                    value="<%= typeof query !== 'undefined' ? query.date : '' %>"
+                    class="w-full sm:w-48 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors"
+                />
+            </div>
 
-        <div class="w-full sm:w-auto flex-1">
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Location</label>
-            <div class="relative">
-                <select name="location" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
-                    <option value="">All Locations</option>
-                    <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
-                        <% locations.forEach(function(loc) { %>
-                            <option value="<%= loc.id %>"><%= loc.name %></option>
-                        <% }); %>
-                    <% } else { %>
-                        <option value="1">Main Branch</option>
-                        <option value="2">Warehouse</option>
-                        <option value="3">Kitchen</option>
-                    <% } %>
-                </select>
-                <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
+            <div class="w-full sm:w-auto flex-1">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Select Location</label>
+                <div class="relative">
+                    <select name="location" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
+                        <option value="">All Locations</option>
+                        <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+                            <% locations.forEach(function(loc) { %>
+                                <option value="<%= loc.id %>" <%= (typeof query !== 'undefined' && query.location == loc.id) ? 'selected' : '' %>>
+                                    <%= loc.name %>
+                                </option>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="1">Main Branch</option>
+                            <option value="2">Warehouse</option>
+                            <option value="3">Kitchen</option>
+                        <% } %>
+                    </select>
+                    <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2">
-            <i class="fa-solid fa-filter"></i> Search
-        </button>
-    </form>
+            <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-filter"></i> Filter
+            </button>
+        </form>
+    </div>
 
     <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-start mb-6 border-b pb-4">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
                     Request #<%= request.id %>
-                    <span class="text-xs font-normal bg-gray-100 text-gray-500 px-2 py-1 rounded-full border border-gray-200">
-                        <i class="fa-regular fa-calendar mr-1"></i>
-                        <%= request.created_at ? new Date(request.created_at).toLocaleDateString() : 'N/A' %>
-                    </span>
+                    <% if (request.created_at) { %>
+                        <span class="text-xs font-normal bg-gray-100 text-gray-500 px-2 py-1 rounded-full border border-gray-200">
+                            <i class="fa-regular fa-calendar mr-1"></i>
+                            <%= new Date(request.created_at).toLocaleDateString() %>
+                        </span>
+                    <% } %>
                 </h2>
                 <p class="text-gray-500 mt-1">Location: <span class="font-bold text-indigo-600"><%= request.location_name %></span></p>
-                <p class="text-xs text-gray-400 mt-1">Status: <%= request.status %></p>
+                <p class="text-xs text-gray-400 mt-1">Status: <span class="font-bold"><%= request.status %></span></p>
             </div>
             <a href="/admin/stock" class="text-gray-500 hover:text-gray-800 text-sm font-medium flex items-center gap-1">
-                <i class="fa-solid fa-arrow-left"></i> Back
+                <i class="fa-solid fa-arrow-left"></i> Back to List
             </a>
         </div>
 
@@ -106,7 +113,6 @@
             </div>
         <% } %>
     </div>
-
 </div>
 
 <script>
