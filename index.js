@@ -18,7 +18,7 @@ import { createRequire } from "module";
 env.config();
 
 const require = createRequire(import.meta.url);
-const upload = require('config/cloudinary.js');
+const upload = require('./config/cloudinary.js');
 const app = express();
 const port = process.env.PORT || 3000; // Use Render's PORT or 3000
 const saltRounds = 10;
