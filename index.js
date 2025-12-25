@@ -1524,14 +1524,35 @@ app.get("/register", (req, res) => {
     res.render("website/auth.ejs", { title: "Login / Register", layout: false, action: 'register' });
 });
 
-app.post("/login", passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
-    const role = req.user.role;
+// REPLACE your existing app.post("/login" ...) with this:
 
-    if (role === 'admin' || role === 'manager' || role === 'store_manager' || role === 'cashier') {
+app.post("/login", passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
+    // 1. Safety Check: If something went wrong with passport
+    if (!req.user) {
+        return res.redirect("/login");
+    }
+
+    // 2. CLEAN THE ROLE DATA
+    // This converts "Staff ", "STAFF", or " Staff" -> "staff"
+    const rawRole = req.user.role || ""; // Handle empty roles safely
+    const role = rawRole.trim().toLowerCase(); 
+
+    // 3. DEBUGGING (Look at your terminal when you login!)
+    console.log("================ LOGIN DEBUG ================");
+    console.log(`User Email:   ${req.user.email}`);
+    console.log(`Database Role: '${req.user.role}'`);  // Shows exact value
+    console.log(`Cleaned Role:  '${role}'`);           // Shows value we test against
+    console.log("=============================================");
+
+    // 4. ROUTING LOGIC
+    if (['admin', 'manager', 'store_manager', 'cashier'].includes(role)) {
         res.redirect("/admin/dashboard");
-    } else if (role === 'staff') {
+    } 
+    else if (role === 'staff') {
         res.redirect("/staff/menu");
-    } else {
+    } 
+    else {
+        // Default for 'user' or any unrecognized role
         res.redirect("/"); 
     }
 });
