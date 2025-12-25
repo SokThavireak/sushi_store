@@ -698,12 +698,11 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
         
         let locationName = "All Locations"; 
 
+        // 1. Handle Location Filter Logic
         if (req.user.role === 'store_manager') {
              if (!req.user.assigned_location_id) return res.send("Error: No location assigned.");
-             
              const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
              locationName = locRes.rows[0].name; 
-             
              whereClauses.push(`location_name = $${queryParams.length + 1}`);
              queryParams.push(locationName);
         } 
@@ -718,6 +717,7 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
             queryParams.push(date);
         }
 
+        // 2. Query Logs
         let sql = `
             SELECT l.*, u.email 
             FROM daily_inventory_logs l
@@ -729,7 +729,10 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
         sql += " ORDER BY report_date DESC";
 
         const logsRes = await pool.query(sql, queryParams);
+        
+        // 3. FETCH MISSING DATA (Fixes the crashes)
         const allLocs = await pool.query("SELECT * FROM locations ORDER BY name ASC");
+        const masterRes = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC"); // <--- Added this
 
         res.render('manager/stock_history.ejs', { 
             title: 'Stock Count History',
@@ -738,7 +741,8 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['manager'
             layout: 'layout',
             filters: { location: location || '', date: date || '' },
             locationName: locationName,
-            alreadySubmitted: false // <--- ADD THIS LINE TO FIX THE ERROR
+            alreadySubmitted: false,
+            masterItems: masterRes.rows  // <--- Pass the missing variable here!
         });
 
     } catch (err) {
