@@ -606,7 +606,7 @@ app.get("/staff/menu", checkAuthenticated, checkRole(['admin', 'manager', 'store
 });
 
 // DAILY STOCK COUNT
-app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager']), async (req, res) => {
+app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     try {
         const userId = req.user.id;
         const locId = req.user.assigned_location_id;
