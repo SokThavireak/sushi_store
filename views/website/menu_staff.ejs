@@ -1,102 +1,96 @@
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-24 lg:mt-32">
-    
+
     <div class="bg-orange-600 text-white p-4 lg:p-6 rounded-xl mb-6 flex justify-between items-center shadow-lg">
         <h1 class="text-xl lg:text-2xl font-bold flex items-center gap-2">
             <i class="fa-solid fa-clipboard-list"></i> STAFF POS
         </h1>
         <div class="text-orange-100 text-xs lg:text-sm font-semibold">
-            <%= typeof user !== 'undefined' ? 'Operator: ' + user.email.split('@')[0] : '' %>
+            <%= typeof user !=='undefined' ? 'Operator: ' + user.email.split('@')[0] : '' %>
         </div>
     </div>
 
     <div class="mb-6 lg:mb-10 flex justify-center">
         <div class="relative w-full max-w-4xl group">
-            <input 
-                type="text" 
-                id="staff-search" 
-                onkeyup="filterStaffMenu()" 
-                placeholder="Search Item Code or Name..." 
-                class="w-full pl-12 pr-4 py-3 lg:pl-14 lg:pr-8 lg:py-4 rounded-lg border border-gray-200 bg-white shadow-sm text-base lg:text-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" 
-            />
+            <input type="text" id="staff-search" onkeyup="filterStaffMenu()" placeholder="Search Item Code or Name..."
+                class="w-full pl-12 pr-4 py-3 lg:pl-14 lg:pr-8 lg:py-4 rounded-lg border border-gray-200 bg-white shadow-sm text-base lg:text-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" />
             <div class="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg lg:text-xl">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
             <div class="mb-8 flex flex-wrap justify-center gap-2" id="category-filters">
-        <button onclick="filterCategory('all')" 
-            class="filter-btn active px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-indigo-600 text-white hover:shadow-md">
-            All
-        </button>
-        <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-            <% categories.forEach((category) => { %>
-                <button onclick="filterCategory('<%= category.name %>')" 
-                    class="filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">
-                    <%= category.name %>
+                <button onclick="filterCategory('all')"
+                    class="filter-btn active px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-indigo-600 text-white hover:shadow-md">
+                    All
                 </button>
-            <% }) %>
-        <% } %>
-    </div>
+                <% if (typeof categories !=='undefined' && categories.length> 0) { %>
+                    <% categories.forEach((category)=> { %>
+                        <button onclick="filterCategory('<%= category.name %>')"
+                            class="filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">
+                            <%= category.name %>
+                        </button>
+                        <% }) %>
+                            <% } %>
+            </div>
         </div>
     </div>
 
-    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-        <% categories.forEach((category) => { %>
-            <% let categoryProducts = category.name === 'Most Sales' ? products.filter(p => p.is_best_seller) : products.filter(p => p.category === category.name); %>
-            <% if (categoryProducts.length > 0) { %>
-                <section class="mb-8 lg:mb-12 category-section" data-category="<%= category.name %>">
-                    <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-4 lg:mb-6 border-b pb-2 flex items-center gap-2">
-                        <span class="w-2 h-6 bg-orange-500 rounded-full inline-block"></span>
-                        <%= category.name %>
-                    </h2>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4">
-                        <% categoryProducts.forEach(product => { %>
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all overflow-hidden product-card group flex flex-row sm:flex-col h-24 sm:h-auto">
-                                
-                                <div class="w-24 sm:w-full h-full sm:h-36 relative flex-shrink-0">
-                                    <img src="<%= product.image_url || 'https://via.placeholder.com/150' %>" class="w-full h-full object-cover" loading="lazy" />
-                                    <button 
-                                        onclick="addToCart(<%= product.id %>)" 
-                                        class="hidden sm:flex absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 items-center justify-center text-white transition-all cursor-pointer"
-                                    >
-                                        <i class="fa-solid fa-plus text-3xl"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="p-3 flex-1 flex flex-col justify-between sm:block">
-                                    <div>
-                                        <h3 class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-1 product-name line-clamp-2">
-                                            <%= product.name %>
-                                        </h3>
-                                        <span class="text-indigo-600 font-bold text-sm sm:text-base">
-                                            <%= product.price %> $
-                                        </span>
-                                    </div>
+    <% if (typeof categories !=='undefined' && categories.length> 0) { %>
+        <% categories.forEach((category)=> { %>
+            <% let categoryProducts=category.name==='Most Sales' ? products.filter(p=> p.is_best_seller) :
+                products.filter(p => p.category === category.name); %>
+                <% if (categoryProducts.length> 0) { %>
+                    <section class="mb-8 lg:mb-12 category-section" data-category="<%= category.name %>">
+                        <h2
+                            class="text-lg lg:text-xl font-bold text-gray-800 mb-4 lg:mb-6 border-b pb-2 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-orange-500 rounded-full inline-block"></span>
+                            <%= category.name %>
+                        </h2>
 
-                                    <div class="flex justify-end sm:justify-between items-center sm:mt-2">
-                                        <button 
-                                            onclick="addToCart(<%= product.id %>)" 
-                                            class="hidden sm:block text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-100 font-bold transition-colors"
-                                        >
-                                            Add
-                                        </button>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4">
+                            <% categoryProducts.forEach(product=> { %>
+                                <div
+                                    class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all overflow-hidden product-card group flex flex-row sm:flex-col h-24 sm:h-auto">
 
-                                        <button 
-                                            onclick="addToCart(<%= product.id %>)" 
-                                            class="sm:hidden w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center active:bg-orange-500 active:text-white transition-colors"
-                                        >
-                                            <i class="fa-solid fa-plus"></i>
+                                    <div class="w-24 sm:w-full h-full sm:h-36 relative flex-shrink-0">
+                                        <img src="<%= product.image_url || 'https://via.placeholder.com/150' %>"
+                                            class="w-full h-full object-cover" loading="lazy" />
+                                        <button onclick="addToCart(<%= product.id %>)"
+                                            class="hidden sm:flex absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 items-center justify-center text-white transition-all cursor-pointer">
+                                            <i class="fa-solid fa-plus text-3xl"></i>
                                         </button>
                                     </div>
+
+                                    <div class="p-3 flex-1 flex flex-col justify-between sm:block">
+                                        <div>
+                                            <h3
+                                                class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-1 product-name line-clamp-2">
+                                                <%= product.name %>
+                                            </h3>
+                                            <span class="text-indigo-600 font-bold text-sm sm:text-base">
+                                                <%= product.price %> $
+                                            </span>
+                                        </div>
+
+                                        <div class="flex justify-end sm:justify-between items-center sm:mt-2">
+                                            <button onclick="addToCart(<%= product.id %>)"
+                                                class="hidden sm:block text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-100 font-bold transition-colors">
+                                                Add
+                                            </button>
+
+                                            <button onclick="addToCart(<%= product.id %>)"
+                                                class="sm:hidden w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center active:bg-orange-500 active:text-white transition-colors">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                                <% }) %>
+                        </div>
+                    </section>
+                    <% } %>
                         <% }) %>
-                    </div>
-                </section>
-            <% } %>
-        <% }) %>
-    <% } %>
+                            <% } %>
 </div>
 
 <script>
@@ -134,13 +128,13 @@
                 body: JSON.stringify({ productId })
             });
             const data = await res.json();
-            if(res.ok) {
+            if (res.ok) {
                 // Show toast but DO NOT reload (Staff needs speed)
                 showNotification(`Added Item #${productId}`, 'success');
             } else {
                 showNotification(data.error, 'error');
             }
-        } catch(err) {
+        } catch (err) {
             console.error(err);
             showNotification('Connection Error', 'error');
         }
