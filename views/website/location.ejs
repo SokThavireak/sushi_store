@@ -3,20 +3,13 @@
         from { opacity: 0; transform: translateY(40px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
     .scroll-hidden { 
-        opacity: 0; 
-        transform: translateY(40px); 
+        opacity: 0; transform: translateY(40px); 
     }
-
     /* CRITICAL FIX: Force visibility on mobile */
     @media (max-width: 640px) {
-        .scroll-hidden {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-        }
+        .scroll-hidden { opacity: 1 !important; transform: translateY(0) !important; }
     }
-
     .animate-fade-up { animation: fadeInUp 0.8s ease-out forwards; }
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
@@ -27,8 +20,8 @@
       
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 scroll-hidden">
         <div>
-          <h1 class="text-4xl font-extrabold mb-2">Our Locations</h1>
-          <p class="text-gray-500">Find the nearest Murakami kitchen.</p>
+          <h1 class="text-4xl font-extrabold mb-2 text-gray-900 dark:text-white">Our Locations</h1>
+          <p class="text-gray-500 dark:text-gray-400">Find the nearest Murakami kitchen.</p>
         </div>
         <a href="https://www.google.com/maps/search/Murakami+Kitchen" target="_blank" class="mt-4 md:mt-0 flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600">
           <i class="fa-solid fa-map-location-dot text-lg"></i>
@@ -40,32 +33,32 @@
         
         <% if (locations && locations.length > 0) { %>
             <% locations.forEach((loc, index) => { %>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow h-full flex flex-col justify-between scroll-hidden" style="animation-delay: <%= index * 0.1 %>s">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow h-full flex flex-col justify-between scroll-hidden" style="animation-delay: <%= index * 0.1 %>s">
                   <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-gray-50 rounded-xl">
-                      <i class="fa-solid fa-store text-gray-900 text-xl"></i>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                      <i class="fa-solid fa-store text-gray-900 dark:text-white text-xl"></i>
                     </div>
                     <% if (loc.status === 'Open') { %>
-                        <span class="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                        <span class="flex items-center gap-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full">
                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Open
                         </span>
                     <% } else { %>
-                        <span class="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">Closed</span>
+                        <span class="flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-full">Closed</span>
                     <% } %>
                   </div>
 
                   <div>
-                      <h3 class="text-xl font-bold text-gray-900 mb-1"><%= loc.name %></h3>
-                      <p class="text-gray-500 text-sm mb-6"><%= loc.address %></p>
+                      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1"><%= loc.name %></h3>
+                      <p class="text-gray-500 dark:text-gray-400 text-sm mb-6"><%= loc.address %></p>
                       
                       <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-400">Mon-Fri</span>
-                            <span class="font-medium"><%= loc.hours_mon_fri || 'Closed' %></span>
+                            <span class="font-medium text-gray-800 dark:text-gray-200"><%= loc.hours_mon_fri || 'Closed' %></span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-400">Sat-Sun</span>
-                            <span class="font-medium"><%= loc.hours_sat_sun || 'Closed' %></span>
+                            <span class="font-medium text-gray-800 dark:text-gray-200"><%= loc.hours_sat_sun || 'Closed' %></span>
                         </div>
                       </div>
                   </div>
@@ -76,7 +69,7 @@
                         mapLink = `http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(loc.address)}`;
                     }
                   %>
-                  <a href="<%= mapLink %>" target="_blank" class="block w-full text-center py-2.5 border border-gray-200 rounded-xl font-semibold text-sm hover:bg-black hover:text-white transition-colors">
+                  <a href="<%= mapLink %>" target="_blank" class="block w-full text-center py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl font-semibold text-sm text-gray-700 dark:text-gray-200 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors">
                     Get Directions
                   </a>
                 </div>
@@ -92,7 +85,6 @@
 </div>
 
 <script>
-    // SCROLL ANIMATION OBSERVER
     document.addEventListener("DOMContentLoaded", function() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -103,7 +95,6 @@
                 }
             });
         }, { threshold: 0.1 });
-
         document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
 </script>

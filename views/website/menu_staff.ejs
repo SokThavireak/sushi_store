@@ -19,10 +19,10 @@
                 id="staff-search" 
                 onkeyup="filterStaffMenu()" 
                 placeholder="Search Item Code or Name..." 
-                class="w-full pl-12 pr-4 py-3 lg:pl-14 lg:pr-8 lg:py-4 rounded-lg border border-gray-200 bg-white shadow-sm text-base lg:text-lg text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" 
+                class="w-full pl-12 pr-4 py-3 lg:pl-14 lg:pr-8 lg:py-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm text-base lg:text-lg text-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" 
             />
             <div class="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 text-gray-400 text-lg lg:text-xl">
-                 <i class="fa-solid fa-magnifying-glass"></i>
+                <i class="fa-solid fa-magnifying-glass"></i>
             </div>
         </div>
 
@@ -34,7 +34,7 @@
             <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                 <% categories.forEach((category) => { %>
                     <button onclick="filterCategory('<%= category.name %>')" 
-                        class="filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">
+                        class="filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <%= category.name %>
                     </button>
                 <% }) %>
@@ -47,47 +47,37 @@
             <% let categoryProducts = category.name === 'Most Sales' ? products.filter(p => p.is_best_seller) : products.filter(p => p.category === category.name); %>
             <% if (categoryProducts.length > 0) { %>
                 <section class="mb-8 lg:mb-12 category-section" data-category="<%= category.name %>">
-                    <h2 class="text-lg lg:text-xl font-bold text-gray-800 mb-4 lg:mb-6 border-b pb-2 flex items-center gap-2">
+                    <h2 class="text-lg lg:text-xl font-bold text-gray-800 dark:text-white mb-4 lg:mb-6 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
                         <span class="w-2 h-6 bg-orange-500 rounded-full inline-block"></span>
                         <%= category.name %>
                     </h2>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4">
                         <% categoryProducts.forEach(product => { %>
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all overflow-hidden product-card group flex flex-row sm:flex-col h-24 sm:h-auto">
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all overflow-hidden product-card group flex flex-row sm:flex-col h-24 sm:h-auto">
                                 
                                 <div class="w-24 sm:w-full h-full sm:h-36 relative flex-shrink-0">
                                     <img src="<%= product.image_url || 'https://via.placeholder.com/150' %>" class="w-full h-full object-cover" loading="lazy" />
-                                    <button 
-                                        onclick="addToCart(<%= product.id %>)" 
-                                        class="hidden sm:flex absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 items-center justify-center text-white transition-all cursor-pointer"
-                                    >
+                                    <button onclick="addToCart(<%= product.id %>)" class="hidden sm:flex absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 items-center justify-center text-white transition-all cursor-pointer">
                                         <i class="fa-solid fa-plus text-3xl"></i>
                                     </button>
                                 </div>
                                 
                                 <div class="p-3 flex-1 flex flex-col justify-between sm:block">
                                     <div>
-                                        <h3 class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-1 product-name line-clamp-2">
+                                        <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm sm:text-base leading-tight mb-1 product-name line-clamp-2">
                                             <%= product.name %>
                                         </h3>
-                                        <span class="text-indigo-600 font-bold text-sm sm:text-base">
+                                        <span class="text-indigo-600 dark:text-indigo-400 font-bold text-sm sm:text-base">
                                             <%= product.price %> $
                                         </span>
                                     </div>
 
                                     <div class="flex justify-end sm:justify-between items-center sm:mt-2">
-                                        <button 
-                                            onclick="addToCart(<%= product.id %>)" 
-                                            class="hidden sm:block text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-100 font-bold transition-colors"
-                                        >
+                                        <button onclick="addToCart(<%= product.id %>)" class="hidden sm:block text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold transition-colors">
                                             Add
                                         </button>
-
-                                        <button 
-                                            onclick="addToCart(<%= product.id %>)" 
-                                            class="sm:hidden w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center active:bg-orange-500 active:text-white transition-colors"
-                                        >
+                                        <button onclick="addToCart(<%= product.id %>)" class="sm:hidden w-8 h-8 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center active:bg-orange-500 active:text-white transition-colors">
                                             <i class="fa-solid fa-plus"></i>
                                         </button>
                                     </div>
@@ -106,22 +96,18 @@
         const searchInput = document.getElementById('staff-search').value.toLowerCase();
         document.querySelectorAll('.product-card').forEach(card => {
             const name = card.querySelector('.product-name').innerText.toLowerCase();
-            // If searching, show all matching cards regardless of category tabs
             if(searchInput.length > 0) {
                  card.style.display = name.includes(searchInput) ? 'flex' : 'none';
             } else {
-                card.style.display = 'flex'; // Reset to flex if search cleared
+                card.style.display = 'flex';
             }
         });
-        
-        // If search is cleared, re-apply category filter
         if(searchInput.length === 0) {
             const activeBtn = document.querySelector('.filter-btn.active');
             if(activeBtn) filterCategory(activeBtn.innerText.trim());
         }
     }
 
-    // NOTIFICATION SYSTEM
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -157,19 +143,15 @@
         }
     }
 
-    // Category Filter Logic
     function filterCategory(categoryName) {
-        // 1. Update Button Styles
         document.querySelectorAll('.filter-btn').forEach(btn => {
             const btnText = btn.innerText.trim();
             if (btnText === categoryName || (categoryName === 'all' && btnText === 'All')) {
                 btn.className = "filter-btn active px-5 py-2 rounded-full font-bold text-sm transition-all shadow-md bg-indigo-600 text-white transform scale-105";
             } else {
-                btn.className = "filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50";
+                btn.className = "filter-btn px-5 py-2 rounded-full font-bold text-sm transition-all shadow-sm bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700";
             }
         });
-        
-        // 2. Show/Hide Sections
         document.querySelectorAll('.category-section').forEach(section => {
             if (categoryName === 'all' || section.dataset.category === categoryName) {
                 section.style.display = 'block';

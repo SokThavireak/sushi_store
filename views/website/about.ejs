@@ -1,32 +1,9 @@
 <style>
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-  }
-  
-  /* BASE ANIMATION CLASSES */
-  .animate-fade-up {
-    animation: fadeInUp 0.8s ease-out forwards;
-    opacity: 0; /* Default hidden */
-  }
-
-  /* CRITICAL FIX: Force visibility on mobile to prevent white screens */
-  @media (max-width: 640px) {
-    .animate-fade-up {
-        opacity: 1 !important;
-        animation: none !important; /* Disable animation on slow phones */
-        transform: translateY(0) !important;
-    }
-  }
-
-  .animate-float {
-    animation: float 4s ease-in-out infinite;
-  }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+  .animate-fade-up { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; }
+  @media (max-width: 640px) { .animate-fade-up { opacity: 1 !important; animation: none !important; transform: translateY(0) !important; } }
+  .animate-float { animation: float 4s ease-in-out infinite; }
   .delay-100 { animation-delay: 0.1s; }
   .delay-200 { animation-delay: 0.2s; }
   .delay-300 { animation-delay: 0.3s; }
@@ -36,23 +13,22 @@
     
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
         <div class="animate-fade-up">
-            <div class="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider mb-6">
+            <div class="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider mb-6">
                 <i class="fa-solid fa-trophy"></i>
                 <span>Voted #1 Sushi Store in Cambodia</span>
             </div>
-            <h1 class="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+            <h1 class="text-4xl md:text-6xl font-black text-gray-900 dark:text-white leading-tight mb-6">
                 Experience the <br/>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Soul of Japan</span>
             </h1>
-            <p class="text-lg text-gray-500 mb-8 leading-relaxed max-w-lg">
-                Welcome to Murakami City. We bring the authentic taste of Japan to the heart of Cambodia.
-                Led by chefs from 5-star hotels, we promise speed, hygiene, and unmatched quality in every bite.
+            <p class="text-lg text-gray-500 dark:text-gray-400 mb-8 leading-relaxed max-w-lg">
+                Welcome to Murakami City. We bring the authentic taste of Japan to the heart of Cambodia. Led by chefs from 5-star hotels, we promise speed, hygiene, and unmatched quality in every bite.
             </p>
             <div class="flex flex-wrap gap-4">
-                <a href="/menu" class="bg-gray-900 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-orange-500 hover:shadow-orange-200 hover:-translate-y-1 transition-all duration-300">
+                <a href="/menu" class="bg-gray-900 dark:bg-orange-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-orange-500 dark:hover:bg-orange-500 hover:shadow-orange-200 hover:-translate-y-1 transition-all duration-300">
                     View Our Menu
                 </a>
-                <a href="/location" class="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-full font-bold shadow-sm hover:border-orange-500 hover:text-orange-500 transition-all duration-300">
+                <a href="/location" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 px-8 py-4 rounded-full font-bold shadow-sm hover:border-orange-500 hover:text-orange-500 transition-all duration-300">
                     Find Our Location
                 </a>
             </div>
@@ -69,62 +45,62 @@
                 </div>
             </div>
             
-            <div class="hidden md:block absolute -top-10 -right-5 z-20 bg-white p-4 rounded-2xl shadow-xl animate-float">
+            <div class="hidden md:block absolute -top-10 -right-5 z-20 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl animate-float border dark:border-gray-700">
                 <div class="flex items-center gap-3">
-                    <div class="bg-yellow-100 p-3 rounded-full text-yellow-600">
+                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-full text-yellow-600 dark:text-yellow-400">
                         <i class="fa-solid fa-star text-xl"></i>
                     </div>
                     <div>
-                        <div class="font-extrabold text-gray-900 text-lg">4.9/5</div>
-                        <div class="text-xs text-gray-500 font-medium">Customer Favorite</div>
+                        <div class="font-extrabold text-gray-900 dark:text-white text-lg">4.9/5</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Customer Favorite</div>
                     </div>
                 </div>
             </div>
             
-            <div class="hidden md:block absolute top-10 -left-10 w-full h-full border-2 border-orange-200 rounded-[3rem] -z-10"></div>
+            <div class="hidden md:block absolute top-10 -left-10 w-full h-full border-2 border-orange-200 dark:border-orange-900/30 rounded-[3rem] -z-10"></div>
         </div>
     </section>
 
     <section class="mb-24">
         <div class="text-center mb-16 animate-fade-up delay-100">
-            <h2 class="text-3xl font-extrabold text-gray-900">Why We Are The Best</h2>
+            <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Why We Are The Best</h2>
             <p class="text-gray-400 mt-2">Uncompromising quality standard since 2015</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-100 group">
-                <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-100 group">
+                <div class="w-14 h-14 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center text-red-500 dark:text-red-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-plane-arrival"></i>
                 </div>
-                <h3 class="font-bold text-xl text-gray-900 mb-3">Direct from Japan</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">
+                <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-3">Direct from Japan</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                     We don't use local substitutes. Our fish and rice are flown in daily from Tokyo markets to ensure authentic flavor.
                 </p>
             </div>
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-200 group">
-                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-200 group">
+                <div class="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-500 dark:text-blue-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
-                <h3 class="font-bold text-xl text-gray-900 mb-3">5-Star Hotel Chefs</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">
+                <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-3">5-Star Hotel Chefs</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                     Our culinary team is led by masters with over 20 years of experience in top-tier 5-star luxury hotels.
                 </p>
             </div>
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-300 group">
-                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-300 group">
+                <div class="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center text-green-500 dark:text-green-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-stopwatch"></i>
                 </div>
-                <h3 class="font-bold text-xl text-gray-900 mb-3">Fast & Clean</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">
+                <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-3">Fast & Clean</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                     We pride ourselves on immaculate hygiene and lightning-fast cooking without sacrificing quality.
                 </p>
             </div>
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-300 group">
-                <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 text-2xl mb-6 group-hover:scale-110 transition-transform">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-up delay-300 group">
+                <div class="w-14 h-14 bg-orange-50 dark:bg-orange-900/20 rounded-2xl flex items-center justify-center text-orange-500 dark:text-orange-400 text-2xl mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-heart"></i>
                 </div>
-                <h3 class="font-bold text-xl text-gray-900 mb-3">Highly Recommended</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">
+                <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-3">Highly Recommended</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                     With thousands of 5-star reviews, we are the go-to spot for locals and tourists seeking the best.
                 </p>
             </div>
@@ -157,5 +133,4 @@
             </div>
         </div>
     </section>
-
 </div>
