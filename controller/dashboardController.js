@@ -1,6 +1,7 @@
 import { pool } from '../config/database.js';
 
-export const getDashboard = async(req, res) => {
+// --- Dashboard ---
+export const getDashboard = async (req, res) => {
     try {
         const client = await pool.connect();
         
@@ -48,13 +49,7 @@ export const getDashboard = async(req, res) => {
             ORDER BY created_at ASC
         `;
         const chartRes = await client.query(chartQuery, queryParams);
-
-        const statusQuery = `
-            SELECT status, COUNT(*) as count 
-            FROM orders 
-            WHERE 1=1 ${locationFilterClause}
-            GROUP BY status
-        `;
+        const statusQuery = `SELECT status, COUNT(*) as count FROM orders WHERE 1=1 ${locationFilterClause} GROUP BY status`;
         const statusRes = await client.query(statusQuery, queryParams);
 
         client.release();
@@ -79,25 +74,21 @@ export const getDashboard = async(req, res) => {
     }
 };
 
+// --- Reports ---
 export const getReports = async (req, res) => {
     try {
         const selectedDate = req.query.date || new Date().toISOString().split('T')[0];
-        
         let filterLocationName = null;
         let dbParams = [selectedDate]; 
         let locationSql = "";
 
         const allLocationsRes = await pool.query("SELECT * FROM locations ORDER BY name ASC");
 
-        if (req.user.role === 'store_manager') {
-            if (req.user.assigned_location_id) {
-                const myLoc = allLocationsRes.rows.find(l => l.id === req.user.assigned_location_id);
-                filterLocationName = myLoc ? myLoc.name : null;
-            }
-        } else {
-            if (req.query.location && req.query.location !== 'All') {
-                filterLocationName = req.query.location;
-            }
+        if (req.user.role === 'store_manager' && req.user.assigned_location_id) {
+            const myLoc = allLocationsRes.rows.find(l => l.id === req.user.assigned_location_id);
+            filterLocationName = myLoc ? myLoc.name : null;
+        } else if (req.query.location && req.query.location !== 'All') {
+            filterLocationName = req.query.location;
         }
 
         if (filterLocationName) {
@@ -114,7 +105,6 @@ export const getReports = async (req, res) => {
         `, dbParams);
 
         const orders = ordersRes.rows;
-
         let grossSales = 0;
         let completedCount = 0;
         orders.forEach(o => {
@@ -144,39 +134,27 @@ export const getReports = async (req, res) => {
     }
 };
 
+// --- Admin Order Management ---
 export const getOrders = async (req, res) => {
     try {
-        let query = `
-            SELECT o.*, u.email 
-            FROM orders o 
-            LEFT JOIN users u ON o.user_id = u.id 
-        `;
+        let query = `SELECT o.*, u.email FROM orders o LEFT JOIN users u ON o.user_id = u.id `;
         let params = [];
 
-        if ((req.user.role === 'store_manager' || req.user.role === 'staff' || req.user.role === 'cashier') && req.user.assigned_location_id) {
+        if (['store_manager', 'staff', 'cashier'].includes(req.user.role) && req.user.assigned_location_id) {
             const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
             if (locRes.rows.length > 0) {
-                const locationName = locRes.rows[0].name;
                 query += ` WHERE o.pickup_location = $1`;
-                params.push(locationName);
+                params.push(locRes.rows[0].name);
             }
         }
 
-        query += ` 
-            ORDER BY 
-            CASE WHEN o.status LIKE '%Requested%' THEN 0 ELSE 1 END,
-            o.created_at DESC
-        `;
-
+        query += ` ORDER BY CASE WHEN o.status LIKE '%Requested%' THEN 0 ELSE 1 END, o.created_at DESC`;
         const result = await pool.query(query, params);
         
-        res.render('admin/orders/orders', { 
-            title: 'Order Management', 
-            orders: result.rows
-        });
+        res.render('admin/orders/orders', { title: 'Order Management', orders: result.rows });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error: " + err.message);
+        res.status(500).send("Server Error");
     }
 };
 
@@ -196,7 +174,6 @@ export const handleOrderRequest = async (req, res) => {
 
     if (action === 'approve_cancel') newStatus = 'Cancelled';
     if (action === 'reject_cancel') newStatus = 'Pending'; 
-    
     if (action === 'approve_refund') newStatus = 'Refunded';
     if (action === 'reject_refund') newStatus = 'Completed'; 
 

@@ -1,11 +1,8 @@
 import { pool } from '../config/database.js';
 
 export const getCart = async (req, res) => {
-  // Return empty if not logged in or is an environment admin
   if (!req.user) return res.json([]); 
-  if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
-      return res.json([]); 
-  }
+  if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) return res.json([]); 
 
   try {
     const result = await pool.query(`
@@ -24,7 +21,6 @@ export const getCart = async (req, res) => {
 
 export const addToCart = async (req, res) => {
   if (!req.user) return res.status(401).json({ error: "Please login to add items" });
-
   if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
       return res.status(403).json({ error: "Super Admins cannot use the shopping cart." });
   }

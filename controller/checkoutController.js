@@ -1,6 +1,8 @@
 import { pool } from '../config/database.js';
 
-// --- User Facing Checkout ---
+// =========================================================
+// USER FACING CHECKOUT
+// =========================================================
 
 export const getCheckout = async (req, res) => {
     if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
@@ -80,8 +82,68 @@ export const createOrder = async (req, res) => {
     }
 };
 
-// --- Admin Order Management (Edit/Delete) ---
+// =========================================================
+// ADMIN ORDER MANAGEMENT
+// =========================================================
 
+// 1. List All Orders (Missing in your file)
+export const getOrders = async (req, res) => {
+    try {
+        let query = `SELECT o.*, u.email FROM orders o LEFT JOIN users u ON o.user_id = u.id `;
+        let params = [];
+
+        // Filter for store managers to only see their location
+        if (['store_manager', 'staff', 'cashier'].includes(req.user.role) && req.user.assigned_location_id) {
+            const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
+            if (locRes.rows.length > 0) {
+                query += ` WHERE o.pickup_location = $1`;
+                params.push(locRes.rows[0].name);
+            }
+        }
+
+        query += ` ORDER BY CASE WHEN o.status LIKE '%Requested%' THEN 0 ELSE 1 END, o.created_at DESC`;
+        const result = await pool.query(query, params);
+        
+        res.render('admin/orders/orders', { title: 'Order Management', orders: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+};
+
+// 2. Update Status (Pending -> Completed etc.)
+export const updateOrderStatus = async (req, res) => {
+    try {
+        await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [req.body.status, req.params.id]);
+        res.redirect('/admin/orders');
+    } catch (err) {
+        res.status(500).send("Error");
+    }
+};
+
+// 3. Handle Cancel/Refund Requests
+export const handleOrderRequest = async (req, res) => {
+    const { action } = req.body;
+    const orderId = req.params.id;
+    let newStatus = '';
+
+    if (action === 'approve_cancel') newStatus = 'Cancelled';
+    if (action === 'reject_cancel') newStatus = 'Pending'; 
+    if (action === 'approve_refund') newStatus = 'Refunded';
+    if (action === 'reject_refund') newStatus = 'Completed'; 
+
+    try {
+        if(newStatus) {
+            await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [newStatus, orderId]);
+        }
+        res.redirect('/admin/orders');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/orders');
+    }
+};
+
+// 4. Edit/Delete Logic
 export const deleteOrder = async (req, res) => {
     try {
         const id = req.params.id;

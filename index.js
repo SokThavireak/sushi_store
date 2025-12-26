@@ -27,8 +27,8 @@ import upload from './config/cloudinary.js';
 import * as adminController from './controller/adminController.js';
 import * as cartController from './controller/cartController.js';
 import * as categoryController from './controller/categoryController.js';
+import * as dashboardController from './controller/dashboardController.js'; // Ensure file is named dashboardController.js
 import * as checkoutController from './controller/checkoutController.js';
-import * as dashboardController from './controller/dashboardController.js'; // Fixed typo
 import * as inventoryController from './controller/inventoryController.js';
 import * as locationsController from './controller/locationsController.js';
 import * as loginController from './controller/loginController.js';
@@ -164,8 +164,10 @@ app.get('/admin/dashboard', checkAuthenticated, checkRole(['admin', 'manager', '
 app.get('/admin/reports', checkAuthenticated, checkRole(['admin', 'manager', 'store_manager']), dashboardController.getReports);
 
 // Orders
-app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), checkoutController.getOrders); // Renamed in controller? check dashboardController or checkoutController
-app.post('/admin/orders/:id/status', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), checkoutController.updateOrderStatus);
+app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), dashboardController.getOrders); 
+app.post('/admin/orders/:id/status', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), dashboardController.updateOrderStatus);
+app.post('/admin/orders/handle-request/:id', checkAuthenticated, checkRole(['admin', 'manager', 'store_manager']), dashboardController.handleOrderRequest);
+app.post('/admin/orders/update/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), checkoutController.updateAdminOrder);
 
 // Inventory
 app.get('/admin/inventory', checkAuthenticated, checkRole(['manager', 'admin']), inventoryController.getInventory);
