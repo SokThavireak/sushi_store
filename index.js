@@ -840,13 +840,10 @@ app.get('/manager/daily-stock/history/:id', checkAuthenticated, async (req, res)
     try {
         const { id } = req.params;
 
-        // 1. Fetch the Request Details (Header)
-        // We join with 'locations' to get the location name
+        // 1. Fetch the Request Details
+        // We removed the JOIN because the table likely stores 'location_name' directly
         const requestResult = await pool.query(`
-            SELECT sr.*, l.name as location_name 
-            FROM stock_requests sr
-            LEFT JOIN locations l ON sr.location_id = l.id
-            WHERE sr.id = $1
+            SELECT * FROM stock_requests WHERE id = $1
         `, [id]);
 
         if (requestResult.rows.length === 0) {
@@ -859,18 +856,20 @@ app.get('/manager/daily-stock/history/:id', checkAuthenticated, async (req, res)
             WHERE request_id = $1
         `, [id]);
 
-        // 3. Render the View
-        // We pass empty 'locations' and 'query' to prevent EJS errors since view_stock.ejs expects them
+        // 3. Fetch Locations for the filter dropdown (needed by view_stock.ejs)
+        const locationsResult = await pool.query('SELECT * FROM locations');
+
+        // 4. Render the View
         res.render('view_stock', {
             user: req.user,
             request: requestResult.rows[0],
             items: itemsResult.rows,
-            locations: [], // Pass empty if you don't need the filter on this detail view
-            query: {}      // Pass empty object to avoid "query is undefined" error
+            locations: locationsResult.rows, // Pass locations for the dropdown
+            query: {} // Pass empty object to avoid "query is undefined" error
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("Error fetching stock history details:", err);
         res.status(500).send('Server Error');
     }
 });
