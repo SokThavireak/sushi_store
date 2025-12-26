@@ -413,7 +413,6 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
     try {
         const orderId = req.params.id;
 
-        // FIXED: Removed "u.name as user_name" because the column does not exist
         const orderRes = await pool.query(`
             SELECT o.*, u.email 
             FROM orders o 
@@ -428,14 +427,16 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
             return res.redirect('/admin/orders');
         }
 
+        // FIXED: Added "title" and fixed the path to "admin/orders/edit_order"
         res.render('admin/orders/edit_order', {
+            title: 'Edit Order',        // <--- This was missing!
             order: orderRes.rows[0],
             items: itemsRes.rows,
             locations: locRes.rows
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error: " + err.message);
+        res.status(500).send("Server Error");
     }
 });
 
