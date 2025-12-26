@@ -136,6 +136,76 @@
 
 </div>
 
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-10 mt-6 transition-colors">
+    <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+        <div>
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white">Request History</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Track status of submitted stock requests</p>
+        </div>
+        <button onclick="window.location.reload()" class="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline">
+            <i class="fa-solid fa-rotate-right"></i> Refresh
+        </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+            <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase text-xs font-bold">
+                <tr>
+                    <th class="px-6 py-4">ID</th>
+                    <th class="px-6 py-4">Date</th>
+                    <th class="px-6 py-4">Location</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <% if (typeof requests !== 'undefined' && requests.length > 0) { %>
+                    <% requests.forEach(req => { %>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                            <td class="px-6 py-4 font-mono text-gray-500">#<%= req.id %></td>
+                            <td class="px-6 py-4 font-bold text-gray-700 dark:text-white">
+                                <%= new Date(req.created_at).toLocaleDateString() %> 
+                                <span class="text-xs text-gray-400 font-normal ml-1"><%= new Date(req.created_at).toLocaleTimeString() %></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded text-xs font-bold border border-indigo-100 dark:border-indigo-800">
+                                    <%= req.location_name %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <% if (req.status === 'Pending') { %>
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                                        <i class="fa-regular fa-clock"></i> Pending
+                                    </span>
+                                <% } else if (req.status === 'Confirmed') { %>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                                        <i class="fa-solid fa-check"></i> Approved
+                                    </span>
+                                <% } else { %>
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                                        <i class="fa-solid fa-xmark"></i> Rejected
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="/admin/stock/request/<%= req.id %>" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" class="px-6 py-10 text-center text-gray-400 dark:text-gray-500">
+                            No requests found.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
     <i class="fa-solid fa-moon dark:hidden text-lg"></i>
     <i class="fa-solid fa-sun hidden dark:block text-lg"></i>

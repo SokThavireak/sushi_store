@@ -174,7 +174,7 @@
                                       class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
                                       <i
                                         class="fa-solid fa-boxes-stacked w-5 text-center group-hover:scale-110 transition-transform"></i>
-                                      <span>Stock Orders</span>
+                                      <span>Stock Requests</span>
                                     </a>
                                     <% } %>
 
@@ -196,13 +196,6 @@
                                                 class="fa-solid fa-clipboard-check w-5 text-center group-hover:scale-110 transition-transform"></i>
                                               <span>Daily Stock</span>
                                             </a>
-                                            <% } %>
-
-                                            <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager' || user.role === 'store_manager')) { %>
-                                                <a href="/admin/stock" 
-                                                  class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-orange-500 rounded-xl transition-all duration-200 group">
-                                                  <i class="fa-solid fa-boxes-stacked w-5 text-center group-hover:scale-110 transition-transform"></i>
-                                                  <span>Stock Requests</span> </a>
                                             <% } %>
 
                                               <% if (typeof user !=='undefined' && (user.role==='admin' ||
