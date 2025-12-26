@@ -1,4 +1,4 @@
-<style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <style>
     /* Custom Scrollbar for the grid */
     .custom-scroll::-webkit-scrollbar { width: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -8,9 +8,17 @@
     /* Cart Animation */
     @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .cart-item-anim { animation: slideInRight 0.3s ease-out; }
+    
+    /* Dark Mode SweetAlert Overrides */
+    .dark .swal2-popup {
+        background-color: #1f2937 !important; /* gray-800 */
+        color: #f3f4f6 !important; /* gray-100 */
+        border: 1px solid #374151;
+    }
+    .dark .swal2-title, .dark .swal2-content {
+        color: #f3f4f6 !important;
+    }
 </style>
-
-<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <% if (user.role === 'store_manager') { %>
 
@@ -28,7 +36,6 @@
                     </div>
                     <div class="w-64">
                         <% 
-                            // Auto-detect location for Store Manager
                             let myLocName = '';
                             if (typeof locations !== 'undefined') {
                                 const found = locations.find(l => l.id == user.assigned_location_id);
@@ -310,16 +317,24 @@
     // State
     let cart = [];
     
-    // Notification
+    // --- SWEETALERT NOTIFICATION MIXIN ---
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
     function showNotification(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        const bgClass = type === 'error' ? 'bg-red-500' : 'bg-green-500';
-        const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
-        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        Toast.fire({
+            icon: type,
+            title: message
+        });
     }
 
     // --- ADD TO CART FUNCTION ---
@@ -415,7 +430,14 @@
                 })
             });
             if (res.ok) {
-                showNotification("Request Sent Successfully!", "success");
+                // SUCCESS ALERT
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Request Sent Successfully!',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 cart = [];
                 renderCart();
                 setTimeout(() => window.location.reload(), 1500);
@@ -432,29 +454,59 @@
         }
     }
 
-    // --- UPDATE REQUEST STATUS (Cancel / Refund) ---
+    // --- UPDATE REQUEST STATUS (Styled Confirmation) ---
     async function updateRequestStatus(id, newStatus) {
-        let confirmMsg = "Are you sure?";
-        if (newStatus.includes('Cancel')) confirmMsg = "Are you sure you want to process this cancellation?";
-        if (newStatus.includes('Refund')) confirmMsg = "Are you sure you want to process this refund?";
+        let title = "Are you sure?";
+        let text = "Do you want to proceed with this action?";
+        let confirmBtnColor = '#3085d6';
 
-        if (!confirm(confirmMsg)) return;
-        try {
-            const res = await fetch(`/api/stock/update-status/${id}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            });
-            if (res.ok) {
-                showNotification("Status Updated Successfully", "success");
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                const data = await res.json();
-                showNotification(data.error || "Error updating status", "error");
+        if (newStatus.includes('Cancel')) {
+            text = "You are about to cancel this request.";
+            confirmBtnColor = '#d33';
+        }
+        if (newStatus === 'Confirmed') {
+            title = "Approve Request?";
+            text = "This will mark the request as approved.";
+            confirmBtnColor = '#10b981'; // Green
+        }
+        if (newStatus.includes('Refund')) {
+            title = "Process Refund?";
+            confirmBtnColor = '#3b82f6'; // Blue
+        }
+
+        // --- SWEETALERT CONFIRM DIALOG ---
+        const result = await Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmBtnColor,
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, do it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/api/stock/update-status/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                    Swal.fire(
+                        'Updated!',
+                        'The status has been updated.',
+                        'success'
+                    );
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    const data = await res.json();
+                    showNotification(data.error || "Error updating status", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                showNotification("Server Error", "error");
             }
-        } catch (err) {
-            console.error(err);
-            showNotification("Server Error", "error");
         }
     }
 
