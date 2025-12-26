@@ -1,25 +1,15 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
   /* Toast Animation Keyframes */
   @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
 
   @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(100%);
-      opacity: 0;
-    }
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
   }
 </style>
 
@@ -208,7 +198,7 @@
     }, 3000);
   }
 
-  // 2. TOGGLE LOCK PERMISSION (New)
+  // 2. TOGGLE LOCK PERMISSION
   async function toggleLock(id) {
         try {
             const res = await fetch(`/api/manager/daily-stock/toggle-lock/${id}`, { method: 'POST' });
@@ -224,13 +214,30 @@
         }
     }
 
-  // 3. DELETE LOG
+  // 3. DELETE LOG (UPDATED: Now uses SweetAlert2)
   async function deleteLog(id) {
-    if(!confirm("Are you sure you want to delete this report? This cannot be undone.")) return;
+    // New Styled Confirmation Alert
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
         const res = await fetch(`/api/manager/daily-stock/${id}`, { method: 'DELETE' });
         if(res.ok) {
-            showNotification("Report deleted successfully", "success");
+            // Success Alert
+            Swal.fire(
+              'Deleted!',
+              'The stock report has been deleted.',
+              'success'
+            );
             setTimeout(() => window.location.reload(), 1000);
         } else {
             const data = await res.json();
@@ -251,7 +258,6 @@
     const form = e.target;
     const data = { items: [] };
     
-    // Build array from inputs
     const inputs = form.querySelectorAll('input[type="number"]');
     inputs.forEach(input => {
       if (input.value !== '') {
@@ -265,12 +271,10 @@
       }
     });
     
-    // Validation Alert
     if (data.items.length === 0) {
       return showNotification("⚠️ Please enter at least one quantity.", "error");
     }
 
-    // Loading State
     btn.disabled = true;
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
     
@@ -282,7 +286,6 @@
       });
       if (res.ok) {
         showNotification("Stock Count Saved Successfully!", "success");
-        // Wait 1.5s before reloading so user sees the success message
         setTimeout(() => window.location.reload(), 1500);
       } else {
         showNotification("Error saving stock count", "error");
