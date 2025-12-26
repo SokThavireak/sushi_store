@@ -925,10 +925,12 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['store_ma
     }
 });
 
+// Route: View Daily Log Details (Fixed: Fetches Images & No Duplicates)
 app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
     try {
         const logId = req.params.id;
 
+        // 1. Fetch Log Details
         const logRes = await pool.query(`
             SELECT l.*, u.email 
             FROM daily_inventory_logs l
@@ -939,7 +941,7 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
         if (logRes.rows.length === 0) return res.redirect('/manager/daily-stock/history');
         const log = logRes.rows[0];
 
-        // Security check for store managers
+        // 2. Security Check for Store Managers
         if (req.user.role === 'store_manager') {
              const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
              if (locRes.rows.length > 0 && log.location_name !== locRes.rows[0].name) {
@@ -947,7 +949,7 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
              }
         }
 
-        // --- CORRECTED QUERY (Only defined once) ---
+        // 3. Fetch Items WITH Images (This was the part causing errors before)
         const itemsRes = await pool.query(`
             SELECT dii.*, s.image_url 
             FROM daily_inventory_items dii
@@ -956,6 +958,7 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
             ORDER BY dii.category, dii.item_name
         `, [logId]);
 
+        // 4. Render
         res.render('manager/view_daily_log.ejs', {
             title: `Log #${logId}`,
             log: log,
