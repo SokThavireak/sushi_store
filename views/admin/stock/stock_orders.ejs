@@ -75,21 +75,12 @@
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate mb-1"><%= item.name %></h4>
+                            <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate mb-3"><%= item.name %></h4>
                             
-                            <div class="flex justify-between items-center mb-3">
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    Available: 
-                                    <span class="font-bold <%= item.quantity > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' %>">
-                                        <%= item.quantity %> <%= item.unit %>
-                                    </span>
-                                </div>
-                            </div>
-
                             <div class="flex items-center gap-2">
-                                <input type="number" min="1" max="<%= item.quantity %>" placeholder="Qty" id="qty-<%= item.id %>" 
+                                <input type="number" min="1" placeholder="Qty" id="qty-<%= item.id %>" 
                                     class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg py-2 px-2 text-center text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                                
+                                 
                                 <button onclick="addToCart(<%= JSON.stringify(item) %>)" 
                                     class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition shadow-lg shadow-indigo-200 dark:shadow-none flex-shrink-0">
                                     <i class="fa-solid fa-plus"></i>
@@ -166,7 +157,7 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // --- ADD TO CART FUNCTION ---
+    // --- ADD TO CART FUNCTION (REMOVED STOCK CHECKS) ---
     function addToCart(item) {
         const inputId = `qty-${item.id}`;
         const input = document.getElementById(inputId);
@@ -177,18 +168,11 @@
             return showNotification("Please enter a valid quantity", "error");
         }
 
-        // 2. CHECK: Is there Enough Stock?
-        if (qty > item.quantity) {
-            return showNotification(`Not enough stock! Only ${item.quantity} available.`, "error");
-        }
+        // REMOVED: Check against item.quantity (Allow infinite ordering)
 
-        // 3. Add to Cart Logic
+        // 2. Add to Cart Logic
         const existing = cart.find(c => c.id === item.id);
         if (existing) {
-            // Check if adding more exceeds limit
-            if (existing.quantity + qty > item.quantity) {
-                return showNotification("Total quantity exceeds available stock.", "error");
-            }
             existing.quantity += qty;
         } else {
             cart.push({ ...item, quantity: qty });
@@ -207,7 +191,7 @@
         const countBadge = document.getElementById('cartCount');
         const totalText = document.getElementById('totalItems');
         const btn = document.getElementById('submitBtn');
-        
+
         if (cart.length === 0) {
             list.classList.add('hidden');
             empty.classList.remove('hidden');
@@ -225,7 +209,6 @@
         countBadge.innerText = cart.length;
         totalText.innerText = cart.length;
 
-        // Added dark mode classes for dynamic cart items
         list.innerHTML = cart.map((item, index) => `
             <div class="bg-white dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm flex items-center justify-between cart-item-anim transition-colors">
                 <div class="flex items-center gap-3">
@@ -255,10 +238,12 @@
         const locName = document.getElementById('location_name')?.value;
         if (!locName) return showNotification("Please select a location first", "error");
         if (cart.length === 0) return showNotification("Cart is empty", "error");
+
         const btn = document.getElementById('submitBtn');
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
         try {
             const res = await fetch('/api/stock/create', {
                 method: 'POST',
@@ -272,6 +257,7 @@
                     })) 
                 })
             });
+
             if (res.ok) {
                 showNotification("Request Sent Successfully!", "success");
                 cart = [];
@@ -309,6 +295,7 @@
                 b.classList.remove('bg-indigo-600', 'text-white');
             }
         });
+
         document.querySelectorAll('.product-card').forEach(card => {
             const category = card.getAttribute('data-category');
             if (cat === 'All' || category === cat) card.style.display = 'block';
