@@ -93,7 +93,7 @@
 
         if (!items || items.length === 0) {
             container.innerHTML = `<div class="text-center mt-10"><i class="fa-solid fa-basket-shopping text-4xl text-gray-300 mb-3"></i><p class="text-gray-500">Your cart is empty.</p></div>`;
-            totalEl.innerText = '0 ֏';
+            totalEl.innerText = '0 $';
             btn.classList.add('opacity-50', 'pointer-events-none');
             if (badge) { badge.innerText = '0'; badge.style.display = 'none'; }
             return;
