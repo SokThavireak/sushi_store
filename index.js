@@ -137,7 +137,7 @@ app.get('/orders', checkAuthenticated, async (req, res) => {
             "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC", 
             [req.user.id]
         );
-        res.render('orders', { title: 'My Orders', orders: result.rows });
+        res.render('orders', { title: 'My Orders', orders: result.rows, layout: 'layouts' });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
