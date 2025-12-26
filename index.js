@@ -874,6 +874,17 @@ app.get('/manager/daily-stock/history/:id', checkAuthenticated, async (req, res)
     }
 });
 
+// DEBUG ROUTE: List all stock requests
+app.get('/debug/stocks', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM stock_requests ORDER BY id DESC');
+        res.json(result.rows); // This will show you the raw JSON data
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+});
+
 // =========================================================
 // MASTER STOCK MENU
 // =========================================================
@@ -1045,50 +1056,34 @@ app.delete("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 
     }
 });
 
-app.post('/api/stock/create', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
-    const client = await pool.connect();
+// Ensure your create route saves 'location_name' directly
+app.post('/api/stock/create', checkAuthenticated, async (req, res) => {
     try {
-        const { location_name, items } = req.body; 
+        const { location_name, items } = req.body;
         
-        let finalLocation = location_name;
-        if (req.user.role === 'store_manager') {
-            if (req.user.assigned_location_id) {
-                const locRes = await client.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
-                if (locRes.rows.length > 0) {
-                    finalLocation = locRes.rows[0].name;
-                } else {
-                    return res.status(403).json({ error: "No assigned location found." });
-                }
-            } else {
-                return res.status(403).json({ error: "You are not assigned to a store." });
-            }
-        }
-
-        await client.query('BEGIN');
-
-        const reqRes = await client.query(
-            "INSERT INTO stock_requests (user_id, location_name, status) VALUES ($1, $2, 'Pending') RETURNING id",
-            [req.user.id, finalLocation]
+        // 1. Insert the Request Header
+        // Make sure you insert 'location_name' as a string string, NOT an ID
+        const requestResult = await pool.query(
+            `INSERT INTO stock_requests (user_id, location_name, status, created_at) 
+             VALUES ($1, $2, 'Pending', NOW()) RETURNING id`,
+            [req.user.id, location_name] 
         );
-        const reqId = reqRes.rows[0].id;
+        
+        const requestId = requestResult.rows[0].id;
 
-        if (items && items.length > 0) {
-            for (const item of items) {
-                await client.query(
-                    "INSERT INTO stock_request_items (stock_request_id, item_name, category, quantity) VALUES ($1, $2, $3, $4)",
-                    [reqId, item.name, item.category, item.quantity]
-                );
-            }
+        // 2. Insert Items (Loop)
+        for (const item of items) {
+            await pool.query(
+                `INSERT INTO stock_request_items (request_id, item_name, quantity, category)
+                 VALUES ($1, $2, $3, $4)`,
+                [requestId, item.name, item.quantity, item.category]
+            );
         }
 
-        await client.query('COMMIT');
-        res.json({ message: "Success" });
+        res.json({ success: true, id: requestId });
     } catch (err) {
-        await client.query('ROLLBACK');
         console.error(err);
-        res.status(500).json({ error: "Failed to create request" });
-    } finally {
-        client.release();
+        res.status(500).json({ error: "Database error" });
     }
 });
 
