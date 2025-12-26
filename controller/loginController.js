@@ -12,26 +12,28 @@ export const getRegister = (req, res) => {
 };
 
 export const postLogin = (req, res, next) => {
+    // We call the 'local' strategy defined in passportController.js
     passport.authenticate("local", (err, user, info) => {
         if (err) return next(err);
         
         if (!user) {
-            return res.status(401).json({ error: "Invalid email or password" });
+            // Send JSON error for your fetch() script
+            return res.status(401).json({ error: info ? info.message : "Invalid credentials" });
         }
 
         req.logIn(user, (err) => {
             if (err) return next(err);
 
-            const rawRole = user.role || "";
-            const role = rawRole.trim().toLowerCase();
-
+            const role = (user.role || "").trim().toLowerCase();
             let targetUrl = "/";
+            
             if (['admin', 'manager', 'store_manager', 'cashier'].includes(role)) {
                 targetUrl = "/admin/dashboard";
             } else if (role === 'staff') {
                 targetUrl = "/staff/menu";
             }
 
+            // Send JSON success
             return res.json({ 
                 message: "Login Successful", 
                 role: role, 
@@ -47,7 +49,8 @@ export const postRegister = async (req, res) => {
   try {
     const checkResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (checkResult.rows.length > 0) {
-      res.redirect("/login");
+      // If using AJAX/fetch on register page, use res.json here too
+      res.redirect("/login"); 
     } else {
       bcrypt.hash(password, saltRounds, async (err, hash) => {
         if (err) console.error(err);

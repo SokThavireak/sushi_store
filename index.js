@@ -21,18 +21,18 @@ import { pool } from './config/database.js';
 import upload from './config/cloudinary.js';
 
 // =========================================================
-// 2. CONTROLLER IMPORTS (Connected to ./controller folder)
+// 2. CONTROLLER IMPORTS 
+// (Make sure all files exist in the 'controller' folder)
 // =========================================================
 import * as adminController from './controller/adminController.js';
 import * as cartController from './controller/cartController.js';
 import * as categoryController from './controller/categoryController.js';
 import * as checkoutController from './controller/checkoutController.js';
-// Note: Keeping 'dasboard' spelling to match your screenshot filename
-import * as dashboardController from './controller/dasboardController.js'; 
+import * as dashboardController from './controller/dashboardController.js'; // Fixed typo
 import * as inventoryController from './controller/inventoryController.js';
 import * as locationsController from './controller/locationsController.js';
 import * as loginController from './controller/loginController.js';
-import * as menuController from './controller/menuController.js';
+import * as menuController from './controller/menuController.js'; // Fixed folder name
 import * as passportController from './controller/passportController.js';
 import * as paymentController from './controller/paymentController.js';
 import * as profileController from './controller/profileController.js';
@@ -57,17 +57,19 @@ const baseUrl = process.env.BASE_URL || `https://sushi-store-zplg.onrender.com`;
 // =========================================================
 app.set('trust proxy', 1); 
 
+// Find this section in your index.js
 app.use(
   session({
     store: new pgSession({ 
       pool: pool, 
-      tableName: 'session' 
+      tableName: 'session',
+      createTableIfMissing: true // <--- Add this to auto-create the table
     }),
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "mysecret", // Add a fallback just in case
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: true, 
+        secure: isProduction, // <--- CHANGE THIS (was true)
         maxAge: 24 * 60 * 60 * 1000 
     } 
   })
@@ -122,20 +124,20 @@ function checkRole(allowedRoles) {
 // =========================================================
 
 // --- Public Pages ---
-app.get('/', publicController.getHome);  // Ensure publicController has 'getHome'
-app.get('/menu', menuController.getMenu);
+app.get('/', publicController.getHome);
+app.get('/menu', menuController.getPublicMenu); // Ensure getPublicMenu is exported
 app.get('/locations', locationsController.getLocations);
 
 // --- Authentication ---
 app.get('/login', loginController.getLogin);
-app.post('/login', loginController.postLogin); // Local Strategy logic usually here
+app.post('/login', loginController.postLogin);
 app.get('/register', loginController.getRegister);
 app.post('/register', loginController.postRegister);
 app.get('/logout', loginController.logout);
 
-// --- Google Auth (Passport Controller) ---
-// Note: Ensure passportController is set up to handle the callbacks
+// --- Google Auth ---
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
 app.get('/auth/google/callback', 
     passport.authenticate('google', { 
         successRedirect: '/menu', 
@@ -145,25 +147,56 @@ app.get('/auth/google/callback',
 
 // --- User Protected Routes ---
 app.get('/profile', checkAuthenticated, profileController.getProfile);
+app.post('/profile/update', checkAuthenticated, profileController.updateProfile);
+app.post('/profile/delete', checkAuthenticated, profileController.deleteProfile);
+
 app.get('/cart', checkAuthenticated, cartController.getCart);
-app.post('/cart/add', checkAuthenticated, cartController.addToCart);
+app.post('/api/cart', checkAuthenticated, cartController.addToCart); // API route
+app.patch('/api/cart/:id', checkAuthenticated, cartController.updateCartItem);
+
 app.get('/checkout', checkAuthenticated, checkoutController.getCheckout);
-app.post('/payment', checkAuthenticated, paymentController.processPayment);
+app.post('/api/orders', checkAuthenticated, checkoutController.createOrder); 
+app.get('/payment/:id', checkAuthenticated, paymentController.processPayment);
+app.post('/payment/confirm/:id', checkAuthenticated, paymentController.confirmPayment);
 
 // --- Admin / Staff Routes ---
-// Dashboard
-app.get('/admin', checkAuthenticated, checkRole(['admin', 'manager']), dashboardController.getDashboard);
+app.get('/admin/dashboard', checkAuthenticated, checkRole(['admin', 'manager', 'store_manager']), dashboardController.getDashboard);
+app.get('/admin/reports', checkAuthenticated, checkRole(['admin', 'manager', 'store_manager']), dashboardController.getReports);
 
-// Inventory & Stock
-app.get('/admin/inventory', checkAuthenticated, checkRole(['admin', 'manager']), inventoryController.getInventory);
-app.get('/admin/stock/menu', checkAuthenticated, checkRole(['admin', 'manager']), stockMenuController.getStockMenu);
-app.get('/admin/stock/orders', checkAuthenticated, checkRole(['admin', 'manager']), stockOrderController.getStockOrders);
+// Orders
+app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), checkoutController.getOrders); // Renamed in controller? check dashboardController or checkoutController
+app.post('/admin/orders/:id/status', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), checkoutController.updateOrderStatus);
 
-// User Management
+// Inventory
+app.get('/admin/inventory', checkAuthenticated, checkRole(['manager', 'admin']), inventoryController.getInventory);
+app.post('/admin/inventory/add', checkAuthenticated, checkRole(['manager', 'admin']), upload.single("image"), inventoryController.addProduct);
+app.patch('/api/inventory/:id', checkAuthenticated, checkRole(['manager', 'admin']), inventoryController.updateProduct);
+app.delete('/api/inventory/:id', checkAuthenticated, checkRole(['manager', 'admin']), inventoryController.deleteProduct);
+
+// Stock
+app.get('/admin/stock/menu', checkAuthenticated, checkRole(['manager', 'admin']), stockMenuController.getStockMenu);
+app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), stockOrderController.getStockOrders); // Changed route to match controller
+app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), stockOrderController.getCreateStock);
+
+// Users
 app.get('/admin/users', checkAuthenticated, checkRole(['admin']), userController.getUsers);
+app.post('/admin/users/delete/:id', checkAuthenticated, checkRole(['admin']), userController.deleteUser);
+app.get('/admin/users/edit/:id', checkAuthenticated, checkRole(['admin']), userController.editUser);
+app.post('/admin/users/update/:id', checkAuthenticated, checkRole(['admin']), userController.updateUser);
+app.post('/admin/create-manager', checkAuthenticated, checkRole(['admin', 'manager']), userController.createManager);
 
 // Categories
-app.get('/admin/categories', checkAuthenticated, checkRole(['admin']), categoryController.getCategories);
+app.get('/admin/category', checkAuthenticated, checkRole(['manager', 'admin']), categoryController.getCategories); // Fixed URL to singular if that matches ejs
+
+// Daily Stock (AdminController)
+app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), adminController.getDailyStock);
+app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), adminController.postDailyStock);
+app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), adminController.getDailyStockHistory);
+app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), adminController.getDailyStockView);
+
+// Staff Menu
+app.get("/staff/menu", checkAuthenticated, checkRole(['admin', 'manager', 'store_manager', 'staff', 'cashier']), menuController.getStaffMenu);
+
 
 // =========================================================
 // 6. START SERVER

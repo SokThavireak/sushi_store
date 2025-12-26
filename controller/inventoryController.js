@@ -1,5 +1,4 @@
 import { pool } from '../config/database.js';
-import upload from '../config/cloudinary.js'; // Assuming you use this for the upload
 
 export const getInventory = async (req, res) => {
   try {
@@ -26,6 +25,7 @@ export const addProduct = async (req, res) => {
     if (nameCheck.rows.length > 0) {
         return res.send(`<script>alert('Error: Name exists.'); window.location.href='/admin/inventory';</script>`);
     }
+
     const catCheck = await pool.query("SELECT * FROM categories WHERE name = $1", [category]);
     if (catCheck.rows.length === 0) {
         await pool.query("INSERT INTO categories (name) VALUES ($1)", [category]);
