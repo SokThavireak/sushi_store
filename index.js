@@ -835,6 +835,46 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
     }
 });
 
+// Route to View Specific History Item Details
+app.get('/manager/daily-stock/history/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 1. Fetch the Request Details (Header)
+        // We join with 'locations' to get the location name
+        const requestResult = await pool.query(`
+            SELECT sr.*, l.name as location_name 
+            FROM stock_requests sr
+            LEFT JOIN locations l ON sr.location_id = l.id
+            WHERE sr.id = $1
+        `, [id]);
+
+        if (requestResult.rows.length === 0) {
+            return res.status(404).send('Request not found');
+        }
+
+        // 2. Fetch the Items associated with this request
+        const itemsResult = await pool.query(`
+            SELECT * FROM stock_request_items 
+            WHERE request_id = $1
+        `, [id]);
+
+        // 3. Render the View
+        // We pass empty 'locations' and 'query' to prevent EJS errors since view_stock.ejs expects them
+        res.render('view_stock', {
+            user: req.user,
+            request: requestResult.rows[0],
+            items: itemsResult.rows,
+            locations: [], // Pass empty if you don't need the filter on this detail view
+            query: {}      // Pass empty object to avoid "query is undefined" error
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
 // =========================================================
 // MASTER STOCK MENU
 // =========================================================
