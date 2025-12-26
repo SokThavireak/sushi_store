@@ -23,11 +23,18 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">Select items to request from the warehouse</p>
                 </div>
                 <div class="w-64">
-                    <% if (typeof user !== 'undefined' && user.role === 'store_manager') { %>
+                    <% if (typeof user !== 'undefined' && user.role === 'store_manager') { 
+                        // --- FIX: Find the location name for this Store Manager ---
+                        let myLocName = '';
+                        if (typeof locations !== 'undefined') {
+                            const found = locations.find(l => l.id == user.assigned_location_id);
+                            if (found) myLocName = found.name;
+                        }
+                    %>
                         <div class="relative">
                             <i class="fa-solid fa-store absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" value="My Store" disabled class="pl-9 w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-sm font-bold text-gray-600 dark:text-gray-200">
-                            <input type="hidden" id="location_name" value=""> 
+                            <input type="text" value="<%= myLocName || 'My Assigned Store' %>" disabled class="pl-9 w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-sm font-bold text-gray-600 dark:text-gray-200">
+                            <input type="hidden" id="location_name" value="<%= myLocName %>"> 
                         </div>
                     <% } else { %>
                         <select id="location_name" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-sm font-bold text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -167,8 +174,6 @@
         if (!qty || qty <= 0) {
             return showNotification("Please enter a valid quantity", "error");
         }
-
-        // REMOVED: Check against item.quantity (Allow infinite ordering)
 
         // 2. Add to Cart Logic
         const existing = cart.find(c => c.id === item.id);
