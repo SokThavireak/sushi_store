@@ -41,13 +41,13 @@
                     <% cart.forEach(item => { total += (item.price * item.quantity); %>
                         <div class="flex justify-between text-sm text-gray-700 dark:text-gray-300">
                             <span><%= item.quantity %>x <%= item.name %></span>
-                            <span class="font-medium"><%= item.price * item.quantity %> ֏</span>
+                            <span class="font-medium"><%= item.price * item.quantity %> $</span>
                         </div>
                     <% }) %>
                 </div>
                 <div class="border-t border-gray-200 dark:border-gray-600 pt-4 flex justify-between font-bold text-xl text-gray-900 dark:text-white">
                     <span>Total</span>
-                    <span class="text-orange-600 dark:text-orange-400"><%= total %> ֏</span>
+                    <span class="text-orange-600 dark:text-orange-400"><%= total %> $</span>
                 </div>
             </div>
         </div>

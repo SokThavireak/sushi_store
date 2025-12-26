@@ -113,10 +113,10 @@
         <div class="flex-1 flex flex-col justify-between">
             <div>
                 <h3 class="font-bold text-gray-900 dark:text-white">${item.name}</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Unit: ${item.price} ֏</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Unit: ${item.price} $</p>
             </div>
             <div class="flex items-center justify-between mt-2">
-                <span class="font-bold text-gray-900 dark:text-white">${item.price * item.quantity} ֏</span>
+                <span class="font-bold text-gray-900 dark:text-white">${item.price * item.quantity} $</span>
                 <div class="flex items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1">
                     <button onclick="updateQty(${item.cart_id}, 'decrement')" class="w-6 h-6 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:text-orange-500 font-bold transition">-</button>
                     <span class="text-sm font-semibold text-gray-900 dark:text-white w-4 text-center">${item.quantity}</span>
@@ -128,7 +128,7 @@
             container.innerHTML += html;
         });
 
-        totalEl.innerText = total.toLocaleString() + ' ֏';
+        totalEl.innerText = total.toLocaleString() + ' $';
         if (badge) { badge.innerText = totalQty; badge.style.display = 'flex'; }
     }
 
