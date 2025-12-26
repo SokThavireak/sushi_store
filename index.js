@@ -1242,8 +1242,8 @@ app.post('/api/stock/create', checkAuthenticated, async (req, res) => {
         // 2. Insert Items (Loop)
         for (const item of items) {
             await pool.query(
-                `INSERT INTO stock_request_items (request_id, item_name, quantity, category)
-                 VALUES ($1, $2, $3, $4)`,
+                `INSERT INTO stock_request_items (stock_request_id, item_name, quantity, category)
+                VALUES ($1, $2, $3, $4)`,
                 [requestId, item.name, item.quantity, item.category]
             );
         }
