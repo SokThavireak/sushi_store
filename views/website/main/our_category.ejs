@@ -40,14 +40,14 @@ const myCategories = [
 ];
 %>
 
-<section id="our-menu" class="py-12 lg:py-16 bg-white">
+<section id="our-menu" class="py-12 lg:py-16 bg-white dark:bg-gray-900">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
     <div class="mb-8 lg:mb-10 text-center">
-        <h2 class="text-2xl lg:text-3xl font-extrabold text-gray-900 scroll-hidden">
+        <h2 class="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white scroll-hidden">
             Our Categories
         </h2>
-        <p class="text-sm lg:text-base text-gray-500 mt-2 scroll-hidden" style="transition-delay: 0.1s">
+        <p class="text-sm lg:text-base text-gray-500 dark:text-gray-400 mt-2 scroll-hidden" style="transition-delay: 0.1s">
             Explore our wide variety of Japanese delicacies
         </p>
     </div>
@@ -86,7 +86,8 @@ const myCategories = [
            
             </div>
           </a>
-      <% }); %>
+      <% });
+      %>
 
     </div>
   </div>

@@ -1,101 +1,144 @@
 <style>
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-    .scroll-hidden { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-    @media (max-width: 640px) { .scroll-hidden { opacity: 1 !important; transform: translateY(0) !important; } }
-    .animate-fade-up { animation: fadeInUp 1s ease-out forwards; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .scroll-hidden {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    @media (max-width: 640px) {
+        .scroll-hidden {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+    }
+
+    .animate-fade-up {
+        animation: fadeInUp 1s ease-out forwards;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-24 lg:mt-36">
-    
+
     <div class="mb-8 lg:mb-20 flex flex-col items-center scroll-hidden">
         <div class="relative w-full max-w-4xl group mb-8">
-            <input 
-                type="text" 
-                id="menu-search" 
-                onkeyup="filterMenu()" 
-                placeholder="Search..." 
-                class="w-full pl-12 lg:pl-20 pr-8 py-3 lg:py-6 rounded-full border-0 bg-white dark:bg-gray-800 shadow-xl text-base lg:text-2xl text-gray-700 dark:text-white focus:ring-4 focus:ring-orange-100 dark:focus:ring-orange-900 focus:outline-none transition-all" 
-            />
+            <input type="text" id="menu-search" onkeyup="filterMenu()" placeholder="Search..."
+                class="w-full pl-12 lg:pl-20 pr-8 py-3 lg:py-6 rounded-full border-0 bg-white dark:bg-gray-800 shadow-xl text-base lg:text-2xl text-gray-700 dark:text-white focus:ring-4 focus:ring-orange-100 dark:focus:ring-orange-900 focus:outline-none transition-all" />
             <div class="absolute left-5 lg:left-8 top-1/2 -translate-y-1/2 text-orange-500 text-xl lg:text-3xl">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
         </div>
 
         <div class="flex flex-wrap justify-center gap-3" id="menu-filters">
-            <button onclick="filterCategory('all')" 
+            <button onclick="filterCategory('all')"
                 class="filter-btn active px-6 py-3 rounded-full font-bold text-base lg:text-lg transition-all shadow-lg bg-orange-500 text-white transform scale-105">
                 All
             </button>
-            <% if (typeof categories !== 'undefined') { %>
-                <% categories.forEach((category) => { %>
-                    <button onclick="filterCategory('<%= category.name %>')" 
+            <% if (typeof categories !=='undefined' ) { %>
+                <% categories.forEach((category)=> { %>
+                    <button onclick="filterCategory('<%= category.name %>')"
                         class="filter-btn px-6 py-3 rounded-full font-bold text-base lg:text-lg transition-all shadow-sm bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-500">
                         <%= category.name %>
                     </button>
-                <% }) %>
-            <% } %>
+                    <% }) %>
+                        <% } %>
         </div>
     </div>
 
-    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-        <% categories.sort((a, b) => a.name === 'Most Sales' ? -1 : (b.name === 'Most Sales' ? 1 : 0)); %>
-        
-        <% categories.forEach((category) => { %>
-            <% let categoryProducts = category.name === 'Most Sales' ? products.filter(p => p.is_best_seller) : products.filter(p => p.category === category.name); %>
-            <% if (categoryProducts.length > 0) { %>
-                
-                <section 
-                    id="<%= category.name.trim().toLowerCase().replace(/\s+/g, '-') %>" 
-                    data-category="<%= category.name %>"
-                    class="mb-12 lg:mb-24 menu-section scroll-hidden"
-                    style="scroll-margin-top: 140px;" 
-                >
-                    <h2 class="text-xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-4 lg:mb-10 border-b border-gray-200 dark:border-gray-700 pb-4 flex items-center gap-2">
-                        <%= category.name === 'Most Sales' ? '🔥 Best Sellers' : category.name + ' Collection' %>
-                    </h2>
+    <% if (typeof categories !=='undefined' && categories.length> 0) { %>
+        <% categories.sort((a, b)=> a.name === 'Most Sales' ? -1 : (b.name === 'Most Sales' ? 1 : 0)); %>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-10">
-                        <% categoryProducts.forEach(product => { %>
-                            
-                            <div class="group relative h-64 lg:h-[450px] w-full rounded-2xl lg:rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl product-card border border-gray-100 dark:border-gray-800 transition-all duration-300">
-                                
-                                <div class="absolute inset-0 w-full h-full">
-                                    <img 
-                                        src="<%= product.image_url || 'https://via.placeholder.com/300' %>" 
-                                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                                        loading="lazy" 
-                                        alt="<%= product.name %>"
-                                    />
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                                </div>
-                                
-                                <div class="absolute bottom-0 left-0 w-full p-3 lg:p-8 z-20 flex items-end justify-between">
-                                    <div class="flex flex-col gap-0.5 lg:gap-1 w-[75%]">
-                                        <h3 class="text-white text-sm lg:text-3xl font-bold product-name leading-tight drop-shadow-md line-clamp-2">
-                                            <%= product.name %>
-                                        </h3>
-                                        <span class="text-orange-300 text-sm lg:text-2xl font-bold">
-                                            <%= product.price %> ֏
-                                        </span>
+            <% categories.forEach((category)=> { %>
+                <% let categoryProducts=category.name==='Most Sales' ? products.filter(p=> p.is_best_seller) :
+                    products.filter(p => p.category === category.name); %>
+                    <% if (categoryProducts.length> 0) { %>
+
+                        <section id="<%= category.name.trim().toLowerCase().replace(/\s+/g, '-') %>"
+                            data-category="<%= category.name %>" class="mb-12 lg:mb-24 menu-section scroll-hidden"
+                            style="scroll-margin-top: 140px;">
+                            <h2
+                                class="text-xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-4 lg:mb-10 border-b border-gray-200 dark:border-gray-700 pb-4 flex items-center gap-2">
+                                <%= category.name==='Most Sales' ? '🔥 Best Sellers' : category.name + ' Collection' %>
+                            </h2>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-10">
+                                <% categoryProducts.forEach(product=> { %>
+
+                                    <div
+                                        class="group relative h-64 lg:h-[450px] w-full rounded-2xl lg:rounded-[2.5rem] overflow-hidden shadow-md hover:shadow-2xl product-card border border-gray-100 dark:border-gray-800 transition-all duration-300">
+
+                                        <div class="absolute inset-0 w-full h-full">
+                                            <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>"
+                                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                loading="lazy" alt="<%= product.name %>" />
+                                            <div
+                                                class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="absolute bottom-0 left-0 w-full p-3 lg:p-8 z-20 flex items-end justify-between">
+                                            <div class="flex flex-col gap-0.5 lg:gap-1 w-[75%]">
+                                                <h3
+                                                    class="text-white text-sm lg:text-3xl font-bold product-name leading-tight drop-shadow-md line-clamp-2">
+                                                    <%= product.name %>
+                                                </h3>
+                                                <span class="text-orange-300 text-sm lg:text-2xl font-bold">
+                                                    <%= product.price %> ֏
+                                                </span>
+                                            </div>
+
+                                            <button onclick="addToCart(<%= product.id %>)"
+                                                class="w-8 h-8 lg:w-16 lg:h-16 bg-white dark:bg-gray-800 dark:text-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all transform active:scale-95">
+                                                <i class="fa-solid fa-basket-shopping text-xs lg:text-xl"></i>
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <button onclick="addToCart(<%= product.id %>)" class="w-8 h-8 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all transform active:scale-95">
-                                        <i class="fa-solid fa-basket-shopping text-xs lg:text-xl"></i>
-                                    </button>
-                                </div>
+                                    <% }) %>
                             </div>
-
-                        <% }) %>
-                    </div>
-                </section>
-            <% } %>
-        <% }) %>
-    <% } %>
+                        </section>
+                        <% } %>
+                            <% }) %>
+                                <% } %>
 </div>
 
 <script>
@@ -114,7 +157,7 @@
     }
     window.addEventListener('load', forceScrollToHash);
     setTimeout(forceScrollToHash, 500);
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -123,7 +166,7 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0 }); 
+        }, { threshold: 0 });
         document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
     });
 
@@ -131,16 +174,16 @@
         const searchInput = document.getElementById('menu-search').value.toLowerCase();
         document.querySelectorAll('.product-card').forEach(card => {
             const name = card.querySelector('.product-name').innerText.toLowerCase();
-            if(searchInput.length > 0) {
-                 if(name.includes(searchInput)) card.parentElement.style.display = 'block'; 
-                 card.style.display = name.includes(searchInput) ? '' : 'none';
+            if (searchInput.length > 0) {
+                if (name.includes(searchInput)) card.parentElement.style.display = 'block';
+                card.style.display = name.includes(searchInput) ? '' : 'none';
             } else {
-                 card.style.display = '';
+                card.style.display = '';
             }
         });
-        if(searchInput.length === 0) {
+        if (searchInput.length === 0) {
             const activeBtn = document.querySelector('.filter-btn.active');
-            if(activeBtn) filterCategory(activeBtn.innerText.trim());
+            if (activeBtn) filterCategory(activeBtn.innerText.trim());
         }
     }
 
@@ -168,8 +211,8 @@
                 text: "You must be logged in to order sushi!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#f97316', 
-                cancelButtonColor: '#ef4444', 
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#ef4444',
                 confirmButtonText: 'Login Now',
                 cancelButtonText: 'Cancel',
                 background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
@@ -188,9 +231,9 @@
                 body: JSON.stringify({ productId })
             });
             const data = await res.json();
-            if(res.ok) { showNotification('Added to Cart Successfully!', 'success'); } 
+            if (res.ok) { showNotification('Added to Cart Successfully!', 'success'); }
             else { showNotification(data.error || 'Could not add item', 'error'); }
-        } catch(err) {
+        } catch (err) {
             console.error(err);
             showNotification('Connection Error', 'error');
         }

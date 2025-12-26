@@ -1,114 +1,173 @@
 <style>
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-    .scroll-hidden { opacity: 0; transform: translateY(40px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; will-change: opacity, transform; }
-    .animate-fade-up { animation: fadeInUp 0.8s ease-out forwards; }
-    .delay-100 { animation-delay: 0.1s; }
-    .delay-200 { animation-delay: 0.2s; }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .scroll-hidden {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        will-change: opacity, transform;
+    }
+
+    .animate-fade-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .delay-100 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-200 {
+        animation-delay: 0.2s;
+    }
 </style>
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-7xl mx-auto px-6 mt-36">
     <section id="page-locations" class="mb-6 md:mb-10">
-      
-      <div class="text-center mb-10 scroll-hidden">
-        <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Deals of the Week</span>
-        <h1 class="text-4xl font-extrabold mt-4 mb-2 text-gray-900 dark:text-white">Exclusive Offers</h1>
-        <p class="text-gray-500 dark:text-gray-400">Save on your favorite sets. Offers valid until Sunday.</p>
-      </div>
 
-      <div class="relative w-full h-64 md:h-80 rounded-3xl overflow-hidden mb-12 group shadow-xl scroll-hidden delay-100">
-        <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Sushi Platter" />
-        <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8 md:px-16">
-          <div class="text-white max-w-lg">
-            <h2 class="text-3xl md:text-5xl font-bold mb-4">50% OFF Second Set</h2>
-            <p class="mb-6 opacity-90">Order any Dragon Set and get the second one half price. Perfect for sharing.</p>
-            <a href="#deals" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all transform hover:translate-y-[-2px] inline-block">Order Now</a>
-          </div>
+        <div class="text-center mb-10 scroll-hidden">
+            <span
+                class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Deals
+                of the Week</span>
+            <h1 class="text-4xl font-extrabold mt-4 mb-2 text-gray-900 dark:text-white">Exclusive Offers</h1>
+            <p class="text-gray-500 dark:text-gray-400">Save on your favorite sets. Offers valid until Sunday.</p>
         </div>
-      </div>
 
-      <div class="mb-10" id="deals">
-          <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 flex items-center gap-2 scroll-hidden">🔥 Hot Deals & Discounts</h2>
+        <div
+            class="relative w-full h-64 md:h-80 rounded-3xl overflow-hidden mb-12 group shadow-xl scroll-hidden delay-100">
+            <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                alt="Sushi Platter" />
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8 md:px-16">
+                <div class="text-white max-w-lg">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-4">50% OFF Second Set</h2>
+                    <p class="mb-6 opacity-90">Order any Dragon Set and get the second one half price. Perfect for
+                        sharing.</p>
+                    <a href="#deals"
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all transform hover:translate-y-[-2px] inline-block">Order
+                        Now</a>
+                </div>
+            </div>
+        </div>
 
-          <% if (products && products.length > 0) { %>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                <% products.forEach((product, index) => { %>
-                    <% 
-                       let finalPrice = Number(product.price);
-                       let discountLabel = "";
-                       if (product.discount_type === 'percentage') {
-                           finalPrice = product.price - (product.price * (product.discount_value / 100));
-                           discountLabel = `-${product.discount_value}%`;
-                       } else if (product.discount_type === 'subtract') {
-                           finalPrice = product.price - product.discount_value;
-                           discountLabel = `SAVE $${product.discount_value}`;
-                       }
-                       finalPrice = Math.round(finalPrice * 100) / 100;
-                    %>
+        <div class="mb-10" id="deals">
+            <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 flex items-center gap-2 scroll-hidden">🔥
+                Hot Deals & Discounts</h2>
 
-                    <div class="group relative h-[450px] w-full rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-500 hover:shadow-2xl product-card border border-gray-100/50 dark:border-gray-800 scroll-hidden" style="animation-delay: <%= (index % 3) * 0.1 %>s">
-                       <div class="absolute inset-0 w-full h-full">
-                            <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>" alt="<%= product.name %>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-                       </div>
-                       
-                       <div class="absolute top-6 left-6 bg-red-600 text-white text-[12px] font-bold px-3 py-1.5 rounded-full shadow-md z-20 tracking-wide uppercase animate-pulse">
-                            <%= discountLabel %> OFF
-                       </div>
+            <% if (products && products.length> 0) { %>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <% products.forEach((product, index)=> { %>
+                        <% let finalPrice=Number(product.price); let discountLabel="" ; if
+                            (product.discount_type==='percentage' ) { finalPrice=product.price - (product.price *
+                            (product.discount_value / 100)); discountLabel=`-${product.discount_value}%`; } else if
+                            (product.discount_type==='subtract' ) { finalPrice=product.price - product.discount_value;
+                            discountLabel=`SAVE $${product.discount_value}`; } finalPrice=Math.round(finalPrice * 100) /
+                            100; %>
 
-                       <div class="absolute bottom-0 left-0 w-full p-8 z-20 flex items-end justify-between">
-                            <div class="flex flex-col gap-1 w-3/4">
-                                <span class="text-orange-500 text-xs font-extrabold uppercase tracking-widest mb-1">Limited Time Offer</span>
-                                <h3 class="text-white text-3xl font-bold leading-tight shadow-black drop-shadow-md product-name mb-3"><%= product.name %></h3>
-                                <div class="flex flex-col">
-                                    <span class="text-gray-400 text-xs font-bold uppercase tracking-wide">Special Price</span>
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-white text-3xl font-bold"><%= finalPrice %> ֏</span>
-                                        <span class="text-gray-400 text-lg line-through decoration-red-500 decoration-2"><%= product.price %> ֏</span>
+                            <div class="group relative h-[450px] w-full rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-500 hover:shadow-2xl product-card border border-gray-100/50 dark:border-gray-800 scroll-hidden"
+                                style="animation-delay: <%= (index % 3) * 0.1 %>s">
+                                <div class="absolute inset-0 w-full h-full">
+                                    <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>"
+                                        alt="<%= product.name %>"
+                                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
                                     </div>
                                 </div>
+
+                                <div
+                                    class="absolute top-6 left-6 bg-red-600 text-white text-[12px] font-bold px-3 py-1.5 rounded-full shadow-md z-20 tracking-wide uppercase animate-pulse">
+                                    <%= discountLabel %> OFF
+                                </div>
+
+                                <div class="absolute bottom-0 left-0 w-full p-8 z-20 flex items-end justify-between">
+                                    <div class="flex flex-col gap-1 w-3/4">
+                                        <span
+                                            class="text-orange-500 text-xs font-extrabold uppercase tracking-widest mb-1">Limited
+                                            Time Offer</span>
+                                        <h3
+                                            class="text-white text-3xl font-bold leading-tight shadow-black drop-shadow-md product-name mb-3">
+                                            <%= product.name %>
+                                        </h3>
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="text-gray-400 text-xs font-bold uppercase tracking-wide">Special
+                                                Price</span>
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-white text-3xl font-bold">
+                                                    <%= finalPrice %> ֏
+                                                </span>
+                                                <span
+                                                    class="text-gray-400 text-lg line-through decoration-red-500 decoration-2">
+                                                    <%= product.price %> ֏
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="addToCart(<%= product.id %>)"
+                                        class="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden">
+                                        <img src="https://img.icons8.com/3d-fluency/94/shopping-basket.png" alt="Add"
+                                            class="w-9 h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6" />
+                                    </button>
+                                </div>
                             </div>
-                            <button onclick="addToCart(<%= product.id %>)" class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden">
-                                <img src="https://img.icons8.com/3d-fluency/94/shopping-basket.png" alt="Add" class="w-9 h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6" />
-                            </button>
-                       </div>
+                            <% }) %>
+                </div>
+                <% } else { %>
+                    <div
+                        class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 scroll-hidden">
+                        <p class="text-gray-500 dark:text-gray-400 text-lg">No special product discounts at the moment.
+                        </p>
+                        <p class="text-gray-400 dark:text-gray-500 text-sm">Check out our <a href="/menu"
+                                class="text-orange-500 font-bold hover:underline">Full Menu</a> instead!</p>
                     </div>
-                <% }) %>
-            </div>
-          <% } else { %>
-            <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 scroll-hidden">
-                <p class="text-gray-500 dark:text-gray-400 text-lg">No special product discounts at the moment.</p>
-                <p class="text-gray-400 dark:text-gray-500 text-sm">Check out our <a href="/menu" class="text-orange-500 font-bold hover:underline">Full Menu</a> instead!</p>
-            </div>
-          <% } %>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between scroll-hidden delay-100">
-          <div>
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">Free Miso Soup</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">On orders over $25</p>
-            <div class="inline-block bg-gray-100 dark:bg-gray-700 border border-dashed border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600" onclick="copyCode('MISO25')">MISO25</div>
-          </div>
-          <div class="h-20 w-20 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-xl">Free</div>
+                    <% } %>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between scroll-hidden delay-200">
-          <div>
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white">20% Off Lunch</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">11:00 AM - 2:00 PM</p>
-            <div class="inline-block bg-gray-100 dark:bg-gray-700 border border-dashed border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600" onclick="copyCode('LUNCH20')">LUNCH20</div>
-          </div>
-          <div class="h-20 w-20 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-xl">-20%</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+            <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between scroll-hidden delay-100">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900 dark:text-white">Free Miso Soup</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">On orders over $25</p>
+                    <div class="inline-block bg-gray-100 dark:bg-gray-700 border border-dashed border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                        onclick="copyCode('MISO25')">MISO25</div>
+                </div>
+                <div
+                    class="h-20 w-20 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-xl">
+                    Free</div>
+            </div>
+
+            <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between scroll-hidden delay-200">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900 dark:text-white">20% Off Lunch</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">11:00 AM - 2:00 PM</p>
+                    <div class="inline-block bg-gray-100 dark:bg-gray-700 border border-dashed border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                        onclick="copyCode('LUNCH20')">LUNCH20</div>
+                </div>
+                <div
+                    class="h-20 w-20 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-xl">
+                    -20%</div>
+            </div>
         </div>
-      </div>
 
     </section>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
