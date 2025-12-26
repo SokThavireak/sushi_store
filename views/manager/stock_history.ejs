@@ -1,72 +1,90 @@
 <style>
-    /* Toast Animation Keyframes */
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+  /* Toast Animation Keyframes */
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
     }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
     }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
 </style>
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
 <div class="max-w-6xl mx-auto my-10 space-y-6">
 
-  <div class="flex flex-col md:flex-row gap-4 items-end justify-between bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+  <div
+    class="flex flex-col md:flex-row gap-4 items-end justify-between bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
     <div>
       <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Stock Count History</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400">View and manage past daily inventory logs</p>
     </div>
 
     <form method="GET" action="/manager/daily-stock/history" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-      
+
       <div class="flex flex-col">
         <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Date</label>
-        <input 
-          type="date" 
-          name="date" 
-          value="<%= typeof query !== 'undefined' ? query.date : '' %>"
-          class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
-        >
+        <input type="date" name="date" value="<%= typeof query !== 'undefined' ? query.date : '' %>"
+          class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5">
       </div>
 
       <div class="flex flex-col">
         <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Location</label>
-        <select name="location" class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 min-w-[150px]">
+        <select name="location"
+          class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 min-w-[150px]">
           <option value="">All Locations</option>
-          <% if (typeof locations !== 'undefined') { %>
-            <% locations.forEach(loc => { %>
-              <option value="<%= loc.id %>" <%= (typeof query !== 'undefined' && query.location == loc.id) ? 'selected' : '' %>>
+          <% if (typeof locations !=='undefined' ) { %>
+            <% locations.forEach(loc=> { %>
+              <option value="<%= loc.id %>" <%=(typeof query !=='undefined' && query.location==loc.id) ? 'selected' : ''
+                %>>
                 <%= loc.name %>
               </option>
-            <% }) %>
-          <% } %>
+              <% }) %>
+                <% } %>
         </select>
       </div>
 
       <div class="flex items-end">
-        <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-bold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center flex items-center gap-2 shadow-md transition-all">
+        <button type="submit"
+          class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-bold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center flex items-center gap-2 shadow-md transition-all">
           <i class="fa-solid fa-filter"></i> Filter
         </button>
       </div>
-      
-      <% if (typeof query !== 'undefined' && (query.date || query.location)) { %>
+
+      <% if (typeof query !=='undefined' && (query.date || query.location)) { %>
         <div class="flex items-end">
-            <a href="/manager/daily-stock/history" class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 font-bold rounded-lg text-sm px-4 py-2.5 transition-all">
-                Clear
-            </a>
+          <a href="/manager/daily-stock/history"
+            class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 font-bold rounded-lg text-sm px-4 py-2.5 transition-all">
+            Clear
+          </a>
         </div>
-      <% } %>
+        <% } %>
 
     </form>
   </div>
 
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+  <div
+    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
+        <thead
+          class="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
           <tr>
             <th scope="col" class="px-6 py-4">Report Date</th>
             <th scope="col" class="px-6 py-4">Location</th>
@@ -76,134 +94,177 @@
           </tr>
         </thead>
         <tbody>
-          <% if (typeof logs !== 'undefined' && logs.length > 0) { %>
-            <% logs.forEach(log => { %>
-              <tr class="bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                
+          <% if (typeof logs !=='undefined' && logs.length> 0) { %>
+            <% logs.forEach(log=> { %>
+              <tr
+                class="bg-white dark:bg-gray-800 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+
                 <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">
                   <%= new Date(log.report_date).toLocaleDateString() %>
                 </td>
-                
+
                 <td class="px-6 py-4">
-                  <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-1 px-3 rounded-full text-xs font-bold border border-indigo-100 dark:border-indigo-800">
+                  <span
+                    class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 py-1 px-3 rounded-full text-xs font-bold border border-indigo-100 dark:border-indigo-800">
                     <%= log.location_name %>
                   </span>
                 </td>
-                
+
                 <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-300">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <%= log.email ? log.email.split('@')[0] : 'Unknown' %>
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-300">
+                      <i class="fa-solid fa-user"></i>
                     </div>
+                    <%= log.email ? log.email.split('@')[0] : 'Unknown' %>
+                  </div>
                 </td>
 
                 <td class="px-6 py-4 text-center">
-                   <span class="font-mono text-gray-400 dark:text-gray-500">#<%= log.id %></span>
+                  <span class="font-mono text-gray-400 dark:text-gray-500">#<%= log.id %></span>
                 </td>
 
-                <td class="px-6 py-4 text-right">
-                  <a href="/manager/daily-stock/history/<%= log.id %>" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline hover:text-indigo-800 dark:hover:text-indigo-300 transition">
-                    View Report <i class="fa-solid fa-arrow-right ml-1"></i>
+                <td class="px-6 py-4 text-right flex items-center justify-end gap-3">
+                  <a href="/manager/daily-stock/history/<%= log.id %>"
+                    class="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition"
+                    title="View Details">
+                    <i class="fa-solid fa-eye"></i>
                   </a>
+
+                  <% // --- TIME LIMIT LOGIC --- const createdTime=new Date(log.created_at); const currentTime=new
+                    Date(); const diffMinutes=(currentTime - createdTime) / 1000 / 60; const
+                    isOwner=(user.id==log.user_id); const isAdmin=(user.role==='admin' ); // Allow if: Is Admin OR (Is
+                    Owner AND created less than 5 mins ago) const canEdit=isAdmin || (isOwner && diffMinutes <=5); %>
+
+                    <% if (canEdit) { %>
+                      <a href="/manager/daily-stock/edit/<%= log.id %>"
+                        class="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition"
+                        title="Edit (Time Limit: 5m)">
+                        <i class="fa-solid fa-pen"></i>
+                      </a>
+
+                      <button onclick="deleteLog(<%= log.id %>)"
+                        class="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition"
+                        title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                      <% } %>
                 </td>
               </tr>
-            <% }) %>
-          <% } else { %>
-            <tr>
-              <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark:text-gray-500">
-                <div class="flex flex-col items-center gap-2">
-                    <i class="fa-regular fa-folder-open text-3xl opacity-50"></i>
-                    <p>No stock history found for this selection.</p>
-                </div>
-              </td>
-            </tr>
-          <% } %>
+              <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-400 dark:text-gray-500">
+                      <div class="flex flex-col items-center gap-2">
+                        <i class="fa-regular fa-folder-open text-3xl opacity-50"></i>
+                        <p>No stock history found for this selection.</p>
+                      </div>
+                    </td>
+                  </tr>
+                  <% } %>
         </tbody>
       </table>
     </div>
-    
-    <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
-        <span class="text-xs text-gray-500 dark:text-gray-400">Showing recent logs</span>
+
+    <div
+      class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+      <span class="text-xs text-gray-500 dark:text-gray-400">Showing recent logs</span>
     </div>
   </div>
 
 </div>
 
 <script>
-    // 1. NOTIFICATION FUNCTION
-    function showNotification(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        const isError = type === 'error';
-        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
-        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
-        toast.style.animation = 'slideIn 0.5s forwards';
-        
-        toast.innerHTML = `
+  // 1. NOTIFICATION FUNCTION
+  function showNotification(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const isError = type === 'error';
+    const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+    const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+    toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+    toast.style.animation = 'slideIn 0.5s forwards';
+
+    toast.innerHTML = `
             <div class="text-2xl">${icon}</div>
             <div class="font-bold text-sm">${message}</div>
         `;
-        container.appendChild(toast);
+    container.appendChild(toast);
 
-        setTimeout(() => {
-            toast.style.animation = 'slideOut 0.5s forwards';
-            setTimeout(() => toast.remove(), 500);
-        }, 3000);
+    setTimeout(() => {
+      toast.style.animation = 'slideOut 0.5s forwards';
+      setTimeout(() => toast.remove(), 500);
+    }, 3000);
+  }
+
+  // 2. SUBMIT HANDLER
+  async function submitDailyStock(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const originalText = btn.innerHTML;
+
+    const form = e.target;
+    const data = { items: [] };
+    // Build array from inputs
+    const inputs = form.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+      if (input.value !== '') {
+        const parent = input.closest('.flex');
+        data.items.push({
+          name: parent.querySelector('input[name*="[name]"]').value,
+          category: parent.querySelector('input[name*="[category]"]').value,
+          unit: parent.querySelector('input[name*="[unit]"]').value,
+          quantity: input.value
+        });
+      }
+    });
+    // Validation Alert
+    if (data.items.length === 0) {
+      return showNotification("⚠️ Please enter at least one quantity.", "error");
     }
 
-    // 2. SUBMIT HANDLER
-    async function submitDailyStock(e) {
-        e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        const originalText = btn.innerHTML;
-        
-        const form = e.target;
-        const data = { items: [] };
-        // Build array from inputs
-        const inputs = form.querySelectorAll('input[type="number"]');
-        inputs.forEach(input => {
-            if(input.value !== '') { 
-                const parent = input.closest('.flex'); 
-                data.items.push({
-                    name: parent.querySelector('input[name*="[name]"]').value,
-                    category: parent.querySelector('input[name*="[category]"]').value,
-                    unit: parent.querySelector('input[name*="[unit]"]').value,
-                    quantity: input.value
-                });
-            }
-        });
-        // Validation Alert
-        if(data.items.length === 0) {
-            return showNotification("⚠️ Please enter at least one quantity.", "error");
-        }
+    // Loading State
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
 
-        // Loading State
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+    try {
+      const res = await fetch('/api/manager/daily-stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        showNotification("Stock Count Saved Successfully!", "success");
+        // Wait 1.5s before reloading so user sees the success message
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        showNotification("Error saving stock count", "error");
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification("Server Connection Error", "error");
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+
+  async function deleteLog(id) {
+        if(!confirm("Are you sure you want to delete this report? This cannot be undone.")) return;
 
         try {
-            const res = await fetch('/api/manager/daily-stock', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            const res = await fetch(`/api/manager/daily-stock/${id}`, { method: 'DELETE' });
             if(res.ok) {
-                showNotification("Stock Count Saved Successfully!", "success");
-                // Wait 1.5s before reloading so user sees the success message
-                setTimeout(() => window.location.reload(), 1500);
+                showNotification("Report deleted successfully", "success");
+                setTimeout(() => window.location.reload(), 1000);
             } else {
-                showNotification("Error saving stock count", "error");
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+                const data = await res.json();
+                showNotification(data.error || "Error deleting report", "error");
             }
         } catch(err) {
             console.error(err);
-            showNotification("Server Connection Error", "error");
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+            showNotification("Server Error", "error");
         }
     }
 </script>

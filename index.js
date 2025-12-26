@@ -729,6 +729,131 @@ app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manag
     }
 });
 
+// --- DELETE LOG ROUTE ---
+app.delete('/api/manager/daily-stock/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const logId = req.params.id;
+        
+        // 1. Fetch Log Info to check permissions
+        const logRes = await pool.query("SELECT * FROM daily_inventory_logs WHERE id = $1", [logId]);
+        if (logRes.rows.length === 0) return res.status(404).json({ error: "Log not found" });
+        
+        const log = logRes.rows[0];
+        
+        // 2. Permission Check (5 Minute Rule)
+        const created = new Date(log.created_at);
+        const now = new Date();
+        const diffMinutes = (now - created) / 1000 / 60;
+        
+        const isOwner = (req.user.id == log.user_id);
+        const isAdmin = (req.user.role === 'admin');
+
+        if (!isAdmin) {
+            if (!isOwner) return res.status(403).json({ error: "Unauthorized" });
+            if (diffMinutes > 5) return res.status(403).json({ error: "Time limit exceeded. Cannot delete after 5 minutes." });
+        }
+
+        // 3. Delete Items first (Foreign Key) then Log
+        await pool.query("DELETE FROM daily_inventory_items WHERE log_id = $1", [logId]);
+        await pool.query("DELETE FROM daily_inventory_logs WHERE id = $1", [logId]);
+
+        res.json({ message: "Deleted successfully" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server Error" });
+    }
+});
+
+// --- GET EDIT PAGE ---
+app.get('/manager/daily-stock/edit/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const logId = req.params.id;
+        
+        const logRes = await pool.query("SELECT * FROM daily_inventory_logs WHERE id = $1", [logId]);
+        if (logRes.rows.length === 0) return res.redirect('/manager/daily-stock/history');
+        const log = logRes.rows[0];
+
+        // Permission Logic
+        const created = new Date(log.created_at);
+        const now = new Date();
+        const diffMinutes = (now - created) / 1000 / 60;
+        
+        const isOwner = (req.user.id == log.user_id);
+        const isAdmin = (req.user.role === 'admin' || req.user.role === 'manager');
+        const isUnlocked = log.is_unlocked; // <--- Check Database Flag
+
+        // ALLOW IF: (Admin/Manager) OR (Unlocked) OR (Owner & < 5 mins)
+        if (!isAdmin && !isUnlocked && (!isOwner || diffMinutes > 5)) {
+            return res.send(`<script>alert('Edit time limit expired. Ask a Manager to unlock this report.'); window.location.href='/manager/daily-stock/history';</script>`);
+        }
+
+        const itemsRes = await pool.query("SELECT * FROM daily_inventory_items WHERE log_id = $1 ORDER BY category, item_name", [logId]);
+
+        res.render('manager/edit_daily_log.ejs', {
+            log: log,
+            items: itemsRes.rows,
+            title: 'Edit Stock Log',
+            layout: 'layout'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.redirect('/manager/daily-stock/history');
+    }
+});
+
+// --- SUBMIT EDIT (UPDATE) ---
+app.post('/api/manager/daily-stock/update/:id', checkAuthenticated, async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const logId = req.params.id;
+        const { items } = req.body; // Array of { id, quantity }
+
+        // (You can add the same 5-minute permission check here for extra security if you want)
+
+        await client.query('BEGIN');
+
+        for (const item of items) {
+            // Update each item's quantity
+            await client.query(
+                "UPDATE daily_inventory_items SET quantity = $1 WHERE id = $2 AND log_id = $3",
+                [item.quantity, item.id, logId]
+            );
+        }
+
+        await client.query('COMMIT');
+        res.json({ message: "Updated" });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ error: "Update failed" });
+    } finally {
+        client.release();
+    }
+});
+
+app.post('/api/manager/daily-stock/toggle-lock/:id', checkAuthenticated, checkRole(['admin', 'manager']), async (req, res) => {
+    try {
+        const logId = req.params.id;
+        
+        // Toggle the is_unlocked status
+        // If it's false, make it true. If true, make it false.
+        await pool.query(`
+            UPDATE daily_inventory_logs 
+            SET is_unlocked = NOT COALESCE(is_unlocked, false) 
+            WHERE id = $1
+        `, [logId]);
+
+        res.json({ message: "Permission updated" });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server Error" });
+    }
+});
+
 app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
     try {
         let queryParams = [];
@@ -807,13 +932,14 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
         const logRes = await pool.query(`
             SELECT l.*, u.email 
             FROM daily_inventory_logs l
-            LEFT JOIN users u ON l.user_id = u.id
+            LEFT JOIN users u ON l.user_id = u.id::varchar
             WHERE l.id = $1
         `, [logId]);
 
         if (logRes.rows.length === 0) return res.redirect('/manager/daily-stock/history');
         const log = logRes.rows[0];
 
+        // Security check for store managers
         if (req.user.role === 'store_manager') {
              const locRes = await pool.query("SELECT name FROM locations WHERE id = $1", [req.user.assigned_location_id]);
              if (locRes.rows.length > 0 && log.location_name !== locRes.rows[0].name) {
@@ -821,12 +947,20 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
              }
         }
 
-        const itemsRes = await pool.query("SELECT * FROM daily_inventory_items WHERE log_id = $1 ORDER BY category, item_name", [logId]);
+        // --- CORRECTED QUERY (Only defined once) ---
+        const itemsRes = await pool.query(`
+            SELECT dii.*, s.image_url 
+            FROM daily_inventory_items dii
+            LEFT JOIN stocks s ON dii.item_name = s.name
+            WHERE dii.log_id = $1 
+            ORDER BY dii.category, dii.item_name
+        `, [logId]);
 
         res.render('manager/view_daily_log.ejs', {
             title: `Log #${logId}`,
             log: log,
-            items: itemsRes.rows
+            items: itemsRes.rows,
+            layout: 'layout'
         });
 
     } catch (err) {
