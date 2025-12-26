@@ -1,16 +1,6 @@
-// =========================================================
-// ADMIN ROUTES
-// =========================================================
+import { pool } from '../config/database.js';
 
-// --- NEW CONTROLLER ROUTE ---
-app.get("/staff/menu", 
-    checkAuthenticated, 
-    checkRole(['admin', 'manager', 'store_manager', 'staff', 'cashier']), 
-    menuController.getStaffMenu
-);
-
-// DAILY STOCK COUNT
-app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
+export const getDailyStock = async (req, res) => {
     try {
         const userId = req.user.id;
         let locId = req.user.assigned_location_id ? String(req.user.assigned_location_id) : null;
@@ -33,7 +23,6 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
         const locationName = locRes.rows[0].name;
 
         const allLocs = await pool.query("SELECT * FROM locations ORDER BY id ASC");
-
         const dateQuery = req.query.date || new Date().toISOString().split('T')[0];
         
         let alreadySubmitted = false;
@@ -65,9 +54,9 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
         console.error(err);
         res.status(500).send("Server Error: " + err.message);
     }
-});
+};
 
-app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
+export const postDailyStock = async (req, res) => {
     const client = await pool.connect();
     try {
         const { items, location_id } = req.body; 
@@ -75,9 +64,8 @@ app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manag
         let locId = req.user.assigned_location_id;
 
         if (['admin', 'manager'].includes(req.user.role)) {
-            if (location_id) {
-                locId = location_id;
-            } else if (!locId) {
+            if (location_id) locId = location_id;
+            else if (!locId) {
                 const firstLoc = await client.query("SELECT id FROM locations ORDER BY id ASC LIMIT 1");
                 if (firstLoc.rows.length > 0) locId = firstLoc.rows[0].id;
             }
@@ -89,16 +77,13 @@ app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manag
         }
 
         const locRes = await client.query("SELECT name FROM locations WHERE id = $1", [locId]);
-        
         if (locRes.rows.length === 0) {
             client.release();
             return res.status(400).json({ error: "Invalid location assigned." });
         }
-
         const locationName = locRes.rows[0].name;
 
         await client.query('BEGIN');
-
         const logRes = await client.query(
             "INSERT INTO daily_inventory_logs (location_name, user_id, report_date) VALUES ($1, $2, CURRENT_DATE) RETURNING id",
             [locationName, userId]
@@ -122,9 +107,9 @@ app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manag
     } finally {
         client.release();
     }
-});
+};
 
-app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
+export const getDailyStockHistory = async (req, res) => {
     try {
         let queryParams = [];
         let queryConditions = [];
@@ -173,17 +158,15 @@ app.get('/manager/daily-stock/history', checkAuthenticated, checkRole(['store_ma
             query: req.query,
             user: req.user
         });
-
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error: " + err.message);
     }
-});
+};
 
-app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const getDailyStockView = async (req, res) => {
     try {
         const logId = req.params.id;
-
         const logRes = await pool.query(`
             SELECT l.*, u.email 
             FROM daily_inventory_logs l
@@ -200,7 +183,6 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
                  return res.status(403).send("Access Denied: This log belongs to another store.");
              }
         }
-
         const itemsRes = await pool.query("SELECT * FROM daily_inventory_items WHERE log_id = $1 ORDER BY category, item_name", [logId]);
 
         res.render('manager/view_daily_log.ejs', {
@@ -208,9 +190,8 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
             log: log,
             items: itemsRes.rows
         });
-
     } catch (err) {
         console.error(err);
         res.redirect('/manager/daily-stock/history');
     }
-});
+};

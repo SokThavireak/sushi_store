@@ -1,8 +1,7 @@
-// =========================================================
-// PAYMENT ROUTES (DEMO MODE)
-// =========================================================
+import { pool } from '../config/database.js';
 
-app.get('/payment/:id', checkAuthenticated, async (req, res) => {
+export const processPayment = async (req, res) => {
+    // This maps to app.get('/payment/:id') in your original code
     try {
         const orderId = req.params.id;
         const orderRes = await pool.query("SELECT * FROM orders WHERE id = $1", [orderId]);
@@ -22,9 +21,10 @@ app.get('/payment/:id', checkAuthenticated, async (req, res) => {
         console.error("Payment Error:", err);
         res.redirect('/profile');
     }
-});
+};
 
-app.post('/payment/confirm/:id', checkAuthenticated, async (req, res) => {
+export const confirmPayment = async (req, res) => {
+    // This maps to app.post('/payment/confirm/:id')
     try {
         const orderId = req.params.id;
         await pool.query(
@@ -36,4 +36,4 @@ app.post('/payment/confirm/:id', checkAuthenticated, async (req, res) => {
         console.error(err);
         res.status(500).send("Error confirming payment");
     }
-});
+};

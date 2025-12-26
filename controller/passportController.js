@@ -1,4 +1,11 @@
-// --- PASSPORT STRATEGIES ---
+import passport from "passport";
+import { Strategy } from "passport-local";
+import GoogleStrategy from "passport-google-oauth2";
+import bcrypt from "bcrypt";
+import { pool } from '../config/database.js';
+import env from "dotenv";
+
+env.config();
 
 passport.use(
   "local",
@@ -55,26 +62,6 @@ passport.use(new GoogleStrategy({
   )
 );
 
-app.get("/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
-
-app.get("/auth/google/callback", 
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-  }),
-  (req, res) => {
-    const role = req.user.role;
-    if (['admin', 'manager', 'store_manager'].includes(role)) {
-      res.redirect("/admin/dashboard");
-    } else {
-      res.redirect("/");
-    }
-  }
-);
-
 passport.serializeUser((user, cb) => {
   cb(null, user);
 });
@@ -82,3 +69,5 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser((user, cb) => {
   cb(null, user);
 });
+
+export default {};

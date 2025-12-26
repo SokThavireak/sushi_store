@@ -1,8 +1,6 @@
-// =========================================================
-// STOCK ORDER MANAGEMENT
-// =========================================================
+import { pool } from '../config/database.js';
 
-app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const getStockOrders = async (req, res) => {
     try {
         let query = `
             SELECT s.*, u.email 
@@ -35,9 +33,9 @@ app.get('/admin/stock', checkAuthenticated, checkRole(['manager', 'admin', 'stor
         console.error(err);
         res.status(500).send("Server Error");
     }
-});
+};
 
-app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const getCreateStock = async (req, res) => {
     try {
         const locRes = await pool.query("SELECT * FROM locations");
         const prodRes = await pool.query("SELECT * FROM products ORDER BY category, name");
@@ -62,9 +60,9 @@ app.get('/admin/stock/create', checkAuthenticated, checkRole(['manager', 'admin'
         console.error(err);
         res.redirect('/admin/stock');
     }
-});
+};
 
-app.post("/admin/stock/add", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), upload.single("image"), async (req, res) => {
+export const addStock = async (req, res) => {
     const { name, category, quantity, unit } = req.body;
     const image_url = req.file ? req.file.path : "";
 
@@ -78,9 +76,9 @@ app.post("/admin/stock/add", checkAuthenticated, checkRole(['manager', 'admin', 
         console.error(err);
         res.status(500).send("Error adding stock item.");
     }
-});
+};
 
-app.patch("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const updateStock = async (req, res) => {
     const { id } = req.params;
     const { name, category, quantity, unit, image_url } = req.body;
     try {
@@ -93,9 +91,9 @@ app.patch("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', '
         console.error(err);
         res.status(500).json({ error: "Update failed" });
     }
-});
+};
 
-app.delete("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const deleteStock = async (req, res) => {
     try {
         await pool.query("DELETE FROM stocks WHERE id=$1", [req.params.id]);
         res.json({ message: "Deleted" });
@@ -103,9 +101,9 @@ app.delete("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 
         console.error(err);
         res.status(500).json({ error: "Delete failed" });
     }
-});
+};
 
-app.post('/api/stock/create', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const createStockRequest = async (req, res) => {
     const client = await pool.connect();
     try {
         const { location_name, items } = req.body; 
@@ -150,4 +148,4 @@ app.post('/api/stock/create', checkAuthenticated, checkRole(['manager', 'admin',
     } finally {
         client.release();
     }
-});
+};

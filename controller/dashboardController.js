@@ -1,7 +1,6 @@
-// =========================================================
-// ADMIN DASHBOARD
-// =========================================================
-app.get("/admin/dashboard", checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async(req, res) => {
+import { pool } from '../config/database.js';
+
+export const getDashboard = async(req, res) => {
     try {
         const client = await pool.connect();
         
@@ -78,9 +77,9 @@ app.get("/admin/dashboard", checkAuthenticated, checkRole(['manager', 'admin', '
             title: "Dashboard", productsCount: 0, userCount: 0, ordersCount: 0, totalRevenue: 0, chartData: [], statusData: [], locations: [], currentFilter: 'All' 
         });
     }
-});
+};
 
-app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const getReports = async (req, res) => {
     try {
         const selectedDate = req.query.date || new Date().toISOString().split('T')[0];
         
@@ -143,9 +142,9 @@ app.get('/admin/reports', checkAuthenticated, checkRole(['manager', 'admin', 'st
         console.error(err);
         res.status(500).send("Server Error");
     }
-});
+};
 
-app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
+export const getOrders = async (req, res) => {
     try {
         let query = `
             SELECT o.*, u.email 
@@ -179,18 +178,18 @@ app.get('/admin/orders', checkAuthenticated, checkRole(['manager', 'admin', 'sto
         console.error(err);
         res.status(500).send("Server Error: " + err.message);
     }
-});
+};
 
-app.post('/admin/orders/:id/status', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
     try {
         await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [req.body.status, req.params.id]);
         res.redirect('/admin/orders');
     } catch (err) {
         res.status(500).send("Error");
     }
-});
+};
 
-app.post('/admin/orders/handle-request/:id', checkAuthenticated, checkRole(['admin', 'manager', 'store_manager']), async (req, res) => {
+export const handleOrderRequest = async (req, res) => {
     const { action } = req.body;
     const orderId = req.params.id;
     let newStatus = '';
@@ -208,4 +207,4 @@ app.post('/admin/orders/handle-request/:id', checkAuthenticated, checkRole(['adm
         console.error(err);
         res.redirect('/admin/orders');
     }
-});
+};

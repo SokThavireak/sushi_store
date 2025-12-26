@@ -1,10 +1,8 @@
-// =========================================================
-// CART API ROUTES
-// =========================================================
+import { pool } from '../config/database.js';
 
-app.get("/api/cart", async (req, res) => {
+export const getCart = async (req, res) => {
+  // Return empty if not logged in or is an environment admin
   if (!req.user) return res.json([]); 
-
   if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
       return res.json([]); 
   }
@@ -22,9 +20,9 @@ app.get("/api/cart", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
-});
+};
 
-app.post("/api/cart", async (req, res) => {
+export const addToCart = async (req, res) => {
   if (!req.user) return res.status(401).json({ error: "Please login to add items" });
 
   if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
@@ -46,9 +44,9 @@ app.post("/api/cart", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
-});
+};
 
-app.patch("/api/cart/:id", async (req, res) => {
+export const updateCartItem = async (req, res) => {
   if (!req.user) return res.status(401).json({ error: "Login required" });
   const { id } = req.params;
   const { action } = req.body;
@@ -69,4 +67,4 @@ app.patch("/api/cart/:id", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
-});
+};

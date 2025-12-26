@@ -1,10 +1,7 @@
-// --- INVENTORY ---
+import { pool } from '../config/database.js';
+import upload from '../config/cloudinary.js'; // Assuming you use this for the upload
 
-app.get("/add-item", checkAuthenticated, checkRole(['manager', 'admin']), (req, res) => {
-    res.render("admin/inventory.ejs", { title: "Add Item" });
-});
-
-app.get("/admin/inventory", checkAuthenticated, checkRole(['manager', 'admin']), async(req, res) => {
+export const getInventory = async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM products ORDER BY id ASC");
     const categoryResult = await pool.query("SELECT * FROM categories ORDER BY id ASC");
@@ -15,9 +12,9 @@ app.get("/admin/inventory", checkAuthenticated, checkRole(['manager', 'admin']),
   } catch (err) {
     res.status(500).send("Database Error");
   }
-});
+};
 
-app.post("/admin/inventory/add", checkAuthenticated, checkRole(['manager', 'admin']), upload.single("image"), async (req, res) => {
+export const addProduct = async (req, res) => {
   const { name, category, price, is_best_seller, discount_type, discount_value } = req.body;
   const image_url = req.file ? req.file.path : "https://via.placeholder.com/150";
   const isBestSellerBool = is_best_seller === 'true';
@@ -29,7 +26,6 @@ app.post("/admin/inventory/add", checkAuthenticated, checkRole(['manager', 'admi
     if (nameCheck.rows.length > 0) {
         return res.send(`<script>alert('Error: Name exists.'); window.location.href='/admin/inventory';</script>`);
     }
-
     const catCheck = await pool.query("SELECT * FROM categories WHERE name = $1", [category]);
     if (catCheck.rows.length === 0) {
         await pool.query("INSERT INTO categories (name) VALUES ($1)", [category]);
@@ -45,9 +41,9 @@ app.post("/admin/inventory/add", checkAuthenticated, checkRole(['manager', 'admi
     console.error(err);
     res.status(500).send("Error adding item");
   }
-});
+};
 
-app.patch("/api/inventory/:id", async (req, res) => {
+export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, category, price, image_url, is_best_seller, discount_type, discount_value } = req.body;
   try {
@@ -59,9 +55,9 @@ app.patch("/api/inventory/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Update failed" });
   }
-});
+};
 
-app.delete("/api/inventory/:id", async (req, res) => {
+export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query("DELETE FROM cart WHERE product_id = $1", [id]); 
@@ -70,4 +66,4 @@ app.delete("/api/inventory/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Delete failed" });
   }
-});
+};

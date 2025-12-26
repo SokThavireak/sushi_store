@@ -1,8 +1,6 @@
-// =========================================================
-// MASTER STOCK MENU
-// =========================================================
+import { pool } from '../config/database.js';
 
-app.get('/admin/stock/menu', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+export const getStockMenu = async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM stocks ORDER BY category, name ASC");
         res.render('admin/stock/stock_menu.ejs', { 
@@ -13,9 +11,9 @@ app.get('/admin/stock/menu', checkAuthenticated, checkRole(['manager', 'admin'])
         console.error(err);
         res.status(500).send("Server Error");
     }
-});
+};
 
-app.post('/admin/stock/menu/add', checkAuthenticated, checkRole(['manager', 'admin']), upload.single('image'), async (req, res) => {
+export const addStockItem = async (req, res) => {
     const { name, category, unit } = req.body;
     const image_url = req.file ? req.file.path : ''; 
     
@@ -29,9 +27,9 @@ app.post('/admin/stock/menu/add', checkAuthenticated, checkRole(['manager', 'adm
         console.error(err);
         res.send(`<script>alert('Error adding item'); window.location.href='/admin/stock/menu';</script>`);
     }
-});
+};
 
-app.patch('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+export const updateStockItem = async (req, res) => {
     const { id } = req.params;
     const { name, category, unit, image_url } = req.body;
     try {
@@ -43,13 +41,13 @@ app.patch('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'admi
     } catch (err) {
         res.status(500).json({ error: "Error" });
     }
-});
+};
 
-app.delete('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+export const deleteStockItem = async (req, res) => {
     try {
         await pool.query("DELETE FROM stocks WHERE id=$1", [req.params.id]);
         res.json({ message: "Deleted" });
     } catch (err) {
         res.status(500).json({ error: "Error" });
     }
-});
+};

@@ -1,6 +1,8 @@
-// --- ADMIN USER MANAGEMENT ---
+import { pool } from '../config/database.js';
+import bcrypt from 'bcrypt';
+const saltRounds = 10;
 
-app.get("/admin/users", checkAuthenticated, checkRole(['admin']), async (req, res) => {
+export const getUsers = async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM users ORDER BY id ASC");
         const locResult = await pool.query("SELECT * FROM locations ORDER BY name ASC"); 
@@ -14,9 +16,9 @@ app.get("/admin/users", checkAuthenticated, checkRole(['admin']), async (req, re
         console.error(err);
         res.status(500).send("Error fetching users");
     }
-});
+};
 
-app.post("/admin/users/delete/:id", checkAuthenticated, checkRole(['admin']), async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const id = req.params.id;
         if (parseInt(id) === req.user.id) return res.redirect("/admin/users");
@@ -25,13 +27,12 @@ app.post("/admin/users/delete/:id", checkAuthenticated, checkRole(['admin']), as
     } catch (err) {
         res.redirect("/admin/users");
     }
-});
+};
 
-app.get("/admin/users/edit/:id", checkAuthenticated, checkRole(['admin']), async (req, res) => {
+export const editUser = async (req, res) => {
     try {
         const id = req.params.id;
         const userResult = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-        
         const locResult = await pool.query("SELECT * FROM locations");
 
         if (userResult.rows.length > 0) {
@@ -47,9 +48,9 @@ app.get("/admin/users/edit/:id", checkAuthenticated, checkRole(['admin']), async
         console.error(err);
         res.redirect("/admin/users");
     }
-});
+};
 
-app.post("/admin/users/update/:id", checkAuthenticated, checkRole(['admin']), async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const id = req.params.id;
         const { email, role, assigned_location_id } = req.body; 
@@ -65,9 +66,9 @@ app.post("/admin/users/update/:id", checkAuthenticated, checkRole(['admin']), as
         console.error(err);
         res.redirect("/admin/users");
     }
-});
+};
 
-app.post("/admin/create-manager", checkAuthenticated, checkRole(['admin', 'manager']), async (req, res) => {
+export const createManager = async (req, res) => {
   const { email, password, role, assigned_location_id } = req.body;
 
   try {
@@ -94,4 +95,4 @@ app.post("/admin/create-manager", checkAuthenticated, checkRole(['admin', 'manag
     console.error(err);
     res.redirect("/admin/users"); 
   }
-});
+};

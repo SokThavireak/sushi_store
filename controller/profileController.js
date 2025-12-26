@@ -1,10 +1,12 @@
-// --- PROFILE ROUTES ---
+import { pool } from '../config/database.js';
+import bcrypt from 'bcrypt';
+const saltRounds = 10;
 
-app.get("/profile", checkAuthenticated, (req, res) => {
+export const getProfile = (req, res) => {
     res.render("website/profile.ejs", { title: "Manage Account", layout: "layouts" });
-});
+};
 
-app.post("/profile/update", checkAuthenticated, async (req, res) => {
+export const updateProfile = async (req, res) => {
     const { email, password } = req.body;
     const userId = req.user.id;
 
@@ -32,9 +34,9 @@ app.post("/profile/update", checkAuthenticated, async (req, res) => {
         console.error(err);
         res.redirect("/profile");
     }
-});
+};
 
-app.post("/profile/delete", checkAuthenticated, async (req, res) => {
+export const deleteProfile = async (req, res) => {
     const userId = req.user.id;
     try {
         await pool.query("DELETE FROM users WHERE id = $1", [userId]);
@@ -45,4 +47,4 @@ app.post("/profile/delete", checkAuthenticated, async (req, res) => {
     } catch (err) {
         res.redirect("/profile");
     }
-});
+};

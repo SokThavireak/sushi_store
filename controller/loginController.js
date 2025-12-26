@@ -1,16 +1,17 @@
-// =========================================================
-// AUTHENTICATION LOGIC
-// =========================================================
+import { pool } from '../config/database.js';
+import passport from 'passport';
+import bcrypt from 'bcrypt';
+const saltRounds = 10;
 
-app.get("/login", (req, res) => {
+export const getLogin = (req, res) => {
     res.render("website/auth.ejs", { title: "Login / Register", layout: false, action: 'login' });
-});
+};
 
-app.get("/register", (req, res) => {
+export const getRegister = (req, res) => {
     res.render("website/auth.ejs", { title: "Login / Register", layout: false, action: 'register' });
-});
+};
 
-app.post("/login", (req, res, next) => {
+export const postLogin = (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
         if (err) return next(err);
         
@@ -38,9 +39,9 @@ app.post("/login", (req, res, next) => {
             });
         });
     })(req, res, next);
-});
+};
 
-app.post("/register", async (req, res) => {
+export const postRegister = async (req, res) => {
   const email = req.body.username;
   const password = req.body.password;
   try {
@@ -64,11 +65,11 @@ app.post("/register", async (req, res) => {
   } catch (err) {
     res.redirect("/register");
   }
-});
+};
 
-app.get("/logout", (req, res) => {
+export const logout = (req, res) => {
     req.logout((err) => {
         if (err) return console.error(err);
         res.redirect("/");
     });
-});
+};

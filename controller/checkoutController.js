@@ -1,8 +1,8 @@
-// =========================================================
-// CHECKOUT & ORDERS ROUTE
-// =========================================================
+import { pool } from '../config/database.js';
 
-app.get('/checkout', checkAuthenticated, async (req, res) => {
+// --- User Facing Checkout ---
+
+export const getCheckout = async (req, res) => {
     if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
          return res.redirect('/'); 
     }
@@ -26,9 +26,9 @@ app.get('/checkout', checkAuthenticated, async (req, res) => {
         console.error(err);
         res.redirect('/');
     }
-});
+};
 
-app.post('/api/orders', checkAuthenticated, async (req, res) => {
+export const createOrder = async (req, res) => {
     let { pickup_location, payment_method, table_number } = req.body;
     const client = await pool.connect();
     
@@ -78,9 +78,11 @@ app.post('/api/orders', checkAuthenticated, async (req, res) => {
     } finally {
         client.release();
     }
-});
+};
 
-app.post('/admin/orders/delete/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+// --- Admin Order Management (Edit/Delete) ---
+
+export const deleteOrder = async (req, res) => {
     try {
         const id = req.params.id;
         await pool.query("DELETE FROM order_items WHERE order_id = $1", [id]);
@@ -90,9 +92,9 @@ app.post('/admin/orders/delete/:id', checkAuthenticated, checkRole(['manager', '
         console.error(err);
         res.status(500).send("Error deleting order");
     }
-});
+};
 
-app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager']), async (req, res) => {
+export const getEditOrder = async (req, res) => {
     try {
         const orderId = req.params.id;
 
@@ -119,9 +121,9 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
         console.error(err);
         res.status(500).send("Server Error");
     }
-});
+};
 
-app.post('/admin/orders/items/delete/:itemId', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
+export const deleteOrderItem = async (req, res) => {
     const client = await pool.connect();
     try {
         const itemId = req.params.itemId;
@@ -147,9 +149,9 @@ app.post('/admin/orders/items/delete/:itemId', checkAuthenticated, checkRole(['m
     } finally {
         client.release();
     }
-});
+};
 
-app.post('/admin/orders/items/update/:itemId', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
+export const updateOrderItem = async (req, res) => {
     const client = await pool.connect();
     try {
         const itemId = req.params.itemId;
@@ -183,9 +185,9 @@ app.post('/admin/orders/items/update/:itemId', checkAuthenticated, checkRole(['m
     } finally {
         client.release();
     }
-});
+};
 
-app.post('/admin/orders/update/:id', checkAuthenticated, checkRole(['manager', 'admin', 'store_manager', 'staff', 'cashier']), async (req, res) => {
+export const updateOrderDetails = async (req, res) => {
     try {
         const id = req.params.id;
         const { status, payment_method, pickup_location, table_number } = req.body;
@@ -199,4 +201,4 @@ app.post('/admin/orders/update/:id', checkAuthenticated, checkRole(['manager', '
         console.error(err);
         res.status(500).send("Error updating order");
     }
-});
+};

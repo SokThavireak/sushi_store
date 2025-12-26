@@ -1,6 +1,6 @@
-// --- CATEGORY MANAGEMENT ---
+import { pool } from '../config/database.js';
 
-app.get('/admin/category', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+export const getCategories = async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM categories ORDER BY id ASC');
         res.render('admin/category.ejs', { 
@@ -9,9 +9,9 @@ app.get('/admin/category', checkAuthenticated, checkRole(['manager', 'admin']), 
     } catch (err) {
         res.status(500).send("Server Error");
     }
-});
+};
 
-app.post('/api/category', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+export const addCategory = async (req, res) => {
     try {
         const { name } = req.body;
         await pool.query('INSERT INTO categories (name) VALUES ($1)', [name]);
@@ -19,9 +19,9 @@ app.post('/api/category', checkAuthenticated, checkRole(['manager', 'admin']), a
     } catch (err) {
         res.status(500).json({ error: "Database Error" });
     }
-});
+};
 
-app.patch('/api/category/:id', checkAuthenticated, checkRole(['manager', 'admin']), async (req, res) => {
+export const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const { name } = req.body;
@@ -30,9 +30,9 @@ app.patch('/api/category/:id', checkAuthenticated, checkRole(['manager', 'admin'
     } catch (err) {
         res.status(500).json({ error: "Database Error" });
     }
-});
+};
 
-app.delete('/api/category/:id', checkAuthenticated, checkRole(['admin']), async (req, res) => {
+export const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
         await pool.query('DELETE FROM categories WHERE id = $1', [id]);
@@ -40,4 +40,4 @@ app.delete('/api/category/:id', checkAuthenticated, checkRole(['admin']), async 
     } catch (err) {
         res.status(500).json({ error: "Database Error" });
     }
-});
+};
