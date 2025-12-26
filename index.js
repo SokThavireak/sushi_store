@@ -413,8 +413,9 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
     try {
         const orderId = req.params.id;
 
+        // FIXED: Removed "u.name as user_name" because the column does not exist
         const orderRes = await pool.query(`
-            SELECT o.*, u.email, u.name as user_name 
+            SELECT o.*, u.email 
             FROM orders o 
             LEFT JOIN users u ON o.user_id = u.id 
             WHERE o.id = $1
@@ -434,7 +435,7 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Server Error");
+        res.status(500).send("Server Error: " + err.message);
     }
 });
 
