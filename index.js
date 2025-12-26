@@ -1752,7 +1752,7 @@ app.get("/auth/google",
 );
 
 // Google Callback Handler
-app.get("/auth/google/secrets",
+app.get("/auth/google/callback", 
   passport.authenticate("google", {
     failureRedirect: "/login",
   }),
