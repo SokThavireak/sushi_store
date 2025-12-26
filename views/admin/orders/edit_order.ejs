@@ -135,10 +135,13 @@
     // 1. NOTIFICATION SYSTEM
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
+        if(!container) return; // Safety check
+
         const toast = document.createElement('div');
         const isError = type === 'error';
         const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
         const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+        
         toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
         toast.style.animation = 'slideIn 0.5s forwards';
         
@@ -152,7 +155,7 @@
             toast.style.animation = 'slideOut 0.5s forwards';
             setTimeout(() => toast.remove(), 500);
         }, 3000);
-    }
+    }    
 
     // 2. UPDATE USER
     async function updateUser(e) {
