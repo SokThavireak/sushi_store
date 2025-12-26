@@ -1,116 +1,123 @@
-<style>
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-</style>
-
-<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
-
-<div class="max-w-3xl mx-auto space-y-6">
-
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-        <form action="/admin/stock" method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
-            
-            <div class="w-full sm:w-auto">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Select Date</label>
-                <input 
-                    type="date" 
-                    name="date" 
-                    value="<%= typeof query !== 'undefined' ? query.date : '' %>"
-                    class="w-full sm:w-48 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-            </div>
-
-            <div class="w-full sm:w-auto flex-1">
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Select Location</label>
-                <div class="relative">
-                    <select name="location" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
-                        <option value="">All Locations</option>
-                        <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
-                            <% locations.forEach(function(loc) { %>
-                                <option value="<%= loc.id %>" <%= (typeof query !== 'undefined' && query.location == loc.id) ? 'selected' : '' %>>
-                                    <%= loc.name %>
-                                </option>
-                            <% }); %>
-                        <% } else { %>
-                            <option value="1">Main Branch</option>
-                            <option value="2">Warehouse</option>
-                            <option value="3">Kitchen</option>
-                        <% } %>
-                    </select>
-                    <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
-            </div>
-
-            <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2">
-                <i class="fa-solid fa-filter"></i> Filter
-            </button>
-        </form>
+<div class="max-w-6xl mx-auto mt-10 px-4 mb-20">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">My Orders</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Track your order history and status</p>
+        </div>
+        <a href="/menu" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-indigo-200 dark:shadow-none flex items-center gap-2">
+            <i class="fa-solid fa-utensils"></i> Order More
+        </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-        <div class="flex justify-between items-start mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
-                    Request #<%= request.id %>
-                    <% if (request.created_at) { %>
-                        <span class="text-xs font-normal bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-2 py-1 rounded-full border border-gray-200 dark:border-gray-600">
-                            <i class="fa-regular fa-calendar mr-1"></i>
-                            <%= new Date(request.created_at).toLocaleDateString() %>
-                        </span>
-                    <% } %>
-                </h2>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Location: <span class="font-bold text-indigo-600 dark:text-indigo-400"><%= request.location_name %></span></p>
-                <p class="text-xs text-gray-400 mt-1">Status: <span class="font-bold"><%= request.status %></span></p>
-            </div>
-            <a href="/admin/stock" class="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white text-sm font-medium flex items-center gap-1">
-                <i class="fa-solid fa-arrow-left"></i> Back to List
-            </a>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
+        
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800 dark:text-white text-lg">Order List</h3>
+            <span class="text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full">
+                <%= typeof orders !== 'undefined' ? orders.length : 0 %> Orders
+            </span>
         </div>
 
-        <div class="mb-8">
-            <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-3">Requested Items</h3>
-            <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-sm uppercase font-bold">
                     <tr>
-                        <th class="p-3">Category</th>
-                        <th class="p-3">Item Name</th>
-                        <th class="p-3 text-right">Quantity</th>
+                        <th class="p-5">ID</th>
+                        <th class="p-5">Date</th>
+                        <th class="p-5">Pickup Location</th>
+                        <th class="p-5">Payment</th>
+                        <th class="p-5">Total</th>
+                        <th class="p-5">Status</th>
+                        <th class="p-5 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    <% items.forEach(item => { %>
-                        <tr class="dark:text-gray-300">
-                            <td class="p-3">
-                                <% if(item.category === 'Cook') { %>
-                                    <span class="bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 px-2 py-1 rounded text-xs font-bold">Cook</span>
-                                <% } else { %>
-                                    <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-xs font-bold">Drink</span>
-                                <% } %>
+                    <% if (typeof orders !== 'undefined' && orders.length > 0) { %>
+                        <% orders.forEach(order => { %>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition duration-200">
+                                
+                                <td class="p-5 font-mono text-sm text-gray-600 dark:text-gray-400">
+                                    #<%= order.id %>
+                                </td>
+
+                                <td class="p-5 text-sm font-medium text-gray-700 dark:text-white">
+                                    <%= new Date(order.created_at).toLocaleDateString() %>
+                                    <span class="text-xs text-gray-400 block font-normal"><%= new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %></span>
+                                </td>
+
+                                <td class="p-5 text-sm text-gray-600 dark:text-gray-300">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-store text-gray-400"></i>
+                                        <%= order.pickup_location %>
+                                    </div>
+                                    <% if(order.table_number) { %>
+                                        <div class="mt-1">
+                                            <span class="text-[10px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
+                                                Table <%= order.table_number %>
+                                            </span>
+                                        </div>
+                                    <% } %>
+                                </td>
+
+                                <td class="p-5">
+                                    <span class="px-2 py-1 rounded text-xs font-bold <%= order.payment_method === 'QR' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400' %>">
+                                        <%= order.payment_method %>
+                                    </span>
+                                </td>
+
+                                <td class="p-5 font-bold text-gray-800 dark:text-white">
+                                    <%= Number(order.total_price).toFixed(2) %> ֏
+                                </td>
+
+                                <td class="p-5">
+                                    <% 
+                                        let statusColor = 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+                                        if(order.status === 'Completed') statusColor = 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400';
+                                        if(order.status === 'Cancelled') statusColor = 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400';
+                                        if(order.status === 'Refunded') statusColor = 'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400';
+                                        if(order.status === 'Pending') statusColor = 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400';
+                                        if(order.status === 'Processing') statusColor = 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400';
+                                        
+                                        if(order.status === 'Cancel Requested' || order.status === 'Refund Requested') 
+                                            statusColor = 'bg-orange-100 text-orange-700 border border-orange-200 animate-pulse';
+                                    %>
+                                    <span class="px-3 py-1 rounded text-xs font-bold <%= statusColor %>">
+                                        <%= order.status %>
+                                    </span>
+                                </td>
+
+                                <td class="p-5 text-right">
+                                    <% if (order.status === 'Pending') { %>
+                                        <form action="/orders/request-cancel/<%= order.id %>" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                            <button type="submit" class="px-3 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 text-xs font-bold transition shadow-sm border border-red-100 dark:border-red-800">
+                                                Request Cancel
+                                            </button>
+                                        </form>
+                                    <% } else if (order.status === 'Completed') { %>
+                                        <form action="/orders/request-refund/<%= order.id %>" method="POST" onsubmit="return confirm('Request a refund for this order?');">
+                                            <button type="submit" class="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 text-xs font-bold transition shadow-sm border border-blue-100 dark:border-blue-800">
+                                                Request Refund
+                                            </button>
+                                        </form>
+                                    <% } else { %>
+                                        <span class="text-gray-300 dark:text-gray-600 text-xs italic">No actions</span>
+                                    <% } %>
+                                </td>
+
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7" class="p-12 text-center text-gray-400 dark:text-gray-500">
+                                <i class="fa-solid fa-basket-shopping text-4xl mb-3 block opacity-20"></i>
+                                No orders found.
                             </td>
-                            <td class="p-3 font-medium text-gray-800 dark:text-gray-200"><%= item.item_name %></td>
-                            <td class="p-3 text-right font-bold"><%= item.quantity %></td>
                         </tr>
-                    <% }) %>
+                    <% } %>
                 </tbody>
             </table>
         </div>
-
-        <% if ((user.role === 'admin' || user.role === 'manager') && request.status === 'Pending') { %>
-            <div class="flex gap-4 border-t border-gray-100 dark:border-gray-700 pt-6">
-                
-                <button onclick="updateStatus('Rejected')" class="flex-1 py-3 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-bold rounded-lg transition transform active:scale-95 border border-red-100 dark:border-red-900/30">
-                    <i class="fa-solid fa-xmark mr-2"></i> Reject
-                </button>
-
-                <button onclick="updateStatus('Confirmed')" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition transform active:scale-95 shadow-lg shadow-indigo-200 dark:shadow-none">
-                    <i class="fa-solid fa-check mr-2"></i> Approve Request
-                </button>
-
-            </div>
-        <% } %>
-        
     </div>
 </div>
 
@@ -120,48 +127,10 @@
 </button>
 
 <script>
-    // --- DARK MODE LOGIC ---
     const themeBtn = document.getElementById('theme-toggle');
     themeBtn.addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
         const isDark = document.documentElement.classList.contains('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
-
-    function showNotification(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        const isError = type === 'error';
-        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
-        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
-        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
-        toast.style.animation = 'slideIn 0.5s forwards';
-        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.animation = 'slideOut 0.5s forwards'; setTimeout(() => toast.remove(), 500); }, 3000);
-    }
-
-    async function updateStatus(status) {
-        // Confirmation before rejecting
-        if(status === 'Rejected' && !confirm("Are you sure you want to reject this request?")) return;
-        
-        try {
-            const res = await fetch('/admin/stock/<%= request.id %>/status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: status })
-            });
-
-            if(res.ok) {
-                const msg = status === 'Confirmed' ? "Request Approved!" : "Request Rejected";
-                showNotification(msg, status === 'Confirmed' ? 'success' : 'error');
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                showNotification("Error updating status", "error");
-            }
-        } catch(err) {
-            console.error(err);
-            showNotification("Server Error", "error");
-        }
-    }
 </script>
