@@ -838,38 +838,37 @@ app.get('/manager/daily-stock/view/:id', checkAuthenticated, checkRole(['manager
 // Route to View Specific History Item Details
 app.get('/manager/daily-stock/history/:id', checkAuthenticated, async (req, res) => {
     try {
-        const { id } = req.params;
+        const logId = req.params.id;
 
-        // 1. Fetch the Request Details
-        // We removed the JOIN because the table likely stores 'location_name' directly
-        const requestResult = await pool.query(`
-            SELECT * FROM stock_requests WHERE id = $1
-        `, [id]);
+        // 1. Fetch from DAILY_INVENTORY_LOGS (Not stock_requests)
+        const logRes = await pool.query(`
+            SELECT l.*, u.email 
+            FROM daily_inventory_logs l
+            LEFT JOIN users u ON l.user_id = u.id::varchar
+            WHERE l.id = $1
+        `, [logId]);
 
-        if (requestResult.rows.length === 0) {
-            return res.status(404).send('Request not found');
+        if (logRes.rows.length === 0) {
+            return res.status(404).send('Stock Log not found');
         }
 
-        // 2. Fetch the Items associated with this request
-        const itemsResult = await pool.query(`
-            SELECT * FROM stock_request_items 
-            WHERE request_id = $1
-        `, [id]);
+        // 2. Fetch the items for this log
+        const itemsRes = await pool.query(`
+            SELECT * FROM daily_inventory_items 
+            WHERE log_id = $1 
+            ORDER BY category, item_name
+        `, [logId]);
 
-        // 3. Fetch Locations for the filter dropdown (needed by view_stock.ejs)
-        const locationsResult = await pool.query('SELECT * FROM locations');
-
-        // 4. Render the View
-        res.render('view_stock', {
-            user: req.user,
-            request: requestResult.rows[0],
-            items: itemsResult.rows,
-            locations: locationsResult.rows, // Pass locations for the dropdown
-            query: {} // Pass empty object to avoid "query is undefined" error
+        // 3. Render the correct view (view_daily_log.ejs)
+        res.render('manager/view_daily_log.ejs', {
+            title: `Log #${logId}`,
+            log: logRes.rows[0],
+            items: itemsRes.rows,
+            layout: 'layout'
         });
 
     } catch (err) {
-        console.error("Error fetching stock history details:", err);
+        console.error("Error fetching daily stock details:", err);
         res.status(500).send('Server Error');
     }
 });
@@ -939,6 +938,32 @@ app.delete('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'adm
         res.json({ message: "Deleted" });
     } catch (err) {
         res.status(500).json({ error: "Error" });
+    }
+});
+
+// NEW ROUTE: View Stock Request (Warehouse Orders)
+app.get('/admin/stock/request/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Query the STOCK_REQUESTS table
+        const requestResult = await pool.query(`SELECT * FROM stock_requests WHERE id = $1`, [id]);
+
+        if (requestResult.rows.length === 0) return res.status(404).send('Request not found');
+
+        const itemsResult = await pool.query(`SELECT * FROM stock_request_items WHERE request_id = $1`, [id]);
+        const locationsResult = await pool.query('SELECT * FROM locations');
+
+        res.render('view_stock', {
+            user: req.user,
+            request: requestResult.rows[0],
+            items: itemsResult.rows,
+            locations: locationsResult.rows,
+            query: {} 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
     }
 });
 
