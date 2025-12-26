@@ -10,61 +10,118 @@
     }
 </style>
 
-<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+<div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mt-10">
 
-<div class="max-w-xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mt-10 transition-colors">
-    
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-white">Edit User Details</h2>
-        <a href="/admin/users" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">Cancel</a>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Order #<%= order.id %></h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Created: <%= new Date(order.created_at).toLocaleString() %>
+            </p>
+        </div>
+        <a href="/admin/orders" class="text-indigo-600 hover:underline">Back to Orders</a>
     </div>
 
-    <form onsubmit="updateUser(event)" class="space-y-4">
-        <input type="hidden" id="userId" value="<%= targetUser.id %>">
+    <form action="/admin/orders/update/<%= order.id %>" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         
         <div>
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Email Address</label>
-            <input type="email" name="email" value="<%= targetUser.email %>" required
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-
-        <div>
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Role Permission</label>
-            <select name="role" id="roleSelect" onchange="toggleLocation()" class="w-full px-4 py-3 bg-white dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="user" <%= targetUser.role === 'user' ? 'selected' : '' %>>User (Standard)</option>
-                <option value="manager" <%= targetUser.role === 'manager' ? 'selected' : '' %>>Head Manager (All Access)</option>
-                <option value="staff" <%= targetUser.role === 'staff' ? 'selected' : '' %>>Staff (POS Access)</option>
-                <option value="store_manager" <%= targetUser.role === 'store_manager' ? 'selected' : '' %>>Local Store Manager</option>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
+            <select name="status" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+                <% ['Pending', 'Processing', 'Completed', 'Cancelled', 'Refunded'].forEach(s => { %>
+                    <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
             </select>
         </div>
 
-        <div id="locationDiv" class="<%= (targetUser.role === 'store_manager' || targetUser.role === 'staff') ? '' : 'hidden' %>">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase text-orange-600 dark:text-orange-400">Assign Store Location</label>
-            <select name="assigned_location_id" id="assignedLocationSelect" 
-                class="w-full px-4 py-3 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 text-orange-900 dark:text-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                <%= (targetUser.role === 'store_manager' || targetUser.role === 'staff') ? 'required' : '' %>>
-                
-                <option value="" class="dark:bg-gray-800 dark:text-white">-- Select Location --</option>
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Payment Method</label>
+            <select name="payment_method" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+                <option value="Cash" <%= order.payment_method === 'Cash' ? 'selected' : '' %>>Cash</option>
+                <option value="QR" <%= order.payment_method === 'QR' ? 'selected' : '' %>>QR / Online</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Pickup Location</label>
+            <select name="pickup_location" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
                 <% locations.forEach(loc => { %>
-                    <option value="<%= loc.id %>" class="dark:bg-gray-800 dark:text-white"
-                        <%= targetUser.assigned_location_id === loc.id ? 'selected' : '' %>>
+                    <option value="<%= loc.name %>" <%= order.pickup_location === loc.name ? 'selected' : '' %>>
                         <%= loc.name %>
                     </option>
                 <% }) %>
             </select>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors">
-            Update User
-        </button>
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Table Number</label>
+            <input type="text" name="table_number" value="<%= order.table_number %>" 
+                   class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+        </div>
 
+        <div class="md:col-span-2">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">
+                Update Order Details
+            </button>
+        </div>
     </form>
-</div>
 
-<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
-    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
-    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
-</button>
+    <hr class="border-gray-200 dark:border-gray-700 my-8">
+
+    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Order Items</h3>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-xs uppercase text-gray-500 border-b dark:border-gray-700">
+                    <th class="py-3">Item Name</th>
+                    <th class="py-3">Price</th>
+                    <th class="py-3">Quantity</th>
+                    <th class="py-3">Total</th>
+                    <th class="py-3 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm text-gray-700 dark:text-gray-300">
+                <% items.forEach(item => { %>
+                    <tr class="border-b dark:border-gray-700">
+                        <td class="py-4">
+                            Product ID: <%= item.product_id %>
+                        </td>
+                        <td class="py-4">$<%= Number(item.price).toFixed(2) %></td>
+                        <td class="py-4">
+                            <form action="/admin/orders/items/update/<%= item.id %>" method="POST" class="flex items-center gap-2">
+                                <input type="number" name="quantity" value="<%= item.quantity %>" min="1" 
+                                       class="w-16 p-1 border rounded text-center dark:bg-gray-700">
+                                <button type="submit" class="text-blue-600 hover:text-blue-800 text-xs font-bold">Update</button>
+                            </form>
+                        </td>
+                        <td class="py-4 font-bold">$<%= (item.price * item.quantity).toFixed(2) %></td>
+                        <td class="py-4 text-right">
+                            <form action="/admin/orders/items/delete/<%= item.id %>" method="POST" onsubmit="return confirm('Remove this item?');">
+                                <button type="submit" class="text-red-500 hover:text-red-700 font-bold">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right py-4 font-bold text-lg">Total Order Value:</td>
+                    <td class="py-4 font-bold text-xl text-indigo-600">$<%= Number(order.total_price).toFixed(2) %></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="mt-8 text-right">
+        <form action="/admin/orders/delete/<%= order.id %>" method="POST" onsubmit="return confirm('Permanently delete this ENTIRE order? This cannot be undone.');">
+            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 px-4 py-2 rounded-lg">
+                Delete Entire Order
+            </button>
+        </form>
+    </div>
+
+</div>
 
 <script>
     // --- DARK MODE LOGIC ---
