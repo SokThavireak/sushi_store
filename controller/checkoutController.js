@@ -1,7 +1,7 @@
 import { pool } from '../config/database.js';
 
 // =========================================================
-// USER FACING CHECKOUT
+// 1. USER FACING CHECKOUT
 // =========================================================
 
 export const getCheckout = async (req, res) => {
@@ -83,10 +83,10 @@ export const createOrder = async (req, res) => {
 };
 
 // =========================================================
-// ADMIN ORDER MANAGEMENT
+// 2. ADMIN ORDER MANAGEMENT (These were missing!)
 // =========================================================
 
-// 1. List All Orders (Missing in your file)
+// List All Orders
 export const getOrders = async (req, res) => {
     try {
         let query = `SELECT o.*, u.email FROM orders o LEFT JOIN users u ON o.user_id = u.id `;
@@ -111,7 +111,7 @@ export const getOrders = async (req, res) => {
     }
 };
 
-// 2. Update Status (Pending -> Completed etc.)
+// Update Status (Pending -> Completed etc.)
 export const updateOrderStatus = async (req, res) => {
     try {
         await pool.query("UPDATE orders SET status = $1 WHERE id = $2", [req.body.status, req.params.id]);
@@ -121,7 +121,7 @@ export const updateOrderStatus = async (req, res) => {
     }
 };
 
-// 3. Handle Cancel/Refund Requests
+// Handle Cancel/Refund Requests
 export const handleOrderRequest = async (req, res) => {
     const { action } = req.body;
     const orderId = req.params.id;
@@ -143,7 +143,7 @@ export const handleOrderRequest = async (req, res) => {
     }
 };
 
-// 4. Edit/Delete Logic
+// Edit/Delete Logic
 export const deleteOrder = async (req, res) => {
     try {
         const id = req.params.id;
