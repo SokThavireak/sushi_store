@@ -671,6 +671,9 @@ app.get('/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 
 });
 
 app.post('/api/manager/daily-stock', checkAuthenticated, checkRole(['store_manager', 'admin', 'manager']), async (req, res) => {
+    if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
+        return res.status(403).json({ error: "Super Admins cannot submit stock counts. Please create a real Manager account." });
+    }
     const client = await pool.connect();
     try {
         const { items, location_id } = req.body; 
@@ -1220,6 +1223,9 @@ app.delete("/api/stock/:id", checkAuthenticated, checkRole(['manager', 'admin', 
 
 // Ensure your create route saves 'location_name' directly
 app.post('/api/stock/create', checkAuthenticated, async (req, res) => {
+    if (typeof req.user.id === 'string' && req.user.id.startsWith('env-')) {
+        return res.status(403).json({ error: "Super Admins cannot submit requests. Please create a real Manager account." });
+    }
     try {
         const { location_name, items } = req.body;
         
