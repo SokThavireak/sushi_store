@@ -1276,6 +1276,52 @@ app.post('/api/stock/create', checkAuthenticated, async (req, res) => {
     }
 });
 
+// Route: Handle Stock Request Status Updates (Cancel/Refund Workflow)
+app.post('/api/stock/update-status/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const requestId = req.params.id;
+        const { status } = req.body;
+        const role = req.user.role;
+
+        // 1. Fetch Current Request to validate logic
+        const currentReq = await pool.query("SELECT * FROM stock_requests WHERE id = $1", [requestId]);
+        if (currentReq.rows.length === 0) return res.status(404).json({ error: "Request not found" });
+        const currentStatus = currentReq.rows[0].status;
+
+        // 2. Logic for Store Managers (Can only REQUEST)
+        if (role === 'store_manager') {
+            if (status === 'Cancel Requested' && currentStatus === 'Pending') {
+                // Allowed: Pending -> Cancel Requested
+            } else if (status === 'Refund Requested' && currentStatus === 'Confirmed') {
+                // Allowed: Confirmed -> Refund Requested
+            } else {
+                return res.status(403).json({ error: "Invalid status change for Store Manager" });
+            }
+        }
+        
+        // 3. Logic for Admins/Managers (Can APPROVE/FINALIZE)
+        else if (role === 'admin' || role === 'manager') {
+            // Admins can set any status, but specifically for this flow:
+            if (status === 'Cancelled' || status === 'Refunded' || status === 'Confirmed' || status === 'Rejected') {
+                // Allowed
+            } else {
+                return res.status(400).json({ error: "Invalid status" });
+            }
+        } else {
+            return res.status(403).json({ error: "Unauthorized" });
+        }
+
+        // 4. Update Database
+        await pool.query("UPDATE stock_requests SET status = $1 WHERE id = $2", [status, requestId]);
+        
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server Error" });
+    }
+});
+
 // =========================================================
 // ADMIN DASHBOARD
 // =========================================================

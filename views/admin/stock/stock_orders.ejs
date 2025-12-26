@@ -12,135 +12,129 @@
 
 <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-<div class="flex flex-col lg:flex-row h-[calc(100vh-100px)] gap-4 overflow-hidden">
-    
-    <div class="w-full lg:w-[70%] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors">
+<% if (user.role === 'store_manager') { %>
+
+    <div class="flex flex-col lg:flex-row h-[calc(100vh-100px)] gap-4 overflow-hidden mb-10">
         
-        <div class="p-5 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-10">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">Master Inventory</h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Select items to request from the warehouse</p>
-                </div>
-                <div class="w-64">
-                    <% if (typeof user !== 'undefined' && user.role === 'store_manager') { 
-                        // --- FIX: Find the location name for this Store Manager ---
-                        let myLocName = '';
-                        if (typeof locations !== 'undefined') {
-                            const found = locations.find(l => l.id == user.assigned_location_id);
-                            if (found) myLocName = found.name;
-                        }
-                    %>
+        <div class="w-full lg:w-[70%] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors">
+            
+            <div class="p-5 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-10">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white">Master Inventory</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Select items to request from the warehouse</p>
+                    </div>
+                    <div class="w-64">
+                        <% 
+                            // Auto-detect location for Store Manager
+                            let myLocName = '';
+                            if (typeof locations !== 'undefined') {
+                                const found = locations.find(l => l.id == user.assigned_location_id);
+                                if (found) myLocName = found.name;
+                            }
+                        %>
                         <div class="relative">
                             <i class="fa-solid fa-store absolute left-3 top-3 text-gray-400"></i>
                             <input type="text" value="<%= myLocName || 'My Assigned Store' %>" disabled class="pl-9 w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-sm font-bold text-gray-600 dark:text-gray-200">
                             <input type="hidden" id="location_name" value="<%= myLocName %>"> 
                         </div>
-                    <% } else { %>
-                        <select id="location_name" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 text-sm font-bold text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="" disabled selected>Select Target Location...</option>
-                            <% if (typeof locations !== 'undefined') { %>
-                                <% locations.forEach(loc => { %>
-                                   <option value="<%= loc.name %>"><%= loc.name %></option>
-                                <% }) %>
-                            <% } %>
-                        </select>
-                    <% } %>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search ingredients (e.g. Salmon, Cup, Rice)..." 
+                        class="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-none rounded-xl font-medium focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none transition-all">
+                </div>
+
+                <div class="flex gap-2 mt-4 overflow-x-auto pb-2 no-scrollbar">
+                    <button onclick="filterCategory('All')" class="cat-btn active bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">All</button>
+                    <button onclick="filterCategory('Cook')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Cook</button>
+                    <button onclick="filterCategory('Drink')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Drink</button>
+                    <button onclick="filterCategory('Supplies')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Supplies</button>
+                    <button onclick="filterCategory('Packaging')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Packaging</button>
                 </div>
             </div>
 
-            <div class="relative">
-                <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400"></i>
-                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search ingredients (e.g. Salmon, Cup, Rice)..." 
-                    class="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-none rounded-xl font-medium focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 outline-none transition-all">
-            </div>
+            <div class="flex-1 overflow-y-auto p-5 custom-scroll bg-gray-50/50 dark:bg-gray-900 transition-colors">
+                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" id="inventoryGrid">
+                    <% if (typeof stocks !== 'undefined' && stocks.length > 0) { %>
+                        <% stocks.forEach(item => { %>
+                            <div class="product-card bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
+                                data-category="<%= item.category %>" 
+                                data-name="<%= item.name.toLowerCase() %>">
+                                
+                                <div class="h-28 w-full bg-gray-50 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden relative">
+                                    <img 
+                                        src="<%= item.image_url || 'https://via.placeholder.com/150?text=No+Img' %>" 
+                                        class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                        onerror="this.src='https://via.placeholder.com/150?text=No+Img'">
+                                    <div class="absolute top-2 right-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold text-gray-500 dark:text-gray-300 shadow-sm">
+                                        <%= item.category %>
+                                    </div>
+                                </div>
 
-            <div class="flex gap-2 mt-4 overflow-x-auto pb-2 no-scrollbar">
-                <button onclick="filterCategory('All')" class="cat-btn active bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">All</button>
-                <button onclick="filterCategory('Cook')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Cook</button>
-                <button onclick="filterCategory('Drink')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Drink</button>
-                <button onclick="filterCategory('Supplies')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Supplies</button>
-                <button onclick="filterCategory('Packaging')" class="cat-btn bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition">Packaging</button>
-            </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-5 custom-scroll bg-gray-50/50 dark:bg-gray-900 transition-colors">
-            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4" id="inventoryGrid">
-                <% if (typeof stocks !== 'undefined' && stocks.length > 0) { %>
-                    <% stocks.forEach(item => { %>
-                        <div class="product-card bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
-                             data-category="<%= item.category %>" 
-                             data-name="<%= item.name.toLowerCase() %>">
-                            
-                            <div class="h-28 w-full bg-gray-50 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden relative">
-                                <img 
-                                    src="<%= item.image_url || 'https://via.placeholder.com/150?text=No+Img' %>" 
-                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                                    onerror="this.src='https://via.placeholder.com/150?text=No+Img'">
-                                <div class="absolute top-2 right-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold text-gray-500 dark:text-gray-300 shadow-sm">
-                                    <%= item.category %>
+                                <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate mb-3"><%= item.name %></h4>
+                                
+                                <div class="flex items-center gap-2">
+                                    <input type="number" min="1" placeholder="Qty" id="qty-<%= item.id %>" 
+                                        class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg py-2 px-2 text-center text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    
+                                    <button onclick="addToCart(<%= JSON.stringify(item) %>)" 
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition shadow-lg shadow-indigo-200 dark:shadow-none flex-shrink-0">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
                                 </div>
                             </div>
-
-                            <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate mb-3"><%= item.name %></h4>
-                            
-                            <div class="flex items-center gap-2">
-                                <input type="number" min="1" placeholder="Qty" id="qty-<%= item.id %>" 
-                                    class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg py-2 px-2 text-center text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                                 
-                                <button onclick="addToCart(<%= JSON.stringify(item) %>)" 
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition shadow-lg shadow-indigo-200 dark:shadow-none flex-shrink-0">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="col-span-full text-center py-10 text-gray-400">
+                            <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                            <p>No items in Master Inventory.</p>
                         </div>
-                    <% }) %>
-                <% } else { %>
-                    <div class="col-span-full text-center py-10 text-gray-400">
-                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                        <p>No items in Master Inventory.</p>
-                    </div>
-                <% } %>
+                    <% } %>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="w-full lg:w-[30%] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors">
-        <div class="p-5 border-b border-gray-100 dark:border-gray-700">
-            <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-cart-shopping text-indigo-600 dark:text-indigo-400"></i> Request Cart
-                <span id="cartCount" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
-            </h3>
-        </div>
-
-        <div id="emptyCart" class="flex-1 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 p-10">
-            <i class="fa-solid fa-basket-shopping text-5xl mb-4 text-gray-200 dark:text-gray-700"></i>
-            <p class="text-sm">Cart is empty</p>
-            <p class="text-xs">Add items from the left to start.</p>
-        </div>
-
-        <div id="cartItemsList" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scroll hidden bg-white dark:bg-gray-800">
-        </div>
-
-        <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-600 dark:text-gray-300">
-                <span>Total Items:</span>
-                <span id="totalItems" class="text-indigo-600 dark:text-indigo-400">0</span>
+        <div class="w-full lg:w-[30%] bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors">
+            <div class="p-5 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping text-indigo-600 dark:text-indigo-400"></i> Request Cart
+                    <span id="cartCount" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                </h3>
             </div>
-            <button onclick="submitRequest()" id="submitBtn" disabled class="w-full py-3 bg-gray-300 dark:bg-gray-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 cursor-not-allowed">
-                <span>Submit Request</span>
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
+
+            <div id="emptyCart" class="flex-1 flex flex-col items-center justify-center text-gray-300 dark:text-gray-600 p-10">
+                <i class="fa-solid fa-basket-shopping text-5xl mb-4 text-gray-200 dark:text-gray-700"></i>
+                <p class="text-sm">Cart is empty</p>
+                <p class="text-xs">Add items from the left to start.</p>
+            </div>
+
+            <div id="cartItemsList" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scroll hidden bg-white dark:bg-gray-800">
+            </div>
+
+            <div class="p-5 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-600 dark:text-gray-300">
+                    <span>Total Items:</span>
+                    <span id="totalItems" class="text-indigo-600 dark:text-indigo-400">0</span>
+                </div>
+                <button onclick="submitRequest()" id="submitBtn" disabled class="w-full py-3 bg-gray-300 dark:bg-gray-700 text-white rounded-xl font-bold transition flex items-center justify-center gap-2 cursor-not-allowed">
+                    <span>Submit Request</span>
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
+
     </div>
 
-</div>
+<% } %>
 
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-10 mt-6 transition-colors">
     <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
         <div>
             <h2 class="text-lg font-bold text-gray-800 dark:text-white">Request History</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Track status of submitted stock requests</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Track and manage stock requests</p>
         </div>
         <button onclick="window.location.reload()" class="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline">
             <i class="fa-solid fa-rotate-right"></i> Refresh
@@ -155,7 +149,7 @@
                     <th class="px-6 py-4">Date</th>
                     <th class="px-6 py-4">Location</th>
                     <th class="px-6 py-4">Status</th>
-                    <th class="px-6 py-4 text-right">Action</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -168,11 +162,6 @@
                                 <span class="text-xs text-gray-400 font-normal ml-1"><%= new Date(req.created_at).toLocaleTimeString() %></span>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded text-xs font-bold border border-indigo-100 dark:border-indigo-800">
-                                    <%= req.location_name %>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
                                 <% if (req.status === 'Pending') { %>
                                     <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
                                         <i class="fa-regular fa-clock"></i> Pending
@@ -181,15 +170,69 @@
                                     <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
                                         <i class="fa-solid fa-check"></i> Approved
                                     </span>
+                                <% } else if (req.status === 'Cancel Requested') { %>
+                                    <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1 animate-pulse">
+                                        <i class="fa-solid fa-ban"></i> Cancel Requested
+                                    </span>
+                                <% } else if (req.status === 'Refund Requested') { %>
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1 animate-pulse">
+                                        <i class="fa-solid fa-rotate-left"></i> Refund Requested
+                                    </span>
+                                <% } else if (req.status === 'Cancelled') { %>
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                                        <i class="fa-solid fa-ban"></i> Cancelled
+                                    </span>
+                                <% } else if (req.status === 'Refunded') { %>
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                                        <i class="fa-solid fa-rotate-left"></i> Refunded
+                                    </span>
                                 <% } else { %>
                                     <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
                                         <i class="fa-solid fa-xmark"></i> Rejected
                                     </span>
                                 <% } %>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="/admin/stock/request/<%= req.id %>" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">
-                                    View Details
+                            <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                
+                                <% if (user.role === 'store_manager') { %>
+                                    <% if (req.status === 'Pending') { %>
+                                        <button onclick="updateRequestStatus(<%= req.id %>, 'Cancel Requested')" 
+                                            class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                                            Request Cancel
+                                        </button>
+                                    <% } else if (req.status === 'Confirmed') { %>
+                                        <button onclick="updateRequestStatus(<%= req.id %>, 'Refund Requested')" 
+                                            class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                                            Request Refund
+                                        </button>
+                                    <% } %>
+                                <% } %>
+
+                                <% if (user.role === 'admin' || user.role === 'manager') { %>
+                                    
+                                    <% if (req.status === 'Cancel Requested') { %>
+                                        <button onclick="updateRequestStatus(<%= req.id %>, 'Cancelled')" 
+                                            class="bg-red-600 text-white hover:bg-red-700 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
+                                            Accept Cancel
+                                        </button>
+                                    <% } else if (req.status === 'Refund Requested') { %>
+                                        <button onclick="updateRequestStatus(<%= req.id %>, 'Refunded')" 
+                                            class="bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
+                                            Accept Refund
+                                        </button>
+                                    <% } %>
+
+                                    <% if (req.status === 'Pending' || req.status === 'Confirmed') { %>
+                                         <button onclick="updateRequestStatus(<%= req.id %>, 'Cancelled')" 
+                                            class="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
+                                            Cancel
+                                        </button>
+                                    <% } %>
+
+                                <% } %>
+
+                                <a href="/admin/stock/request/<%= req.id %>" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition p-2">
+                                    <i class="fa-solid fa-eye text-lg"></i>
                                 </a>
                             </td>
                         </tr>
@@ -222,6 +265,7 @@
 
     // State
     let cart = [];
+    
     // Notification
     function showNotification(message, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -234,18 +278,16 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // --- ADD TO CART FUNCTION (REMOVED STOCK CHECKS) ---
+    // --- ADD TO CART FUNCTION ---
     function addToCart(item) {
         const inputId = `qty-${item.id}`;
         const input = document.getElementById(inputId);
         const qty = parseInt(input.value);
 
-        // 1. VALIDATION: Check if input is valid
         if (!qty || qty <= 0) {
             return showNotification("Please enter a valid quantity", "error");
         }
 
-        // 2. Add to Cart Logic
         const existing = cart.find(c => c.id === item.id);
         if (existing) {
             existing.quantity += qty;
@@ -253,7 +295,6 @@
             cart.push({ ...item, quantity: qty });
         }
 
-        // Reset input and update UI
         input.value = '';
         renderCart();
         showNotification("Added to Cart!", "success");
@@ -337,15 +378,45 @@
                 showNotification("Request Sent Successfully!", "success");
                 cart = [];
                 renderCart();
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 const data = await res.json();
                 showNotification(data.error || "Failed to send", "error");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         } catch (err) {
             showNotification("Server Error", "error");
-        } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;
+        }
+    }
+
+    // --- UPDATE REQUEST STATUS (Cancel / Refund) ---
+    async function updateRequestStatus(id, newStatus) {
+        let confirmMsg = "Are you sure?";
+        if (newStatus.includes('Cancel')) confirmMsg = "Are you sure you want to process this cancellation?";
+        if (newStatus.includes('Refund')) confirmMsg = "Are you sure you want to process this refund?";
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const res = await fetch(`/api/stock/update-status/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                showNotification("Status Updated Successfully", "success");
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                const data = await res.json();
+                showNotification(data.error || "Error updating status", "error");
+            }
+        } catch (err) {
+            console.error(err);
+            showNotification("Server Error", "error");
         }
     }
 
@@ -360,7 +431,6 @@
     }
 
     function filterCategory(cat) {
-        // Highlight Button
         document.querySelectorAll('.cat-btn').forEach(b => {
             if(b.innerText === cat) {
                 b.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
