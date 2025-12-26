@@ -49,7 +49,7 @@
   <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
     <h3 class="font-bold text-gray-800 dark:text-white text-lg">Order Management</h3>
     <span class="text-xs font-bold bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 px-2 py-1 rounded">
-        Requests Priority
+        Total: <%= orders.length %>
     </span>
   </div>
 
@@ -58,11 +58,10 @@
       <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-sm">
         <tr>
           <th class="p-4">ID</th>
-          <th class="p-4">Table</th>
-          <th class="p-4">Customer Account</th> 
+          <th class="p-4">Date</th> <th class="p-4">Table</th>
+          <th class="p-4">Customer</th> 
           <th class="p-4">Store</th>
           <th class="p-4">Total</th>
-          <th class="p-4">Payment</th>
           <th class="p-4">Status</th>
           <th class="p-4 text-right">Actions</th>
         </tr>
@@ -74,50 +73,63 @@
                 
                 <td class="p-4 font-mono text-xs text-gray-600 dark:text-gray-400">#<%= order.id %></td>
                 
+                <td class="p-4 text-xs font-bold text-gray-600 dark:text-gray-300">
+                    <%= new Date(order.created_at).toLocaleDateString() %>
+                    <span class="block font-normal text-gray-400"><%= new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %></span>
+                </td>
+
                 <td class="p-4 font-bold text-indigo-600 dark:text-indigo-400">
                     <% if(order.table_number) { %>
-                         Table <%= order.table_number %>
+                         <span class="bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded text-xs">Table <%= order.table_number %></span>
                     <% } else { %>
-                        <span class="text-gray-400 text-xs">N/A</span>
+                        <span class="text-gray-400 text-xs italic">Takeout</span>
                     <% } %>
                 </td>
 
                 <td class="p-4">
                     <div class="flex flex-col">
                         <% if(order.user_name) { %>
-                            <span class="font-bold text-sm text-gray-800 dark:text-white"><%= order.user_name %></span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400"><%= order.email %></span>
+                             <span class="font-bold text-sm text-gray-800 dark:text-white"><%= order.user_name %></span>
                         <% } else { %>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 italic"><%= order.email || 'Guest User' %></span>
+                             <span class="text-sm text-gray-500 dark:text-gray-400 italic"><%= order.email || 'Guest' %></span>
                         <% } %>
                     </div>
                 </td>
 
                 <td class="p-4 text-sm text-gray-800 dark:text-gray-300"><%= order.pickup_location %></td>
-                <td class="p-4 font-bold text-gray-800 dark:text-white"><%= Number(order.total_price).toFixed(2) %> $</td>
+                
+                <td class="p-4 font-bold text-gray-800 dark:text-white"><%= Number(order.total_price).toFixed(2) %> ֏</td>
                 
                 <td class="p-4">
-                    <span class="px-2 py-1 rounded text-xs font-bold <%= order.payment_method === 'QR' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400' %>">
-                        <%= order.payment_method %>
-                    </span>
-                </td>
-
-                <td class="p-4">
-                    <% 
-                       let statusColor = 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
-                       if(order.status === 'Completed') statusColor = 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400';
-                       if(order.status === 'Cancelled') statusColor = 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400';
-                       if(order.status === 'Refunded') statusColor = 'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400';
-                       if(order.status === 'Pending') statusColor = 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400';
-                       if(order.status === 'Processing') statusColor = 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400';
-                       
-                       // Warning color for requests
-                       if(order.status === 'Cancel Requested' || order.status === 'Refund Requested') 
-                           statusColor = 'bg-orange-500 text-white animate-pulse';
-                    %>
-                    <span class="px-2 py-1 rounded text-xs font-bold <%= statusColor %>">
-                        <%= order.status %>
-                    </span>
+                    <% if (order.status === 'Pending') { %>
+                        <span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                            <i class="fa-regular fa-clock"></i> Pending
+                        </span>
+                    <% } else if (order.status === 'Completed') { %>
+                        <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                            <i class="fa-solid fa-check"></i> Completed
+                        </span>
+                    <% } else if (order.status === 'Processing') { %>
+                        <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                             <i class="fa-solid fa-spinner fa-spin"></i> Processing
+                        </span>
+                    <% } else if (order.status === 'Cancel Requested') { %>
+                        <span class="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1 animate-pulse">
+                            <i class="fa-solid fa-ban"></i> Cancel Req
+                        </span>
+                    <% } else if (order.status === 'Refund Requested') { %>
+                         <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1 animate-pulse">
+                            <i class="fa-solid fa-rotate-left"></i> Refund Req
+                        </span>
+                    <% } else if (order.status === 'Cancelled') { %>
+                        <span class="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                             <i class="fa-solid fa-ban"></i> Cancelled
+                        </span>
+                    <% } else if (order.status === 'Refunded') { %>
+                        <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Refunded
+                        </span>
+                    <% } %>
                 </td>
                 
                 <td class="p-4 flex justify-end gap-2 items-center">
@@ -125,44 +137,55 @@
                     <% if (order.status === 'Cancel Requested') { %>
                         <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" class="flex gap-1">
                             <input type="hidden" name="action" value="approve_cancel">
-                            <button class="px-3 py-1 bg-green-600 text-white rounded text-xs font-bold hover:bg-green-700 shadow-sm">
-                                <i class="fa-solid fa-check mr-1"></i> Accept
+                            <button class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 shadow-sm transition">
+                                <i class="fa-solid fa-check mr-1"></i> Accept Cancel
                             </button>
                         </form>
                         <form action="/admin/orders/handle-request/<%= order.id %>" method="POST">
                             <input type="hidden" name="action" value="reject_cancel">
-                            <button class="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-600 shadow-sm">
+                            <button class="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-600 shadow-sm transition">
                                 Reject
-                            </button>
+                             </button>
                         </form>
                     
                     <% } else if (order.status === 'Refund Requested') { %>
-                        <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" class="flex gap-1">
+                         <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" class="flex gap-1">
                             <input type="hidden" name="action" value="approve_refund">
-                            <button class="px-3 py-1 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 shadow-sm">
-                                <i class="fa-solid fa-check mr-1"></i> Refund
+                            <button class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 shadow-sm transition">
+                                 <i class="fa-solid fa-check mr-1"></i> Accept Refund
                             </button>
                         </form>
                         <form action="/admin/orders/handle-request/<%= order.id %>" method="POST">
                             <input type="hidden" name="action" value="reject_refund">
-                            <button class="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-600 shadow-sm">
+                            <button class="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-600 shadow-sm transition">
                                 Reject
                             </button>
                         </form>
 
-                    <% } else { %>
-                        <form action="/admin/orders/<%= order.id %>/status" method="POST" class="flex gap-1 mr-2">
-                           <select name="status" class="text-xs border border-gray-200 dark:border-gray-600 rounded p-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none" onchange="this.form.submit()">
-                                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                <option value="Completed" <%= order.status === 'Completed' ? 'selected' : '' %>>Completed</option>
-                                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                <option value="Refunded" <%= order.status === 'Refunded' ? 'selected' : '' %>>Refunded</option>
-                            </select>
+                    <% } else if (order.status === 'Pending') { %>
+                        
+                        <form action="/admin/orders/<%= order.id %>/status" method="POST">
+                            <input type="hidden" name="status" value="Completed">
+                            <button type="submit" class="px-3 py-1.5 bg-green-600 text-white hover:bg-green-700 rounded-lg text-xs font-bold transition shadow-sm">
+                                Approve
+                            </button>
                         </form>
 
-                        <a href="/admin/orders/edit/<%= order.id %>" class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 text-xs font-bold transition flex items-center">
-                            <i class="fa-solid fa-pen-to-square"></i>
+                        <form action="/admin/orders/<%= order.id %>/status" method="POST" onsubmit="return confirm('Cancel this order?');">
+                            <input type="hidden" name="status" value="Cancelled">
+                            <button type="submit" class="px-3 py-1.5 bg-white border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-xs font-bold transition shadow-sm">
+                                Cancel
+                            </button>
+                        </form>
+
+                        <a href="/admin/orders/edit/<%= order.id %>" class="px-3 py-1.5 text-gray-400 hover:text-indigo-600 transition">
+                             <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        </a>
+
+                    <% } else { %>
+
+                         <a href="/admin/orders/edit/<%= order.id %>" class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 text-xs font-bold transition flex items-center">
+                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
                         
                         <form action="/admin/orders/delete/<%= order.id %>" method="POST" onsubmit="return confirm('Delete this order permanently?');">
@@ -170,6 +193,7 @@
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </form>
+
                     <% } %>
 
                 </td>
@@ -191,7 +215,6 @@
 </button>
 
 <script>
-    // --- DARK MODE LOGIC ---
     const themeBtn = document.getElementById('theme-toggle');
     themeBtn.addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
