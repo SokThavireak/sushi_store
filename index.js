@@ -428,7 +428,7 @@ app.get('/admin/orders/edit/:id', checkAuthenticated, checkRole(['manager', 'adm
             return res.redirect('/admin/orders');
         }
 
-        res.render('admin/edit_order', {
+        res.render('admin/orders/edit_order', {
             order: orderRes.rows[0],
             items: itemsRes.rows,
             locations: locRes.rows
