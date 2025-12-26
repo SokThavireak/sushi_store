@@ -1081,6 +1081,27 @@ app.delete('/api/stock/menu/:id', checkAuthenticated, checkRole(['manager', 'adm
     }
 });
 
+// Route: Update Stock Request Status (Approve/Reject)
+// PERMISSION: Only 'admin' and 'manager' can approve/reject.
+app.post('/admin/stock/:id/status', checkAuthenticated, checkRole(['admin', 'manager']), async (req, res) => {
+    try {
+        const requestId = req.params.id;
+        const { status } = req.body; // 'Confirmed' or 'Rejected'
+
+        // 1. Update the status in the database
+        await pool.query(
+            "UPDATE stock_requests SET status = $1 WHERE id = $2",
+            [status, requestId]
+        );
+
+        res.json({ success: true, message: "Status updated successfully" });
+
+    } catch (err) {
+        console.error("Error updating stock request status:", err);
+        res.status(500).json({ error: "Server Error" });
+    }
+});
+
 // NEW ROUTE: View Stock Request (Warehouse Orders)
 app.get('/admin/stock/request/:id', checkAuthenticated, async (req, res) => {
     try {
