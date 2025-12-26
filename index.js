@@ -1712,15 +1712,12 @@ passport.use(
   })
 );
 
-passport.use(
-  "google",
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${baseUrl}/auth/google/secrets`, // Ensure this matches Google Console exactly
-      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
-    },
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: '/auth/google/callback',
+    proxy: true // <--- ADD THIS LINE to force HTTPS in the callback
+  },
     async (accessToken, refreshToken, profile, cb) => {
       try {
         // 1. Check if user already exists in DB
