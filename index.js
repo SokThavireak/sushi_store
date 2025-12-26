@@ -1117,7 +1117,7 @@ app.get('/admin/stock/request/:id', checkAuthenticated, async (req, res) => {
         const itemsResult = await pool.query(`SELECT * FROM stock_request_items WHERE request_id = $1`, [id]);
         const locationsResult = await pool.query('SELECT * FROM locations');
 
-        res.render('admin/view_stock', {
+        res.render('admin/stock/view_stock', {
             user: req.user,
             request: requestResult.rows[0],
             items: itemsResult.rows,
