@@ -82,8 +82,13 @@
     <div class="px-6 mb-6">
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-sm"></i>
-        <input type="text" placeholder="Search..."
-          class="w-full bg-[#1e204a] text-sm text-white rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500" />
+        <input 
+  type="text" 
+  id="sidebar-search" 
+  onkeyup="filterSidebar()" 
+  placeholder="Search..."
+  class="w-full bg-[#1e204a] text-sm text-white rounded-lg pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500" 
+/>
       </div>
     </div>
 
@@ -274,6 +279,32 @@
         icon.classList.add('fa-sun');
       }
     });
+
+    // ... existing functions ...
+
+    function filterSidebar() {
+      // 1. Get the search query
+      const query = document.getElementById('sidebar-search').value.toLowerCase();
+      
+      // 2. Select only the navigation links within the sidebar
+      // We target the 'nav' element inside 'sidebar' specifically
+      const sidebarNav = document.querySelector('#sidebar nav');
+      const links = sidebarNav.querySelectorAll('a');
+
+      // 3. Loop through links and toggle visibility
+      links.forEach(link => {
+        // We check the text inside the link (the span text)
+        const text = link.innerText.toLowerCase();
+        
+        if (text.includes(query)) {
+          link.style.display = ''; // Show (reverts to CSS 'flex')
+        } else {
+          link.style.display = 'none'; // Hide
+        }
+      });
+    }
+
+    // ... existing event listeners ...
   </script>
 </body>
 
