@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Welcome to Opulent POS</title>
+    <style>
+        /* TOAST ANIMATIONS */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* BASE STYLES */
+        .container-box {
+            position: relative;
+            overflow: hidden;
+            width: 768px;
+            max-width: 100%;
+            min-height: 480px;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        /* Sign In Form */
+        .sign-in-container {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+        }
+
+        /* Sign Up Form */
+        .sign-up-container {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        /* ANIMATIONS */
+        .container-box.right-panel-active .sign-in-container {
+            transform: translateX(100%);
+        }
+
+        .container-box.right-panel-active .sign-up-container {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: show 0.6s;
+        }
+
+        @keyframes show {
+
+            0%,
+            49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        /* OVERLAY */
+        .overlay-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
+            z-index: 100;
+        }
+
+        .container-box.right-panel-active .overlay-container {
+            transform: translateX(-100%);
+        }
+
+        .overlay {
+            background: #f97316;
+            background: -webkit-linear-gradient(to right, #ea580c, #f97316);
+            background: linear-gradient(to right, #ea580c, #f97316);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 0 0;
+            color: #ffffff;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .container-box.right-panel-active .overlay {
+            transform: translateX(50%);
+        }
+
+        .overlay-panel {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            text-align: center;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-left {
+            transform: translateX(-20%);
+        }
+
+        .container-box.right-panel-active .overlay-left {
+            transform: translateX(0);
+        }
+
+        .overlay-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .container-box.right-panel-active .overlay-right {
+            transform: translateX(20%);
+        }
+
+        /* MOBILE TOGGLE LINKS */
+        .mobile-toggle {
+            display: none;
+        }
+
+        /* MOBILE RESPONSIVENESS */
+        @media (max-width: 768px) {
+            .container-box {
+                width: 90%;
+                min-height: 550px;
+                border-radius: 20px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .overlay-container {
+                display: none;
+            }
+
+            .form-container {
+                width: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                padding: 0;
+            }
+
+            .sign-in-container {
+                width: 100%;
+                transition: all 0.4s ease-in-out;
+                opacity: 1;
+                z-index: 5;
+                pointer-events: all;
+            }
+
+            .sign-up-container {
+                width: 100%;
+                transition: all 0.4s ease-in-out;
+                opacity: 0;
+                z-index: 1;
+                pointer-events: none;
+                transform: none;
+            }
+
+            /* Mobile Active States */
+            .container-box.right-panel-active .sign-in-container {
+                transform: none;
+                opacity: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            .container-box.right-panel-active .sign-up-container {
+                transform: none;
+                opacity: 1;
+                z-index: 5;
+                pointer-events: all;
+                animation: none;
+            }
+
+            .mobile-toggle {
+                display: block;
+                margin-top: 20px;
+                font-size: 14px;
+                color: #6b7280;
+            }
+
+            .mobile-toggle a {
+                color: #f97316;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 flex justify-center items-center flex-col font-sans h-screen px-4 relative overflow-hidden">
+    
+    <!-- Three.js Background Canvas -->
+    <canvas id="shader-canvas" class="absolute inset-0 w-full h-full z-0"></canvas>
+
+    <!-- Back to Home Button -->
+    <a href="/" class="absolute top-6 left-6 z-20 flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full hover:bg-white/25 transition duration-300 shadow-lg font-semibold text-sm">
+        <i class="fa-solid fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="container-box bg-white rounded-[20px] shadow-2xl relative z-10 <%= (typeof action !== 'undefined' && action === 'register') ? 'right-panel-active' : '' %>"
+        id="container">
+
+        <div class="form-container sign-up-container">
+            <form onsubmit="handleAuth(event, '/register')"
+                class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
+                <h1 class="font-bold text-3xl mb-4">Create Account</h1>
+
+                <div class="flex gap-4 mb-4">
+                    <a href="/auth/google"
+                        class="border border-gray-200 rounded-full w-10 h-10 flex justify-center items-center hover:bg-orange-50 hover:border-orange-500 hover:text-orange-500 transition duration-300">
+                        <i class="fab fa-google text-sm"></i>
+                    </a>
+                </div>
+
+                <span class="text-xs text-gray-500 mb-4">or use your email for registration</span>
+
+                <input type="email" name="username" placeholder="Email" required
+                    class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                <input type="password" name="password" placeholder="Password" required
+                    class="bg-gray-100 border-none px-4 py-3 mb-4 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+
+                <button type="submit"
+                    class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
+                    Sign Up
+                </button>
+
+                <p class="mobile-toggle">
+                    Already have an account? <a id="mobileSignIn">Sign In</a>
+                </p>
+            </form>
+        </div>
+
+        <div class="form-container sign-in-container">
+            <form onsubmit="handleAuth(event, '/login')"
+                class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
+                <h1 class="font-bold text-3xl mb-4">Sign in</h1>
+
+                <div class="flex gap-4 mb-4">
+                    <a href="/auth/google"
+                        class="border border-gray-200 rounded-full w-10 h-10 flex justify-center items-center hover:bg-orange-50 hover:border-orange-500 hover:text-orange-500 transition duration-300">
+                        <i class="fab fa-google text-sm"></i>
+                    </a>
+                </div>
+
+                <span class="text-xs text-gray-500 mb-4">or use your account</span>
+
+                <input type="email" name="username" placeholder="Email" required
+                    class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                <input type="password" name="password" placeholder="Password" required
+                    class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+
+                <a href="#" class="text-xs text-gray-400 mb-4 hover:text-orange-500 transition">Forgot your
+                    password?</a>
+
+                <button type="submit"
+                    class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
+                    Sign In
+                </button>
+
+                <p class="mobile-toggle">
+                    Don't have an account? <a id="mobileSignUp">Sign Up</a>
+                </p>
+            </form>
+        </div>
+
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1 class="font-bold text-3xl mb-4">Welcome Back!</h1>
+                    <p class="text-sm font-thin leading-5 mb-8">To keep connected with us please login with your
+                        personal info</p>
+                    <button
+                        class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none"
+                        id="signIn">Sign In</button>
+                </div>
+
+                <div class="overlay-panel overlay-right">
+                    <h1 class="font-bold text-3xl mb-4">Hello, Friend!</h1>
+                    <p class="text-sm font-thin leading-5 mb-8">Enter your personal details and start your journey with
+                        Us</p>
+                    <button
+                        class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none"
+                        id="signUp">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========================
+           1. UI LOGIC (SLIDER) 
+           ======================== */
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const mobileSignUp = document.getElementById('mobileSignUp');
+        const mobileSignIn = document.getElementById('mobileSignIn');
+        const container = document.getElementById('container');
+
+        function activateSignUp() { container.classList.add("right-panel-active"); }
+        function activateSignIn() { container.classList.remove("right-panel-active"); }
+
+        signUpButton.addEventListener('click', activateSignUp);
+        signInButton.addEventListener('click', activateSignIn);
+        if (mobileSignUp) mobileSignUp.addEventListener('click', activateSignUp);
+        if (mobileSignIn) mobileSignIn.addEventListener('click', activateSignIn);
+
+        /* ========================
+           2. NOTIFICATION SYSTEM 
+           ======================== */
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+
+            const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+            const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+
+            toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[320px] border-2 border-white/20`;
+            toast.style.animation = 'slideIn 0.5s forwards';
+
+            toast.innerHTML = `
+                <div class="text-2xl">${icon}</div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-sm uppercase tracking-wide opacity-80">${isError ? 'Error' : 'Success'}</span>
+                    <span class="font-bold text-base">${message}</span>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        /* ========================
+           3. AUTH AJAX HANDLER 
+           ======================== */
+        async function handleAuth(event, endpoint) {
+            event.preventDefault(); // Stop page reload
+
+            const form = event.target;
+            const btn = form.querySelector('button');
+            const originalText = btn.innerText;
+
+            // 1. Loading State
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                // 2. Send Request
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                // Find this section inside handleAuth function:
+                if (response.ok) {
+                    // SUCCESS
+                    showNotification(result.message || 'Authentication Successful!', 'success');
+
+                    // --- REPLACE THE OLD REDIRECT LOGIC WITH THIS ---
+
+                    // 1. Check if the server sent a specific URL
+                    let targetUrl = result.targetUrl;
+
+                    // 2. Fallback logic (just in case)
+                    if (!targetUrl) {
+                        const role = result.role || (result.user && result.user.role);
+                        if (role === 'staff') targetUrl = '/staff/menu';
+                        else if (['admin', 'manager', 'store_manager'].includes(role)) targetUrl = '/admin/dashboard';
+                        else targetUrl = '/';
+                    }
+
+                    // 3. Go to the page
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 1000);
+
+                    // --- END OF REPLACEMENT ---
+
+                } else {
+                    // ERROR
+                    showNotification(result.error || 'Invalid credentials', 'error');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
+
+            } catch (error) {
+                console.error(error);
+                showNotification('Connection error. Please try again.', 'error');
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
+    </script>
+    
+    <!-- Three.js Shader Background Implementation -->
+    <script>
+        const canvas = document.getElementById('shader-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+        const vertexShader = `
+          uniform float time;
+          uniform float intensity;
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          
+          void main() {
+            vUv = uv;
+            vPosition = position;
+            
+            vec3 pos = position;
+            pos.y += sin(pos.x * 10.0 + time) * 0.1 * intensity;
+            pos.x += cos(pos.y * 8.0 + time * 1.5) * 0.05 * intensity;
+            
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+          }
+        `;
+
+        const fragmentShader = `
+          uniform float time;
+          uniform float intensity;
+          uniform vec3 color1;
+          uniform vec3 color2;
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          
+          void main() {
+            vec2 uv = vUv;
+            
+            // Create animated noise pattern
+            float noise = sin(uv.x * 20.0 + time) * cos(uv.y * 15.0 + time * 0.8);
+            noise += sin(uv.x * 35.0 - time * 2.0) * cos(uv.y * 25.0 + time * 1.2) * 0.5;
+            
+            // Mix colors based on noise and position
+            vec3 color = mix(color1, color2, noise * 0.5 + 0.5);
+            // Mix with a bright white highlight to make white and orange stand out
+            color = mix(color, vec3(1.0, 1.0, 1.0), pow(abs(noise), 2.0) * intensity * 0.7);
+            
+            // Add glow effect
+            float glow = 1.0 - length(uv - 0.5) * 1.5; // expanded glow radius
+            glow = clamp(glow, 0.0, 1.0);
+            glow = pow(glow, 1.5);
+            
+            // Output color with higher alpha
+            gl_FragColor = vec4(color * glow, glow);
+          }
+        `;
+
+        // Background animation colors: White and Orange
+        const uniforms = {
+            time: { value: 0 },
+            intensity: { value: 1.0 },
+            color1: { value: new THREE.Color("#ffffff") }, // Pure White
+            color2: { value: new THREE.Color("#f97316") }  // Vibrant Orange
+        };
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+            uniforms,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        const geometry = new THREE.PlaneGeometry(2, 2, 32, 32);
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            uniforms.time.value = elapsedTime;
+            uniforms.intensity.value = 1.0 + Math.sin(elapsedTime * 2) * 0.3;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

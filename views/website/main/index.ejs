@@ -1,0 +1,154 @@
+<style>
+  /* 1. SCROLL ANIMATION STYLES */
+  .scroll-hidden {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform;
+  }
+
+  .reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* CRITICAL MOBILE FIX: Prevent white screen on phones if JS lags */
+  @media (max-width: 640px) {
+    .scroll-hidden {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+  }
+
+  /* 2. TOAST NOTIFICATION STYLES */
+  @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+  }
+</style>
+
+<%- include('./header.ejs') %>
+
+<%- include('./our_category.ejs') %>
+
+<%- include('./mostsale.ejs') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+<script>
+  // 1. GSAP ANIMATIONS
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+  let mm = gsap.matchMedia();
+
+  mm.add("(min-width: 1024px)", () => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#feature-scroll-section",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+        snap: {
+          snapTo: 1 / 4,
+          duration: { min: 0.3, max: 0.6 },
+          delay: 0,
+          ease: "power1.inOut",
+        },
+      },
+    });
+
+    const cards = document.querySelectorAll(".feature-card");
+
+    if(cards.length > 0) {
+        tl.to(cards[1], { y: 0, duration: 1, ease: "none" })
+          .to(cards[2], { y: 0, duration: 1, ease: "none" })
+          .to(cards[3], { y: 0, duration: 1, ease: "none" });
+
+        tl.add("zoomStart");
+        const gridWidth = 280;
+        const gridHeight = 400;
+        const gap = 24;
+        const commonGridProps = {
+          width: `${gridWidth}px`,
+          height: `${gridHeight}px`,
+          borderRadius: "1rem",
+          top: "50%",
+          y: "-50%",
+          ease: "power2.inOut",
+          duration: 1,
+        };
+        
+        tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
+          .to(".icon-container", { width: "3.5rem", height: "3.5rem", marginBottom: "1rem", duration: 1 }, "zoomStart")
+          .to(".icon-container svg", { width: "2rem", height: "2rem", duration: 1 }, "zoomStart");
+          
+        tl.to(cards[0], { ...commonGridProps, left: `calc(50% - ${gridWidth * 2 + gap * 1.5}px)` }, "zoomStart")
+          .to(cards[1], { ...commonGridProps, left: `calc(50% - ${gridWidth * 1 + gap * 0.5}px)` }, "zoomStart")
+          .to(cards[2], { ...commonGridProps, left: `calc(50% + ${gap * 0.5}px)` }, "zoomStart")
+          .to(cards[3], { ...commonGridProps, left: `calc(50% + ${gridWidth * 1 + gap * 1.5}px)` }, "zoomStart");
+    }
+  });
+
+  mm.add("(max-width: 1023px)", () => {
+    gsap.set(".feature-card", {
+      position: "relative",
+      transform: "none",
+      height: "400px",
+      width: "100%",
+      marginBottom: "1rem",
+      borderRadius: "1rem",
+    });
+    gsap.set("#feature-scroll-section > div", { height: "auto" });
+    gsap.set("#feature-scroll-section .sticky", {
+      position: "relative",
+      height: "auto",
+      padding: "1rem",
+    });
+  });
+
+  // 2. SCROLL REVEAL OBSERVER
+  document.addEventListener("DOMContentLoaded", function () {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-active");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 } 
+    );
+
+    document.querySelectorAll(".scroll-hidden").forEach((el) => {
+      const delay = el.getAttribute("data-delay");
+      if (delay) el.style.transitionDelay = delay;
+      observer.observe(el);
+    });
+  });
+
+  // 3. SEARCH FUNCTION
+  function filterMenu() {
+    const searchInput = document.getElementById("menu-search").value.toLowerCase();
+    const productCards = document.querySelectorAll(".product-card");
+
+    productCards.forEach((card) => {
+      const productName = card.querySelector(".product-name").innerText.toLowerCase();
+      // Logic to handle different layout structures (grid vs flex)
+      const wrapper = card.closest('.group'); 
+      if(productName.includes(searchInput)) {
+          if(wrapper) wrapper.style.display = '';
+          else card.style.display = '';
+      } else {
+          if(wrapper) wrapper.style.display = 'none';
+          else card.style.display = 'none';
+      }
+    });
+  }
+</script>

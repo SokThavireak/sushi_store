@@ -1,0 +1,472 @@
+<style>
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+<% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'manager')) { %>
+    <form method="GET" action="/admin/orders" class="mb-6 bg-white dark:bg-gray-900/95 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-4 items-end transition-colors">
+        
+        <div class="w-full md:w-auto">
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Filter Date</label>
+            <input 
+                type="date" 
+                name="date" 
+                value="<%= typeof query !== 'undefined' ? query.date : '' %>"
+                class="w-full md:w-48 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+        </div>
+
+        <div class="w-full md:w-auto flex-1">
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Filter Location</label>
+            <div class="relative">
+                <select name="location" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
+                    <option value="">All Locations</option>
+                    <% if (typeof locations !== 'undefined') { %>
+                        <% locations.forEach(function(loc) { %>
+                            <option value="<%= loc.id %>" <%= (typeof query !== 'undefined' && query.location == loc.id) ? 'selected' : '' %>>
+                                <%= loc.name %>
+                            </option>
+                        <% }); %>
+                    <% } else { %>
+                        <option value="1">Main Branch</option>
+                        <option value="2">Warehouse</option>
+                    <% } %>
+                </select>
+                <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-auto">
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Filter Status</label>
+            <div class="relative">
+                <select name="status" class="w-full bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-2 appearance-none text-gray-700 focus:outline-none focus:border-indigo-500 transition-colors">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" <%= (typeof query !== 'undefined' && query.status === 'Pending') ? 'selected' : '' %>>Pending</option>
+                    <option value="Processing" <%= (typeof query !== 'undefined' && query.status === 'Processing') ? 'selected' : '' %>>Processing</option>
+                    <option value="Completed" <%= (typeof query !== 'undefined' && query.status === 'Completed') ? 'selected' : '' %>>Completed</option>
+                    <option value="Cancel Requested" <%= (typeof query !== 'undefined' && query.status === 'Cancel Requested') ? 'selected' : '' %>>Cancel Requested</option>
+                    <option value="Refund Requested" <%= (typeof query !== 'undefined' && query.status === 'Refund Requested') ? 'selected' : '' %>>Refund Requested</option>
+                    <option value="Cancelled" <%= (typeof query !== 'undefined' && query.status === 'Cancelled') ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Refunded" <%= (typeof query !== 'undefined' && query.status === 'Refunded') ? 'selected' : '' %>>Refunded</option>
+                </select>
+                <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-filter"></i> Filter
+        </button>
+
+        <% if (typeof query !== 'undefined' && (query.date || query.location || query.status)) { %>
+            <a href="/admin/orders" class="w-full md:w-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 font-bold py-2 px-4 rounded-lg transition-all flex items-center justify-center">
+                Clear
+            </a>
+        <% } %>
+    </form>
+<% } %>
+
+<div class="bg-white dark:bg-gray-900/95 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
+  <% if (orders && orders.length > 0) { %>
+    <!-- No static success banner -->
+  <% } else { %>
+    <div class="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 p-4 rounded mb-4 flex items-center gap-2">
+      <i class="fa-solid fa-exclamation-triangle"></i>
+      <span>No orders found.</span>
+    </div>
+  <% } %>
+  <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+    <h3 class="font-bold text-gray-800 dark:text-white text-lg">Order Management</h3>
+    <span class="text-xs font-bold bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 px-2 py-1 rounded">
+        Total: <%= orders.length %>
+    </span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-sm">
+        <tr>
+          <th class="p-4">ID</th>
+          <th class="p-4">Date</th>
+          <th class="p-4">Table</th>
+          <th class="p-4">Customer</th> 
+          <th class="p-4">Store</th>
+<th class="p-4">Address</th>
+          <th class="p-4">Total</th>
+          <th class="p-4">Status</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+        <% if (orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+              <tr class="<%= (order.status === 'Cancel Requested' || order.status === 'Refund Requested') ? 'bg-orange-50 dark:bg-orange-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50' %> transition-colors border-gray-100 dark:border-gray-700">
+                
+                <td class="p-4 font-mono text-xs text-gray-600 dark:text-gray-400">#<%= order.id %></td>
+                
+                <td class="p-4 text-xs font-bold text-gray-600 dark:text-gray-300">
+                    <%= new Date(order.created_at).toLocaleDateString() %>
+                    <span class="block font-normal text-gray-400"><%= new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %></span>
+                </td>
+
+                <td class="p-4 font-bold text-indigo-600 dark:text-indigo-400">
+                    <% if(order.table_number) { %>
+                         <span class="bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded text-xs">Table <%= order.table_number %></span>
+                    <% } else { %>
+                        <span class="text-gray-400 text-xs italic">Takeout</span>
+                    <% } %>
+                </td>
+
+                <td class="p-4">
+                    <div class="flex flex-col">
+                        <% if(order.user_name) { %>
+                              <span class="font-bold text-sm text-gray-800 dark:text-white"><%= order.user_name %></span>
+                        <% } else { %>
+                             <span class="text-sm text-gray-500 dark:text-gray-400 italic"><%= order.email || 'Guest' %></span>
+                        <% } %>
+                    </div>
+                </td>
+
+                <td class="p-4 text-sm text-gray-800 dark:text-gray-300"><%= order.pickup_location %></td>
+<td class="p-4 text-sm text-gray-800 dark:text-gray-300"><%= order.location_address || 'N/A' %></td>
+                 
+                <td class="p-4 font-bold text-gray-800 dark:text-white"><%= Number(order.total_price).toFixed(2) %> $</td>
+                
+                <td class="p-4">
+                    <% if (order.status === 'Pending') { %>
+                        <span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                            <i class="fa-regular fa-clock"></i> Pending
+                        </span>
+                    <% } else if (order.status === 'Completed') { %>
+                        <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                            <i class="fa-solid fa-check"></i> Completed
+                        </span>
+                    <% } else if (order.status === 'Processing') { %>
+                        <span class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                             <i class="fa-solid fa-spinner fa-spin"></i> Processing
+                        </span>
+                    <% } else if (order.status === 'Cancel Requested') { %>
+                        <span class="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1 animate-pulse">
+                            <i class="fa-solid fa-ban"></i> Cancel Req
+                        </span>
+                    <% } else if (order.status === 'Refund Requested') { %>
+                         <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1 animate-pulse">
+                            <i class="fa-solid fa-rotate-left"></i> Refund Req
+                        </span>
+                    <% } else if (order.status === 'Cancelled') { %>
+                        <span class="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                             <i class="fa-solid fa-ban"></i> Cancelled
+                        </span>
+                    <% } else if (order.status === 'Refunded') { %>
+                        <span class="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 px-2 py-1 rounded-full text-xs font-bold flex items-center w-fit gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Refunded
+                        </span>
+                    <% } %>
+                </td>
+                
+                <td class="p-4 flex justify-end gap-2 items-center">
+                    
+                    <% if (order.status !== 'Completed' && order.status !== 'Cancelled' && order.status !== 'Refunded') { %>
+                        <button type="button" onclick="checkoutOrder('<%= order.id %>', '<%= order.total_price %>')" 
+                                class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-cash-register"></i> Pay
+                        </button>
+                    <% } %>
+                    <% if (order.status === 'Cancel Requested') { %>
+                        <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" class="flex gap-1" onsubmit="return confirmAction(event, 'Approve Cancel Request?')">
+                            <input type="hidden" name="action" value="approve_cancel">
+                            <button class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 shadow-sm transition">
+                                <i class="fa-solid fa-check mr-1"></i> Accept Cancel
+                            </button>
+                        </form>
+                        <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" onsubmit="return confirmAction(event, 'Reject Cancel Request?')">
+                            <input type="hidden" name="action" value="reject_cancel">
+                            <button class="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-600 shadow-sm transition">
+                                Reject
+                             </button>
+                        </form>
+                    
+                    <% } else if (order.status === 'Refund Requested') { %>
+                         <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" class="flex gap-1" onsubmit="return confirmAction(event, 'Approve Refund?')">
+                            <input type="hidden" name="action" value="approve_refund">
+                            <button class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 shadow-sm transition">
+                                 <i class="fa-solid fa-check mr-1"></i> Accept Refund
+                            </button>
+                        </form>
+                        <form action="/admin/orders/handle-request/<%= order.id %>" method="POST" onsubmit="return confirmAction(event, 'Reject Refund?')">
+                            <input type="hidden" name="action" value="reject_refund">
+                            <button class="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-600 shadow-sm transition">
+                                Reject
+                             </button>
+                        </form>
+
+                    <% } else if (order.status === 'Pending') { %>
+
+                        <form action="/admin/orders/<%= order.id %>/status" method="POST" onsubmit="return confirmAction(event, 'Approve Order?')">
+                            <input type="hidden" name="_method" value="PATCH">
+                            <input type="hidden" name="status" value="Completed">
+                            <button type="submit" class="px-3 py-1.5 bg-green-600 text-white hover:bg-green-700 rounded-lg text-xs font-bold transition shadow-sm">
+                                Approve
+                            </button>
+                        </form>
+
+                        <form action="/admin/orders/<%= order.id %>/status" method="POST" onsubmit="return doubleCancelConfirm(event)">
+                            <input type="hidden" name="_method" value="PATCH">
+                            <input type="hidden" name="status" value="Cancelled">
+                            <button type="submit" class="px-3 py-1.5 bg-white border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-xs font-bold transition shadow-sm">
+                                Cancel
+                            </button>
+                        </form>
+
+                        <% if (user && user.role !== 'user') { %>
+                        <!-- Delete order button for pending orders -->
+                        <form action="/admin/order/delete/<%= order.id %>" method="POST" onsubmit="return doubleDeleteConfirm(event)" class="inline-block ml-2">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="px-2 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-100 dark:hover:bg-red-900/50 text-xs font-bold transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+
+                        <a href="/admin/order/edit/<%= order.id %>" onclick="return doubleEditConfirm(event)" class="px-3 py-1.5 text-gray-400 hover:text-indigo-600 transition">
+                             <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        </a>
+                        <% } %>
+
+                    <% } else { %>
+
+                        <% if (user && user.role !== 'user') { %>
+                         <a href="/admin/order/edit/<%= order.id %>" onclick="return doubleEditConfirm(event)" class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 text-xs font-bold transition flex items-center">
+                             <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+
+                        <form action="/admin/order/delete/<%= order.id %>" method="POST" onsubmit="return doubleDeleteConfirm(event)">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-100 dark:hover:bg-red-900/50 text-xs font-bold transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                        <% } %>
+
+                    <% } %>
+
+                </td>
+              </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="8" class="p-8 text-center text-gray-500 dark:text-gray-400">No orders found.</td>
+            </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // 1. Dark Mode Logic
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // 2. Notification System
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+        
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        
+        toast.innerHTML = `
+            <div class="text-2xl">${icon}</div>
+            <div class="font-bold text-sm">${message}</div>
+        `;
+        
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 5000);
+    }
+
+    // 3. Helper to intercept Forms and show alerts (async Swal)
+    function confirmAction(e, message) {
+        e.preventDefault();
+        Swal.fire({
+            title: message,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, proceed',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                e.target.submit();
+            }
+        });
+        return false;
+    }
+
+    // 4. Check URL Params on Load
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('status') === 'success') {
+            showNotification('Operation Successful!', 'success');
+        }
+        if(urlParams.get('error')) {
+            showNotification(urlParams.get('error'), 'error');
+        }
+        // Custom messages for completed or cancelled orders
+        const msg = urlParams.get('msg');
+        if (msg) {
+            const decoded = decodeURIComponent(msg);
+            if (decoded.toLowerCase().includes('completed')) {
+                showNotification('Order completed successfully', 'success');
+            } else if (decoded.toLowerCase().includes('cancelled')) {
+                showNotification('Order cancelled successfully', 'success');
+            }
+        }
+    });
+
+    // 5. STAFF POS CHECKOUT LOGIC
+    async function checkoutOrder(orderId, amount) {
+        const result = await Swal.fire({
+            title: `Checkout Order #${orderId}`,
+            text: `Total Amount to Pay: $${Number(amount).toFixed(2)}`,
+            icon: 'info',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonColor: '#10b981', // Emerald Green for Cash
+            denyButtonColor: '#ef4444',    // Red for ABA PayWay
+            cancelButtonColor: '#6b7280',  // Gray for Cancel
+            confirmButtonText: '<i class="fa-solid fa-money-bill-wave"></i> Cash',
+            denyButtonText: '<i class="fa-solid fa-qrcode"></i> ABA QR',
+            cancelButtonText: 'Cancel',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+
+        if (result.isConfirmed) {
+            processPayment(orderId, 'Cash');
+        } else if (result.isDenied) {
+            processPayment(orderId, 'QR');
+        }
+    }
+
+    async function processPayment(orderId, method) {
+        Swal.fire({
+            title: 'Processing...',
+            allowOutsideClick: false,
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            const res = await fetch(`/api/staff/checkout/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ payment_method: method })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                if (data.method === 'QR') {
+                    // Redirect to ABA QR Page
+                    window.location.href = data.redirectUrl;
+                } else {
+                    // Success for Cash
+                    Swal.fire({
+                        title: 'Paid!',
+                        text: 'Order completed successfully with Cash.',
+                        icon: 'success',
+                        confirmButtonColor: '#10b981',
+                        background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+                        color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+                        customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+                    }).then(() => {
+                        window.location.reload(); 
+                    });
+                }
+            } else {
+                Swal.fire('Error', data.error || 'Failed to process payment', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire('Error', 'Connection failed. Please check your internet.', 'error');
+        }
+    }
+
+    function doubleDeleteConfirm(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: 'Delete Order?',
+        text: 'This action will Delete the order. Are you sure?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Delete order',
+        background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+        color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+        customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.target.submit();
+        }
+    });
+    return false;
+}
+
+    function doubleCancelConfirm(e) {
+    // Stop the form from submitting immediately
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Cancel this order?',
+        text: 'Are you sure you want to cancel this order? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'Keep it',
+        background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+        color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+        customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.target.submit();
+        }
+    });
+    return false;
+}
+
+</script>

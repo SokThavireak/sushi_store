@@ -1,0 +1,161 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+<div class="max-w-xl mx-auto bg-white dark:bg-gray-900/95 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mt-10 transition-colors">
+    
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white">Edit User Details</h2>
+        <a href="/admin/users" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">Cancel</a>
+    </div>
+
+    <form onsubmit="return false;" class="space-y-4" id="edit-user-form">
+        <input type="hidden" id="userId" value="<%= targetUser.id %>">
+        
+        <div>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Email Address</label>
+            <input type="email" name="email" value="<%= targetUser.email %>" required
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">New Password <span class="text-gray-400 dark:text-gray-500 font-normal lowercase">(Leave blank to keep current)</span></label>
+            <input type="password" name="password" placeholder="••••••••"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Role Permission</label>
+            <select name="role" id="roleSelect" onchange="toggleLocation()" 
+                    class="w-full px-4 py-3 bg-white dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="user" <%= targetUser.role === 'user' ? 'selected' : '' %>>User (Standard)</option>
+                <option value="manager" <%= targetUser.role === 'manager' ? 'selected' : '' %>>Head Manager (All Access)</option>
+                <option value="staff" <%= targetUser.role === 'staff' ? 'selected' : '' %>>Staff (POS Access)</option>
+                <option value="cashier" <%= targetUser.role === 'cashier' ? 'selected' : '' %>>Cashier (Payment)</option>
+                <option value="store_manager" <%= targetUser.role === 'store_manager' ? 'selected' : '' %>>Local Store Manager</option>
+            </select>
+        </div>
+
+        <div id="locationDiv" class="<%= (targetUser.role === 'store_manager' || targetUser.role === 'staff' || targetUser.role === 'cashier') ? '' : 'hidden' %>">
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase text-orange-600 dark:text-orange-400">Assign Store Location</label>
+            <select name="assigned_location_id" id="assignedLocationSelect" 
+                class="w-full px-4 py-3 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 text-orange-900 dark:text-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                <%= (targetUser.role === 'store_manager' || targetUser.role === 'staff' || targetUser.role === 'cashier') ? 'required' : '' %>>
+                
+                <option value="" class="dark:bg-gray-900/95 dark:text-gray-200">-- Select Location --</option>
+                <% locations.forEach(loc => { %>
+                    <option value="<%= loc.id %>" class="dark:bg-gray-900/95 dark:text-gray-200"
+                        <%= targetUser.assigned_location_id === loc.id ? 'selected' : '' %>>
+                        <%= loc.name %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <button type="button" onclick="doubleUpdateUser()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors">
+            Update User
+        </button>
+
+    </form>
+</div>
+
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // --- DARK MODE LOGIC ---
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // 1. NOTIFICATION SYSTEM
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        
+        toast.innerHTML = `
+            <div class="text-2xl">${icon}</div>
+            <div class="font-bold text-sm">${message}</div>
+        `;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    // 2. UPDATE USER
+    async function doubleUpdateUser() {
+        const result = await Swal.fire({
+            title: 'Update User?',
+            text: 'Save changes to this user?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, update user',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+        if (!result.isConfirmed) return;
+        const userId = document.getElementById('userId').value;
+        const form = document.getElementById('edit-user-form');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        try {
+            const res = await fetch(`/admin/users/update/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if(res.ok) {
+                showNotification('User Details Updated!', 'success');
+                setTimeout(() => window.location.href = '/admin/users', 1000);
+            } else {
+                showNotification('Error updating user', 'error');
+            }
+        } catch(err) {
+            console.error(err);
+            showNotification('Server Error', 'error');
+        }
+    }
+
+    function toggleLocation() {
+        const role = document.getElementById('roleSelect').value;
+        const locDiv = document.getElementById('locationDiv');
+        const locSelect = document.getElementById('assignedLocationSelect');
+
+        // Check for Store Manager, Staff, AND Cashier
+        if (role === 'store_manager' || role === 'staff' || role === 'cashier') {
+            locDiv.classList.remove('hidden');
+            locSelect.setAttribute('required', 'true'); 
+        } else {
+            locDiv.classList.add('hidden');
+            locSelect.removeAttribute('required');
+            locSelect.value = ""; 
+        }
+    }
+</script>

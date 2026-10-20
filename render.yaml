@@ -1,0 +1,51 @@
+# Render Blueprint Specification
+# See https://render.com/docs/blueprints for details
+
+services:
+  # 1. Express Backend Web Service
+  - type: web
+    name: sushi-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_USER
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_PORT
+        value: 5432
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: BASE_URL
+        fromService:
+          type: web
+          name: sushi-backend
+          property: host
+
+  # 2. React Vite Static Site Frontend
+  - type: web
+    name: sushi-frontend
+    runtime: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: sushi-backend
+          property: host
+    routes:
+      # Rewrite all requests to index.html for React Router SPA support
+      - type: rewrite
+        source: /*
+        destination: /index.html

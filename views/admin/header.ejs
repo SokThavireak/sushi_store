@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+</head>
+<body>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const currentPath = window.location.pathname;
+  const adminLinks = document.querySelectorAll('a'); 
+
+  adminLinks.forEach(link => {
+    const linkHref = link.getAttribute('href');
+    if (linkHref && linkHref === currentPath) {
+      link.classList.add('text-blue-500');
+      link.classList.remove('text-gray-700', 'text-gray-900', 'dark:text-gray-200');
+
+      const icon = link.querySelector('i');
+      if (icon) {
+          icon.classList.add('text-blue-500');
+          icon.classList.remove('text-gray-400', 'text-gray-500');
+      }
+
+      // OPTION 2: If you want a background color too (like the mobile menu)
+      // Uncomment these lines if you want the full block highlighted:
+      // link.classList.add('bg-blue-50', 'dark:bg-gray-800');
+      // link.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-700'); 
+    }
+  });
+});
+</script>

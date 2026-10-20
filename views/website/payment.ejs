@@ -1,0 +1,60 @@
+<div class="min-h-screen flex items-center justify-center px-4 py-12 lg:pt-24">
+    <div class="w-full max-w-md bg-white p-6 lg:p-8 rounded-3xl shadow-xl border border-gray-100 text-center">
+        
+        <div class="mb-6 animate-bounce">
+            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <i class="fa-solid fa-check text-3xl"></i>
+            </div>
+        </div>
+
+        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Confirm Payment</h1>
+        <p class="text-gray-500 text-sm mb-8">Order ID: <span class="font-mono font-bold text-gray-700">#<%= orderId %></span></p>
+
+        <div class="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Total Amount</p>
+            <p class="text-4xl font-extrabold text-indigo-600 tracking-tight"><%= amount %> $</p>
+        </div>
+
+        <button onclick="confirmDemoPayment(this.getAttribute('data-order-id'))" data-order-id="<%= orderId %>" id="pay_btn" class="group w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
+            <i class="fa-solid fa-credit-card group-hover:rotate-12 transition-transform"></i>
+            <span>Confirm & Pay Now (Demo Mode)</span>
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    async function confirmDemoPayment(orderId) {
+        const btn = document.getElementById('pay_btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Processing Payment...';
+        try {
+            const res = await fetch(`/payment/confirm/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Payment Successful',
+                    text: 'Your order has been paid successfully!',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    const targetUrl = '<%= typeof user !== "undefined" && user && ["manager", "admin", "store_manager", "staff", "cashier"].includes(user.role) ? "/admin/orders" : "/orders" %>';
+                    window.location.href = targetUrl;
+                });
+            } else {
+                alert(data.error || 'Payment failed');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> <span>Confirm & Pay Now (Demo Mode)</span>';
+            }
+        } catch(e) {
+            console.error(e);
+            alert('Connection error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> <span>Confirm & Pay Now (Demo Mode)</span>';
+        }
+    }
+</script>

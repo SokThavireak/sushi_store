@@ -1,0 +1,272 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div class="max-w-4xl mx-auto bg-white dark:bg-gray-900/95 p-8 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mt-10">
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Order #<%= order.id %></h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Created: <%= new Date(order.created_at).toLocaleString() %>
+            </p>
+        </div>
+        <a href="/admin/orders" class="text-indigo-600 hover:underline">Back to Orders</a>
+    </div>
+
+    <form action="/admin/order/update/<%= order.id %>" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" onsubmit="return doubleUpdateConfirm(event)">
+        <input type="hidden" name="_method" value="PUT">
+        
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
+            <select name="status" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+                <% ['Pending', 'Processing', 'Completed', 'Cancelled', 'Refunded'].forEach(s => { %>
+                    <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Payment Method</label>
+            <select name="payment_method" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+                <option value="Cash" <%= order.payment_method === 'Cash' ? 'selected' : '' %>>Cash</option>
+                <option value="QR" <%= order.payment_method === 'QR' ? 'selected' : '' %>>QR / Online</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Pickup Location</label>
+            <select name="pickup_location" class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+                <% locations.forEach(loc => { %>
+                    <option value="<%= loc.name %>" <%= order.pickup_location === loc.name ? 'selected' : '' %>>
+                        <%= loc.name %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Table Number</label>
+            <input type="text" name="table_number" value="<%= order.table_number %>" 
+                   class="w-full p-3 border rounded-lg dark:bg-gray-700 dark:text-white">
+        </div>
+
+        <div class="md:col-span-2">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">
+                Update Order Details
+            </button>
+        </div>
+    </form>
+
+    <hr class="border-gray-200 dark:border-gray-700 my-8">
+
+    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Order Items</h3>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-xs uppercase text-gray-500 border-b dark:border-gray-700">
+                    <th class="py-3">Item Name</th>
+                    <th class="py-3">Price</th>
+                    <th class="py-3">Quantity</th>
+                    <th class="py-3">Total</th>
+                    <th class="py-3 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm text-gray-700 dark:text-gray-300">
+                <% items.forEach(item => { %>
+                    <tr class="border-b dark:border-gray-700">
+                        <td class="py-4">
+                            Product ID: <%= item.product_id %>
+                        </td>
+                        <td class="py-4">$<%= Number(item.price).toFixed(2) %></td>
+                        <td class="py-4">
+                            <form action="/admin/orders/items/update/<%= item.id %>" method="POST" class="flex items-center gap-2">
+                                <input type="hidden" name="_method" value="PATCH">
+                                <input type="number" name="quantity" value="<%= item.quantity %>" min="1"
+                                       class="w-16 p-1 border rounded text-center dark:bg-gray-700">
+                                <button type="submit" class="text-blue-600 hover:text-blue-800 text-xs font-bold">Update</button>
+                            </form>
+                        </td>
+                        <td class="py-4 font-bold">$<%= (item.price * item.quantity).toFixed(2) %></td>
+                        <td class="py-4 text-right">
+                            <form action="/admin/orders/items/delete/<%= item.id %>" method="POST" onsubmit="return doubleConfirm(event, 'Remove this item?')">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="text-red-500 hover:text-red-700 font-bold">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right py-4 font-bold text-lg">Total Order Value:</td>
+                    <td class="py-4 font-bold text-xl text-indigo-600">$<%= Number(order.total_price).toFixed(2) %></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="mt-8 text-right">
+        <form action="/admin/order/delete/<%= order.id %>" method="POST" onsubmit="return doubleDeleteEntireConfirm(event)">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 px-4 py-2 rounded-lg">
+                Delete Entire Order
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    // --- DARK MODE LOGIC ---
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // 1. NOTIFICATION SYSTEM
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if(!container) return; // Safety check
+
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+        
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        
+        toast.innerHTML = `
+            <div class="text-2xl">${icon}</div>
+            <div class="font-bold text-sm">${message}</div>
+        `;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }    
+
+    // 2. UPDATE USER
+    async function updateUser(e) {
+        e.preventDefault();
+        const userId = document.getElementById('userId').value;
+        const form = e.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        try {
+            const res = await fetch(`/admin/users/update/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if(res.ok) {
+                showNotification('User Details Updated!', 'success');
+                // Redirect back to user list after 1s
+                setTimeout(() => window.location.href = '/admin/users', 1000);
+            } else {
+                showNotification('Error updating user', 'error');
+            }
+        } catch(err) {
+            console.error(err);
+            showNotification('Server Error', 'error');
+        }
+    }
+
+    function toggleLocation() {
+        const role = document.getElementById('roleSelect').value;
+        const locDiv = document.getElementById('locationDiv');
+        const locSelect = document.getElementById('assignedLocationSelect');
+
+        // Check for BOTH roles
+        if (role === 'store_manager' || role === 'staff') {
+            locDiv.classList.remove('hidden');
+            locSelect.setAttribute('required', 'true');
+        } else {
+            locDiv.classList.add('hidden');
+            locSelect.removeAttribute('required');
+            locSelect.value = "";
+        }
+    }
+
+    // --- Async confirmation helpers for this page ---
+    async function doubleCancelConfirm(e) {
+        e.preventDefault();
+        const result = await Swal.fire({
+            title: 'Cancel Order?',
+            text: 'This action will cancel the order. Are you sure?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, cancel order',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+        if (result.isConfirmed) {
+            e.target.submit();
+        }
+        return false;
+    }
+
+    async function doubleUpdateConfirm(e) {
+        e.preventDefault();
+        const result = await Swal.fire({
+            title: 'Update Order?',
+            text: 'Save changes to this order?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981', // emerald green
+            cancelButtonColor: '#6b7280', // gray
+            confirmButtonText: 'Yes, update order',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+        if (result.isConfirmed) {
+            e.target.submit();
+        }
+        return false;
+    }
+
+    async function doubleDeleteEntireConfirm(e) {
+        e.preventDefault();
+        const result = await Swal.fire({
+            title: 'Delete Order?',
+            text: 'This action will permanently delete the order. Are you sure?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444', // red
+            cancelButtonColor: '#6b7280', // gray
+            confirmButtonText: 'Yes, delete order',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+        if (result.isConfirmed) {
+            e.target.submit();
+        }
+        return false;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+window.doubleCancelConfirm = doubleCancelConfirm;
+window.doubleUpdateConfirm = doubleUpdateConfirm;
+window.doubleDeleteEntireConfirm = doubleDeleteEntireConfirm;
+</script>

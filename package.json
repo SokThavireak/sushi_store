@@ -1,0 +1,41 @@
+{
+  "name": "assigment",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/anhahseven/sushi-store#readme",
+  "bugs": {
+    "url": "https://github.com/anhahseven/sushi-store/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anhahseven/sushi-store.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "db:import": "node scripts/importDb.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.8.0",
+    "connect-pg-simple": "^10.0.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.2",
+    "method-override": "^3.0.0",
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth2": "^0.2.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.16.3"
+  }
+}

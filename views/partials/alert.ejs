@@ -1,0 +1,8 @@
+<% if (typeof query !== 'undefined' && query.msg) { %>
+<div id="styled-alert" class="fixed top-4 inset-x-0 mx-auto max-w-md bg-indigo-600 text-white p-4 rounded-lg shadow-lg flex items-center justify-between z-50 animate-bounce">
+  <span><%= decodeURIComponent(query.msg) %></span>
+  <button onclick="document.getElementById('styled-alert').remove()" class="ml-4 text-white hover:text-gray-200">
+    <i class="fa-solid fa-times"></i>
+  </button>
+</div>
+<% } %>

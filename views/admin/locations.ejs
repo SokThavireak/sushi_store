@@ -1,0 +1,255 @@
+<style>
+    /* Toast Animation Keyframes */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+</style>
+
+<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+<div class="bg-white dark:bg-gray-900/95 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
+  <div class="p-6 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
+    <h3 class="font-bold text-gray-800 dark:text-white text-lg">Location Management</h3>
+    <button onclick="toggleModal('add-modal')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700 transition">
+      + Add Location
+    </button>
+  </div>
+
+  <div class="p-6">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-gray-500 dark:text-gray-400 text-sm border-b border-gray-100 dark:border-gray-700">
+            <th class="p-3">Name</th>
+            <th class="p-3">Address</th>
+            <th class="p-3">Status</th>
+            <th class="p-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700 dark:text-gray-300">
+          <% locations.forEach(loc => { %>
+             <tr class="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/50 group transition-colors">
+              <td class="p-3 font-bold text-gray-800 dark:text-white"><%= loc.name %></td>
+              <td class="p-3 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate"><%= loc.address %></td>
+              <td class="p-3">
+                <% if(loc.status === 'Open') { %>
+                  <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded text-xs font-bold">Open</span>
+                <% } else { %>
+                  <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-1 rounded text-xs font-bold">Closed</span>
+                <% } %>
+              </td>
+              <td class="p-3 text-right space-x-2">
+                <button onclick="openEditModal(<%= JSON.stringify(loc) %>)" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-bold">Edit</button>
+                <button onclick="deleteLocation(<%= loc.id %>)" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-bold">Delete</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="add-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-white dark:bg-gray-900/95 rounded-2xl w-full max-w-lg p-6 shadow-2xl border dark:border-gray-700 transition-colors">
+    <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Add New Location</h3>
+    <form onsubmit="submitAdd(event)" class="space-y-4">
+      <input type="text" id="add-name" name="name" placeholder="Location Name" required 
+             class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+      
+      <input type="text" id="add-address" name="address" placeholder="Full Address" required 
+             class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+      
+      <input type="text" id="add-google_map_url" name="google_map_url" placeholder="Google Maps Link" 
+             class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+      
+      <div class="grid grid-cols-2 gap-4">
+          <input type="text" id="add-hours_mon_fri" name="hours_mon_fri" placeholder="Mon-Fri Hours" 
+                 class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+          <input type="text" id="add-hours_sat_sun" name="hours_sat_sun" placeholder="Sat-Sun Hours" 
+                 class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+      </div>
+      
+      <select id="add-status" name="status" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+      </select>
+      
+      <div class="flex justify-end gap-2 mt-4">
+         <button type="button" onclick="toggleModal('add-modal')" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="edit-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-white dark:bg-gray-900/95 rounded-2xl w-full max-w-lg p-6 shadow-2xl border dark:border-gray-700 transition-colors">
+    <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Edit Location</h3>
+    <div class="space-y-4">
+      <input type="hidden" id="edit-id">
+      <input type="text" id="edit-name" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+      <input type="text" id="edit-address" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+      <input type="text" id="edit-google_map_url" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+      <div class="grid grid-cols-2 gap-4">
+          <input type="text" id="edit-hours_mon_fri" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+          <input type="text" id="edit-hours_sat_sun" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+      </div>
+      <select id="edit-status" class="w-full border dark:border-gray-600 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500">
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+      </select>
+      <div class="flex justify-end gap-2 mt-4">
+        <button type="button" onclick="toggleModal('edit-modal')" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Cancel</button>
+        <button onclick="submitEdit()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="theme-toggle" class="fixed bottom-6 right-6 w-12 h-12 bg-gray-900 dark:bg-yellow-400 text-white dark:text-gray-900 rounded-full shadow-lg z-[9999] flex items-center justify-center transition-transform hover:scale-110 focus:outline-none">
+    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
+    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
+</button>
+
+<script>
+    // --- DARK MODE LOGIC ---
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+
+    // 1. NOTIFICATION SYSTEM
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const isError = type === 'error';
+        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
+        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[300px] border-2 border-white/20`;
+        toast.style.animation = 'slideIn 0.5s forwards';
+        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold text-sm">${message}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.5s forwards';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+    function openEditModal(loc) {
+        document.getElementById('edit-id').value = loc.id;
+        document.getElementById('edit-name').value = loc.name;
+        document.getElementById('edit-address').value = loc.address;
+        document.getElementById('edit-google_map_url').value = loc.google_map_url;
+        document.getElementById('edit-hours_mon_fri').value = loc.hours_mon_fri;
+        document.getElementById('edit-hours_sat_sun').value = loc.hours_sat_sun;
+        document.getElementById('edit-status').value = loc.status;
+        toggleModal('edit-modal');
+    }
+
+    // 2. ADD LOCATION
+    async function submitAdd(e) {
+        e.preventDefault();
+        const data = {
+            name: document.getElementById('add-name').value,
+            address: document.getElementById('add-address').value,
+            google_map_url: document.getElementById('add-google_map_url').value,
+            hours_mon_fri: document.getElementById('add-hours_mon_fri').value,
+            hours_sat_sun: document.getElementById('add-hours_sat_sun').value,
+            status: document.getElementById('add-status').value
+        };
+        try {
+            const res = await fetch('/api/locations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                showNotification("Location Added Successfully!");
+                toggleModal('add-modal');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showNotification("Error adding location", 'error');
+            }
+        } catch(err) { console.error(err); showNotification("Server Error", 'error');
+        }
+    }
+
+    // 3. EDIT LOCATION
+    async function submitEdit() {
+        const result = await Swal.fire({
+            title: 'Update Location?',
+            text: 'Save changes to this location?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, update it',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+        if (!result.isConfirmed) return;
+        const id = document.getElementById('edit-id').value;
+        const data = {
+            name: document.getElementById('edit-name').value,
+            address: document.getElementById('edit-address').value,
+            google_map_url: document.getElementById('edit-google_map_url').value,
+            hours_mon_fri: document.getElementById('edit-hours_mon_fri').value,
+            hours_sat_sun: document.getElementById('edit-hours_sat_sun').value,
+            status: document.getElementById('edit-status').value
+        };
+        try {
+            const res = await fetch(`/api/locations/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) {
+                showNotification("Location Updated!");
+                toggleModal('edit-modal');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showNotification("Error updating location", 'error');
+            }
+        } catch(err) { console.error(err); showNotification("Server Error", 'error');
+        }
+    }
+
+    // 4. DELETE LOCATION
+    async function deleteLocation(id) {
+        const result = await Swal.fire({
+            title: 'Delete Location?',
+            text: 'This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete it',
+            background: document.documentElement.classList.contains('dark') ? '#111827' : '#fff',
+            color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            customClass: { popup: 'rounded-2xl shadow-xl font-sans' }
+        });
+        if (!result.isConfirmed) return;
+        try {
+            const res = await fetch(`/api/locations/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showNotification("Location Deleted");
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showNotification("Error deleting location", 'error');
+            }
+        } catch(err) { console.error(err); showNotification("Server Error", 'error');
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
