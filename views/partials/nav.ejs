@@ -82,12 +82,16 @@
           </a>
         <% } %>
 
-        <!-- Mobile Drawer Toggle -->
-        <button onclick="toggleHauteDrawer()" class="lg:hidden w-8 h-8 flex flex-col justify-center items-end gap-1.5 focus:outline-none text-sand hover:text-gold group">
-          <span class="w-6 h-[1px] bg-[#F5F5F0] group-hover:bg-gold transition-all"></span>
-          <span class="w-4 h-[1px] bg-[#F5F5F0] group-hover:bg-gold transition-all"></span>
-          <span class="w-5 h-[1px] bg-[#F5F5F0] group-hover:bg-gold transition-all"></span>
+        <!-- Sidebar Trigger Button (Desktop & Mobile) -->
+        <button onclick="openHauteSidebar()" title="Open Atelier Sidebar" class="flex items-center gap-2 px-3 py-1.5 border border-gold/40 text-xs uppercase tracking-[0.22em] text-gold hover:bg-gold hover:text-[#0B0C10] transition-all group focus:outline-none">
+          <div class="flex flex-col gap-1 items-end w-4">
+            <span class="w-4 h-[1px] bg-gold group-hover:bg-[#0B0C10] transition-colors"></span>
+            <span class="w-2.5 h-[1px] bg-gold group-hover:bg-[#0B0C10] transition-colors"></span>
+            <span class="w-3.5 h-[1px] bg-gold group-hover:bg-[#0B0C10] transition-colors"></span>
+          </div>
+          <span class="font-cinzel text-[11px] hidden sm:inline">Menu</span>
         </button>
+
       </div>
 
     </div>
