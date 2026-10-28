@@ -15,9 +15,14 @@ cloudinary.config({
 });
 
 // Local cache directory for fast local serving & fallback backup
-const CACHE_DIR = path.resolve('public', 'uploads', 'cache');
-if (!fs.existsSync(CACHE_DIR)) {
-  fs.mkdirSync(CACHE_DIR, { recursive: true });
+// Safely try creating local cache directory if writable (serverless lambdas like Vercel have a read-only filesystem)
+try {
+  const CACHE_DIR = path.resolve('public', 'uploads', 'cache');
+  if (!fs.existsSync(CACHE_DIR)) {
+    fs.mkdirSync(CACHE_DIR, { recursive: true });
+  }
+} catch (err) {
+  // Ignored in read-only serverless environments like Vercel (/var/task)
 }
 
 // In-memory quick lookup cache (original url / key -> compressed url)
