@@ -2,7 +2,7 @@
 
 echo "========================================================"
 echo "Connecting and Pushing sushi_store to GitHub:"
-echo "https://github.com/anhahseven/sushi-store"
+echo "https://github.com/SokThavireak/sushi_store"
 echo "========================================================"
 
 # Navigate to script directory
@@ -19,7 +19,7 @@ git branch -M main
 
 # 3. Set remote origin
 git remote remove origin 2>/dev/null
-git remote add origin https://github.com/anhahseven/sushi-store.git
+git remote add origin https://github.com/SokThavireak/sushi_store.git
 
 echo "[*] Current remote URL:"
 git remote -v
@@ -39,7 +39,7 @@ git push -u origin main
 if [ $? -eq 0 ]; then
     echo "========================================================"
     echo "[SUCCESS] Project successfully connected and pushed!"
-    echo "Check: https://github.com/anhahseven/sushi-store"
+    echo "Check: https://github.com/SokThavireak/sushi_store"
     echo "========================================================"
 else
     echo "[!] If remote has existing files, run: git pull origin main --rebase && git push origin main"

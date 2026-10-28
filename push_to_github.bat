@@ -1,7 +1,7 @@
 @echo off
 echo ========================================================
 echo Connecting and Pushing sushi_store to GitHub:
-echo https://github.com/anhahseven/sushi-store
+echo https://github.com/SokThavireak/sushi_store
 echo ========================================================
 echo.
 
@@ -18,7 +18,7 @@ git branch -M main 2>nul
 
 REM 3. Set remote origin
 git remote remove origin 2>nul
-git remote add origin https://github.com/anhahseven/sushi-store.git
+git remote add origin https://github.com/SokThavireak/sushi_store.git
 
 echo [*] Current remote URL:
 git remote -v
@@ -40,7 +40,7 @@ if %ERRORLEVEL% EQU 0 (
     echo.
     echo ========================================================
     echo [SUCCESS] Project successfully connected and pushed!
-    echo Check: https://github.com/anhahseven/sushi-store
+    echo Check: https://github.com/SokThavireak/sushi_store
     echo ========================================================
 ) else (
     echo.

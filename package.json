@@ -2,13 +2,13 @@
   "name": "assigment",
   "version": "1.0.0",
   "description": "",
-  "homepage": "https://github.com/anhahseven/sushi-store#readme",
+  "homepage": "https://github.com/SokThavireak/sushi_store#readme",
   "bugs": {
-    "url": "https://github.com/anhahseven/sushi-store/issues"
+    "url": "https://github.com/SokThavireak/sushi_store/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anhahseven/sushi-store.git"
+    "url": "git+https://github.com/SokThavireak/sushi_store.git"
   },
   "license": "ISC",
   "author": "",
