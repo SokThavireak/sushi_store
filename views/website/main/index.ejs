@@ -354,7 +354,19 @@
   }
 
   // QUICK ADD TO BAG FUNCTION
-  async function quickAddToBag(productId, name) {
+  async function quickAddToBag(target, nameFallback) {
+    let productId = target;
+    let name = nameFallback;
+
+    // Handle case where element itself is passed (this)
+    if (typeof target === 'object' && target !== null && target.closest) {
+      const card = target.closest('.dish-card');
+      if (card) {
+        productId = card.getAttribute('data-dish-id');
+        name = card.getAttribute('data-dish-name');
+      }
+    }
+
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
@@ -368,7 +380,7 @@
       }
       const data = await res.json();
       if (res.ok) {
-        showToast(`${name} added to your dining bag.`, 'success');
+        showToast(`${name || 'Course'} added to your dining bag.`, 'success');
         updateBagBadge();
       } else {
         showToast(data.error || 'Unable to add dish', 'error');
