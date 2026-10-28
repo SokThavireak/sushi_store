@@ -1,391 +1,155 @@
-<nav
-  class="fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md bg-blue-100/40 dark:bg-blue-950/45 border-b border-blue-100/30 dark:border-blue-900/30 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 py-3 lg:px-8 lg:py-4">
-    <div class="flex justify-between items-center">
+<nav id="haute-nav" class="fixed top-0 inset-x-0 z-50 transition-all duration-500 bg-transparent border-b border-transparent">
+  <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+    <div class="flex items-center justify-between h-20 lg:h-24">
 
-      <div class="text-2xl lg:text-3xl font-extrabold tracking-tight z-50">
-        <a href="<%= (typeof user !== 'undefined' && user.role === 'staff') ? '/staff/menu' : '/' %>"
-          class="text-gray-900 dark:text-orange-400">Murakami<span class="text-orange-500">.</span></a>
-      </div>
-
-      <div class="hidden lg:flex items-center gap-1 p-1 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm" id="expandable-nav-container">
-        <% if (typeof user==='undefined' || user.role !=='staff' ) { %>
-          <a href="/" class="expandable-tab flex items-center rounded-xl px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer transition-colors duration-300">
-            <i class="fa-solid fa-house text-[18px]"></i>
-            <span class="expandable-tab-text">Home</span>
-          </a>
-
-          <a href="/menu" class="expandable-tab flex items-center rounded-xl px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer transition-colors duration-300">
-            <i class="fa-solid fa-utensils text-[18px]"></i>
-            <span class="expandable-tab-text">Menu</span>
-          </a>
-
-          <div class="mx-1 h-[24px] w-[1.5px] bg-gray-200 dark:bg-gray-700"></div>
-
-          <a href="/about" class="expandable-tab flex items-center rounded-xl px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer transition-colors duration-300">
-            <i class="fa-solid fa-circle-info text-[18px]"></i>
-            <span class="expandable-tab-text">About</span>
-          </a>
-
-          <a href="/offers" class="expandable-tab flex items-center rounded-xl px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer transition-colors duration-300">
-            <i class="fa-solid fa-tag text-[18px]"></i>
-            <span class="expandable-tab-text">Offers</span>
-          </a>
-
-          <a href="/location" class="expandable-tab flex items-center rounded-xl px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer transition-colors duration-300">
-            <i class="fa-solid fa-map-location-dot text-[18px]"></i>
-            <span class="expandable-tab-text">Locations</span>
-          </a>
-          <% } %>
-      </div>
-
-      <div class="flex items-center gap-3 lg:gap-6">
-
-        <% if (typeof user !=='undefined' && user) { %>
-          <% if (user.role==='manager' || user.role==='admin' || user.role==='store_manager' || user.role==='cashier' )
-            { %>
-            <a href="/admin/dashboard"
-              class="hidden lg:flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300">
-              <i class="fa-solid fa-chart-pie"></i> Dashboard
-            </a>
-            <% } %>
-
-              <% if (['manager', 'admin' , 'store_manager' , 'staff' , 'cashier' ].includes(user.role)) { %>
-                <a href="/staff/menu"
-                  class="hidden lg:flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300">
-                  <i class="fa-solid fa-utensils"></i> POS Menu
-                </a>
-                <a href="/admin/orders"
-                  class="hidden lg:flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-lg transition-colors">
-                  <i class="fa-solid fa-cash-register"></i> POS Checkout
-                </a>
-                <% } %>
-
-                  <div class="relative">
-                    <button onclick="toggleProfileMenu()"
-                      class="flex items-center justify-center w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900/30 text-gray-700 dark:text-orange-400 transition-all focus:outline-none">
-                      <i class="fa-solid fa-user"></i>
-                    </button>
-
-                    <div id="profile-menu"
-                      class="hidden absolute right-0 mt-3 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-fade-in-down">
-                      <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Signed in as</p>
-                        <p class="text-sm font-bold text-gray-800 dark:text-orange-400 truncate">
-                          <%= user.email.split('@')[0] %>
-                        </p>
-                      </div>
-                      <% if (user.role === 'user') { %>
-                      <a href="/profile"
-                        class="block px-4 py-3 text-sm text-gray-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors">
-                        <i class="fa-solid fa-gear mr-2 text-gray-400"></i> Manage Account
-                      </a>
-                      <% } %>
-                      <a href="/orders"
-                        class="block px-4 py-3 text-sm text-gray-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-gray-700 transition-colors">
-                        <i class="fa-solid fa-receipt mr-2 text-gray-400"></i> Orders
-                      </a>
-                      <a href="/logout"
-                        class="block px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-gray-100 dark:border-gray-700">
-                        <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
-                      </a>
-                    </div>
-                  </div>
-
-                  <% } else { %>
-                    <a href="/login"
-                      class="hidden lg:flex desktop-link text-sm font-bold text-gray-800 dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300 transition-colors">
-                      Login
-                    </a>
-                    <% } %>
-
-                      <button onclick="toggleTheme()"
-                        class="hidden lg:flex w-10 h-10 items-center justify-center text-gray-700 dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300 transition focus:outline-none">
-                        <i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
-                      </button>
-                      <script>
-                        function syncThemeIcons() {
-                          const isDark = document.documentElement.classList.contains('dark');
-                          const dIcon = document.getElementById('theme-icon');
-                          const mIcon = document.getElementById('mobile-theme-icon');
-                          if (dIcon) dIcon.className = isDark ? 'fa-solid fa-sun text-xl text-amber-400' : 'fa-solid fa-moon text-xl';
-                          if (mIcon) mIcon.className = isDark ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-orange-500';
-                        }
-                        syncThemeIcons();
-                      </script>
-
-                      <button onclick="toggleCart()"
-                        class="relative w-10 h-10 flex items-center justify-center text-gray-700 dark:text-orange-400 hover:text-orange-500 dark:hover:text-orange-300 transition">
-                        <i class="fa-solid fa-shopping-bag text-xl"></i>
-                        <span id="cart-count"
-                          class="absolute top-0 right-0 bg-orange-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-sm">0</span>
-                      </button>
-
-                      <button onclick="toggleMobileMenu()"
-                        class="lg:hidden w-10 h-10 flex items-center justify-center text-gray-800 dark:text-orange-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none">
-                        <i id="menu-icon" class="fa-solid fa-bars text-xl"></i>
-                      </button>
-      </div>
-    </div>
-  </div>
-
-  </nav>
-
-  <!-- Mobile Sidebar Backdrop Overlay -->
-  <div id="mobile-sidebar-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] hidden lg:hidden opacity-0 transition-opacity duration-300"></div>
-
-  <!-- Mobile Slide-over Sidebar Drawer -->
-  <div id="mobile-menu"
-    class="fixed top-0 right-0 h-screen w-[82%] max-w-[340px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 z-[9999] shadow-2xl flex flex-col translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
-    
-    <!-- Sidebar Header with Brand & Close Button -->
-    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-      <div class="text-2xl font-extrabold tracking-tight">
-        <a href="/" class="text-gray-900 dark:text-orange-400">Murakami<span class="text-orange-500">.</span></a>
-      </div>
-      <button onclick="toggleMobileMenu()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:text-orange-500 transition-colors">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-    </div>
-
-    <!-- Sidebar Body -->
-    <div class="flex-1 overflow-y-auto p-5 flex flex-col space-y-2">
-      <!-- Dark mode switch inside mobile sidebar -->
-      <div class="flex items-center justify-between px-3.5 py-3 rounded-2xl bg-gray-100/70 dark:bg-gray-800/70 mb-3 border border-gray-200/50 dark:border-gray-700/50">
-        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2.5">
-          <i id="mobile-theme-icon" class="fa-solid fa-moon text-orange-500 text-base"></i> Dark Mode
+      <!-- LEFT: Brand Logo / Monogram -->
+      <a href="<%= (typeof user !== 'undefined' && user.role === 'staff') ? '/staff/menu' : '/' %>" class="group flex items-center gap-3">
+        <span class="font-cinzel text-xl lg:text-2xl font-semibold tracking-[0.25em] text-[#F5F5F0] transition-colors group-hover:text-gold">
+          MURAKAMI
         </span>
-        <button onclick="toggleTheme()" class="px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-sm active:scale-95 transition-transform">
-          Toggle
+        <span class="inline-block text-[10px] tracking-[0.28em] font-sans text-gold/70 border-l border-white/15 pl-3 py-0.5 uppercase hidden sm:inline-block">
+          Atelier · Tokyo
+        </span>
+      </a>
+
+      <!-- CENTER: Editorial Navigation Links -->
+      <div class="hidden lg:flex items-center gap-8 xl:gap-11">
+        <a href="/" class="nav-editorial-link text-xs uppercase tracking-[0.22em] text-[#F5F5F0]/80 hover:text-gold transition-colors duration-300 relative py-1">
+          The Concept
+        </a>
+        <a href="#culinary-showcase" class="nav-editorial-link text-xs uppercase tracking-[0.22em] text-[#F5F5F0]/80 hover:text-gold transition-colors duration-300 relative py-1">
+          Omakase & Menu
+        </a>
+        <a href="#chef-philosophy" class="nav-editorial-link text-xs uppercase tracking-[0.22em] text-[#F5F5F0]/80 hover:text-gold transition-colors duration-300 relative py-1">
+          Chef's Table
+        </a>
+        <a href="#omakase-sets" class="nav-editorial-link text-xs uppercase tracking-[0.22em] text-[#F5F5F0]/80 hover:text-gold transition-colors duration-300 relative py-1">
+          Tasting Sets
+        </a>
+        <a href="#reservations" class="nav-editorial-link text-xs uppercase tracking-[0.22em] text-[#F5F5F0]/80 hover:text-gold transition-colors duration-300 relative py-1">
+          Reservations
+        </a>
+        <a href="/location" class="nav-editorial-link text-xs uppercase tracking-[0.22em] text-[#F5F5F0]/80 hover:text-gold transition-colors duration-300 relative py-1">
+          Ateliers
+        </a>
+      </div>
+
+      <!-- RIGHT: Bag / Cart, Admin Portal & Mobile Toggle -->
+      <div class="flex items-center gap-5 sm:gap-7">
+        
+        <!-- Cart / Bag Trigger -->
+        <button onclick="toggleCartDrawer()" class="relative flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-sand hover:text-gold transition-colors group focus:outline-none">
+          <span class="font-cinzel text-xs hidden sm:inline">Bag</span>
+          <div class="relative w-8 h-8 rounded-full border border-white/10 group-hover:border-gold/50 flex items-center justify-center transition-colors">
+            <i class="fa-solid fa-bag-shopping text-[13px] text-gold"></i>
+            <span id="cart-item-count" class="absolute -top-1 -right-1 w-4 h-4 bg-gold text-[#0B0C10] font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
+          </div>
+        </button>
+
+        <!-- User / Staff Account -->
+        <% if (typeof user !== 'undefined' && user) { %>
+          <% if (['manager', 'admin', 'store_manager', 'staff', 'cashier'].includes(user.role)) { %>
+            <a href="/admin/dashboard" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 border border-gold/40 text-[11px] uppercase tracking-[0.18em] text-gold hover:bg-gold hover:text-[#0B0C10] transition-colors rounded-none">
+              <i class="fa-solid fa-compass text-[10px]"></i> Staff
+            </a>
+          <% } %>
+
+          <!-- Profile Dropdown Trigger -->
+          <div class="relative">
+            <button onclick="toggleProfileDropdown()" class="w-8 h-8 rounded-full border border-white/15 text-sand hover:border-gold/60 hover:text-gold flex items-center justify-center transition-colors text-xs focus:outline-none">
+              <i class="fa-regular fa-user"></i>
+            </button>
+            <div id="haute-profile-menu" class="hidden absolute right-0 mt-3 w-52 bg-[#12141A] border border-white/10 shadow-2xl py-2 z-50">
+              <div class="px-4 py-2 border-b border-white/5 text-[11px] tracking-wider text-sand-muted">
+                Signed in as <span class="text-sand font-semibold block truncate"><%= user.email %></span>
+              </div>
+              <a href="/orders" class="block px-4 py-2.5 text-xs tracking-wider text-sand hover:bg-white/5 hover:text-gold transition-colors">
+                <i class="fa-solid fa-receipt mr-2 text-gold/70"></i> My Orders
+              </a>
+              <% if (user.role === 'user') { %>
+              <a href="/profile" class="block px-4 py-2.5 text-xs tracking-wider text-sand hover:bg-white/5 hover:text-gold transition-colors">
+                <i class="fa-solid fa-sliders mr-2 text-gold/70"></i> Settings
+              </a>
+              <% } %>
+              <a href="/logout" class="block px-4 py-2.5 text-xs tracking-wider text-crimson hover:bg-crimson/10 transition-colors border-t border-white/5">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        <% } else { %>
+          <a href="/login" class="text-xs uppercase tracking-[0.22em] text-gold hover:text-white transition-colors">
+            Sign In
+          </a>
+        <% } %>
+
+        <!-- Mobile Drawer Toggle -->
+        <button onclick="toggleHauteDrawer()" class="lg:hidden w-8 h-8 flex flex-col justify-center items-end gap-1.5 focus:outline-none text-sand hover:text-gold group">
+          <span class="w-6 h-[1px] bg-[#F5F5F0] group-hover:bg-gold transition-all"></span>
+          <span class="w-4 h-[1px] bg-[#F5F5F0] group-hover:bg-gold transition-all"></span>
+          <span class="w-5 h-[1px] bg-[#F5F5F0] group-hover:bg-gold transition-all"></span>
         </button>
       </div>
 
-      <% if (typeof user==='undefined' || user.role !=='staff' ) { %>
-        <a href="/" class="mobile-link">
-          <i class="fa-solid fa-house w-6 text-center text-gray-400"></i> Home
-        </a>
-        <a href="/menu" class="mobile-link">
-          <i class="fa-solid fa-utensils w-6 text-center text-gray-400"></i> Menu
-        </a>
-        <a href="/about" class="mobile-link">
-          <i class="fa-solid fa-circle-info w-6 text-center text-gray-400"></i> About
-        </a>
-        <a href="/offers" class="mobile-link">
-          <i class="fa-solid fa-tag w-6 text-center text-gray-400"></i> Offers
-        </a>
-        <a href="/location" class="mobile-link">
-          <i class="fa-solid fa-map-location-dot w-6 text-center text-gray-400"></i> Locations
-        </a>
-        <% if (typeof user==='undefined' || !user) { %>
-          <div class="border-t border-gray-100 dark:border-gray-800 my-2 pt-2"></div>
-          <a href="/login" class="mobile-link">
-            <i class="fa-solid fa-right-to-bracket w-6 text-center text-gray-400"></i> Login
-          </a>
-          <% } %>
-      <% } %>
-
-      <% if (typeof user !=='undefined' && (user.role==='manager' || user.role==='admin' || user.role==='store_manager' )) { %>
-        <div class="border-t border-gray-100 dark:border-gray-800 my-2 pt-2"></div>
-        <a href="/admin/dashboard" class="mobile-link">
-          <i class="fa-solid fa-chart-pie w-6 text-center text-gray-400"></i> Dashboard
-        </a>
-      <% } %>
     </div>
   </div>
+</nav>
 
-<style>
-  .mobile-link {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    color: #374151;
-    /* gray-700 */
-    font-weight: 600;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-  }
+<!-- FULL-SCREEN MATTE-BLACK MOBILE OVERLAY DRAWER -->
+<div id="haute-drawer" class="fixed inset-0 z-[60] bg-[#0B0C10]/98 backdrop-blur-2xl transform translate-x-full transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col justify-between p-8 sm:p-12">
+  <div class="flex items-center justify-between border-b border-white/10 pb-6">
+    <span class="font-cinzel text-lg tracking-[0.3em] text-gold">MURAKAMI ATELIER</span>
+    <button onclick="toggleHauteDrawer()" class="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center text-sand hover:text-gold hover:border-gold transition-colors">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+  </div>
 
-  /* Added Dark Mode support for Mobile Link */
-  :is(.dark .mobile-link) {
-    color: #fdba74;
-    /* orange-300 */
-  }
+  <div class="flex flex-col gap-6 py-10">
+    <a href="/" onclick="toggleHauteDrawer()" class="font-serif text-3xl sm:text-4xl tracking-wider text-[#F5F5F0] hover:text-gold hover:translate-x-2 transition-all">
+      01. The Concept
+    </a>
+    <a href="#culinary-showcase" onclick="toggleHauteDrawer()" class="font-serif text-3xl sm:text-4xl tracking-wider text-[#F5F5F0] hover:text-gold hover:translate-x-2 transition-all">
+      02. Omakase & Menu
+    </a>
+    <a href="#chef-philosophy" onclick="toggleHauteDrawer()" class="font-serif text-3xl sm:text-4xl tracking-wider text-[#F5F5F0] hover:text-gold hover:translate-x-2 transition-all">
+      03. Chef's Table
+    </a>
+    <a href="#omakase-sets" onclick="toggleHauteDrawer()" class="font-serif text-3xl sm:text-4xl tracking-wider text-[#F5F5F0] hover:text-gold hover:translate-x-2 transition-all">
+      04. Tasting Sets
+    </a>
+    <a href="#reservations" onclick="toggleHauteDrawer()" class="font-serif text-3xl sm:text-4xl tracking-wider text-[#F5F5F0] hover:text-gold hover:translate-x-2 transition-all">
+      05. Reservations
+    </a>
+    <a href="/location" class="font-serif text-3xl sm:text-4xl tracking-wider text-[#F5F5F0] hover:text-gold hover:translate-x-2 transition-all">
+      06. Locations
+    </a>
+  </div>
 
-  .mobile-link:hover {
-    background-color: #fff7ed;
-    /* orange-50 */
-    color: #f97316;
-    /* orange-500 */
-  }
-
-  :is(.dark .mobile-link:hover) {
-    background-color: #7c2d12;
-    /* orange-900 */
-    color: #fb923c;
-    /* orange-400 */
-  }
-
-  /* Focus states handled by Javascript classes */
-  .mobile-active-state {
-    background-color: #ffedd5 !important;
-    /* orange-100 */
-    color: #ea580c !important;
-    /* orange-600 */
-  }
-
-  :is(.dark .mobile-active-state) {
-    background-color: #7c2d12 !important;
-    /* orange-900 */
-    color: #fb923c !important;
-    /* orange-400 */
-  }
-
-  .animate-fade-in-down {
-    animation: fadeInDown 0.2s ease-out;
-  }
-
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Expandable Tabs CSS */
-  .expandable-tab-text {
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
-    /* Smooth spring-like transition similar to Framer Motion */
-    transition: max-width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                opacity 0.4s ease, 
-                margin-left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    white-space: nowrap;
-    display: block; /* Use block to prevent weird inline spacing issues during animation */
-  }
-  
-  .expandable-tab:hover .expandable-tab-text,
-  .expandable-tab.active .expandable-tab-text {
-    max-width: 150px;
-    opacity: 1;
-    margin-left: 0.5rem;
-  }
-  
-  .expandable-tab {
-    /* Smooth background color transition */
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .expandable-tab.active {
-    background-color: #ffedd5 !important; /* orange-100 */
-    color: #ea580c !important; /* orange-600 */
-  }
-  
-  :is(.dark .expandable-tab.active) {
-    background-color: #7c2d12 !important; /* orange-900 */
-    color: #fb923c !important; /* orange-400 */
-  }
-</style>
+  <div class="border-t border-white/10 pt-6 flex flex-col gap-3 text-xs tracking-[0.2em] uppercase text-sand-muted">
+    <p>GINZA DISTRICT · TOKYO, JAPAN</p>
+    <p>TABLE SERVICE BY RESERVATION ONLY</p>
+  </div>
+</div>
 
 <script>
-  // --- ACTIVE LINK HIGHLIGHTER (Synchronous to prevent flicker) ---
-  (function() {
-    const currentPath = window.location.pathname;
-
-    // 1. Highlight Desktop Links (Expandable Tabs)
-    const desktopLinks = document.querySelectorAll('.expandable-tab');
-    desktopLinks.forEach(link => {
-      // Exact match for most pages, or includes for nested routes like /orders/123
-      if (link.getAttribute('href') === currentPath || (currentPath.startsWith('/orders') && link.getAttribute('href') === '/orders')) {
-        link.classList.add('active');
-        
-        // Also ensure the icon is orange when active
-        const icon = link.querySelector('i');
-        if (icon) {
-          icon.classList.remove('text-gray-500', 'dark:text-gray-400');
-          icon.classList.add('text-orange-600', 'dark:text-orange-400');
-        }
-      }
-    });
-
-    // 2. Highlight Mobile Links
-    const mobileLinks = document.querySelectorAll('.mobile-link');
-    mobileLinks.forEach(link => {
-      if (link.getAttribute('href') === currentPath || (currentPath.startsWith('/orders') && link.getAttribute('href') === '/orders')) {
-        link.classList.add('mobile-active-state');
-
-        // Make the icon orange too
-        const icon = link.querySelector('i');
-        if (icon) {
-          icon.classList.remove('text-gray-400');
-          icon.classList.add('text-orange-500');
-        }
-      }
-    });
-  })();
-
-  // Toggle Dark Mode
-  function toggleTheme() {
-    const html = document.documentElement;
-    const icon = document.getElementById('theme-icon');
-    if (html.classList.contains('dark')) {
-      html.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      if (icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
+  // Sticky Blur Header Transition
+  const hauteNav = document.getElementById('haute-nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      hauteNav.classList.add('bg-[#0B0C10]/85', 'backdrop-blur-md', 'border-white/10');
+      hauteNav.classList.remove('bg-transparent', 'border-transparent');
     } else {
-      html.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      if (icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
-    }
-  }
-
-
-
-  // Toggle Mobile Menu Sidebar Drawer
-  function toggleMobileMenu() {
-    const menu = document.getElementById("mobile-menu");
-    const backdrop = document.getElementById("mobile-sidebar-backdrop");
-    const icon = document.getElementById("menu-icon");
-
-    const isOpen = !menu.classList.contains("translate-x-full");
-
-    if (isOpen) {
-      // Close Sidebar Drawer
-      menu.classList.add("translate-x-full");
-      backdrop.classList.add("opacity-0");
-      setTimeout(() => backdrop.classList.add("hidden"), 300);
-      document.body.style.overflow = "";
-      if (icon) { icon.classList.remove("fa-xmark"); icon.classList.add("fa-bars"); }
-    } else {
-      // Open Sidebar Drawer
-      backdrop.classList.remove("hidden");
-      setTimeout(() => {
-        backdrop.classList.remove("opacity-0");
-        menu.classList.remove("translate-x-full");
-      }, 10);
-      document.body.style.overflow = "hidden";
-      if (icon) { icon.classList.remove("fa-bars"); icon.classList.add("fa-xmark"); }
-    }
-  }
-
-  // Toggle Profile Menu (Desktop)
-  function toggleProfileMenu() {
-    const menu = document.getElementById("profile-menu");
-    menu.classList.toggle("hidden");
-  }
-
-  // Close menus when clicking outside
-  window.addEventListener("click", function (e) {
-    // Close Profile Menu
-    const profileBtn = document.querySelector('button[onclick="toggleProfileMenu()"]');
-    const profileMenu = document.getElementById("profile-menu");
-    if (profileBtn && profileMenu && !profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
-      profileMenu.classList.add("hidden");
+      hauteNav.classList.remove('bg-[#0B0C10]/85', 'backdrop-blur-md', 'border-white/10');
+      hauteNav.classList.add('bg-transparent', 'border-transparent');
     }
   });
+
+  function toggleHauteDrawer() {
+    const drawer = document.getElementById('haute-drawer');
+    drawer.classList.toggle('translate-x-full');
+  }
+
+  function toggleProfileDropdown() {
+    const menu = document.getElementById('haute-profile-menu');
+    if (menu) menu.classList.toggle('hidden');
+  }
 </script>

@@ -1,185 +1,395 @@
-<style>
-  /* 1. SCROLL ANIMATION STYLES */
-  .scroll-hidden {
-    opacity: 0;
-    transform: translateY(60px);
-    transition: opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: opacity, transform;
-  }
-
-  .reveal-active {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* CRITICAL MOBILE FIX: Prevent white screen on phones if JS lags */
-  @media (max-width: 640px) {
-    .scroll-hidden {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-    }
-  }
-
-  /* 2. TOAST NOTIFICATION STYLES */
-  @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-  }
-  @keyframes slideOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
-  }
-</style>
-
 <%- include('./header.ejs') %>
-
-<%- include('./our_category.ejs') %>
 
 <%- include('./mostsale.ejs') %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+<%- include('./our_category.ejs') %>
+
+<!-- SECTION 5: TASTING SETS / OMAKASE BENTO (MULTI-COURSE EXPERIENCE) -->
+<section id="omakase-sets" class="py-24 sm:py-32 bg-[#0B0C10] relative">
+  <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+    
+    <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+      <span class="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-gold font-sans block mb-3">
+        Dégustation & Omakase · おまかせ
+      </span>
+      <h2 class="font-serif text-3xl sm:text-5xl uppercase tracking-[0.12em] text-[#F5F5F0] font-light gold-hairline">
+        The Multi-Course Menus
+      </h2>
+      <p class="font-serif italic text-sand-muted text-base sm:text-lg mt-8 leading-relaxed">
+        A seamless progression of ocean delicacies orchestrating seasonal temperatures, smoke, and texture.
+      </p>
+    </div>
+
+    <!-- Tiered Multi-Course Tasting Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Tier 1: Kaisho Selection -->
+      <div class="bg-[#12141A] border border-white/10 hover:border-gold/40 transition-all duration-500 p-8 sm:p-10 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-baseline border-b border-white/10 pb-6 mb-8">
+            <div>
+              <span class="text-[10px] tracking-[0.25em] text-gold uppercase block font-sans">Level I</span>
+              <h3 class="font-serif text-2xl uppercase tracking-[0.1em] text-white">Kaisho Omakase</h3>
+            </div>
+            <span class="font-serif text-2xl text-gold font-light">$95</span>
+          </div>
+
+          <p class="font-serif italic text-sand-muted text-sm mb-8">
+            An introduction to traditional Edomae craftsmanship focusing on pristine seasonal nigiri.
+          </p>
+
+          <ul class="space-y-4 text-xs font-sans tracking-[0.14em] text-sand/90">
+            <li class="flex items-center justify-between">
+              <span>Sakizuke Seasonal Appetizer</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>7 Pieces Seasonal Nigiri Flights</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Otoro Temaki Hand Roll</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Red Miso & Clam Consommé</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Hojicha Smoked Gelato</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="pt-10 border-t border-white/5 mt-8">
+          <p class="text-[11px] font-serif italic text-gold/80 mb-4">Pairing recommendation: Dassai 23 Junmai Daiginjo</p>
+          <a href="#reservations" class="btn-haute w-full text-center">Reserve Experience</a>
+        </div>
+      </div>
+
+      <!-- Tier 2: The Murakami Prestige (Featured Hero Tier) -->
+      <div class="bg-[#181A22] border-2 border-gold/60 p-8 sm:p-10 flex flex-col justify-between relative shadow-2xl gold-radial-glow">
+        <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gold text-[#0B0C10] font-sans text-[10px] uppercase tracking-[0.25em] px-4 py-1 font-bold">
+          Master Selection
+        </span>
+
+        <div>
+          <div class="flex justify-between items-baseline border-b border-white/10 pb-6 mb-8">
+            <div>
+              <span class="text-[10px] tracking-[0.25em] text-gold uppercase block font-sans">Level II</span>
+              <h3 class="font-serif text-2xl uppercase tracking-[0.1em] text-white">Murakami Prestige</h3>
+            </div>
+            <span class="font-serif text-2xl text-gold font-light">$175</span>
+          </div>
+
+          <p class="font-serif italic text-sand-muted text-sm mb-8">
+            The signature culinary sequence highlighting aged bluefin tuna, sea urchin, and caviar garnishes.
+          </p>
+
+          <ul class="space-y-4 text-xs font-sans tracking-[0.14em] text-sand/90">
+            <li class="flex items-center justify-between">
+              <span>Hokkaido Scallop & Truffle Pearls</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>12 Courses Nigiri (Triple Tuna, Uni, Wagyu)</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Bincho-Tan Smoked Akami</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Steamed Awabi Abalone with Liver Sauce</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Matcha Mont Blanc & Sweet Tamago</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="pt-10 border-t border-white/5 mt-8">
+          <p class="text-[11px] font-serif italic text-gold/80 mb-4">Pairing recommendation: Grand Cru Burgundy Flight</p>
+          <a href="#reservations" class="btn-haute-solid w-full text-center">Reserve Master Counter</a>
+        </div>
+      </div>
+
+      <!-- Tier 3: Omakase & Grand Cru -->
+      <div class="bg-[#12141A] border border-white/10 hover:border-gold/40 transition-all duration-500 p-8 sm:p-10 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-baseline border-b border-white/10 pb-6 mb-8">
+            <div>
+              <span class="text-[10px] tracking-[0.25em] text-gold uppercase block font-sans">Level III</span>
+              <h3 class="font-serif text-2xl uppercase tracking-[0.1em] text-white">Kiwami Imperial</h3>
+            </div>
+            <span class="font-serif text-2xl text-gold font-light">$260</span>
+          </div>
+
+          <p class="font-serif italic text-sand-muted text-sm mb-8">
+            Ultra-limited counter service limited to 6 guests nightly with rare catches personally curated by Chef Kenjiro.
+          </p>
+
+          <ul class="space-y-4 text-xs font-sans tracking-[0.14em] text-sand/90">
+            <li class="flex items-center justify-between">
+              <span>Caviar Tartlet with Shima Aji</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>16-Course Complete Gastronomy Flight</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Bafun Uni & A5 Miyazaki Ribcap Nigiri</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Live Blue Crab Dashi Infusion</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Private Rare Sake Ceremony</span>
+              <span class="text-sand-muted">· · ·</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="pt-10 border-t border-white/5 mt-8">
+          <p class="text-[11px] font-serif italic text-gold/80 mb-4">Pairing recommendation: Rare Vintage Juyondai Sake</p>
+          <a href="#reservations" class="btn-haute w-full text-center">Request Private Service</a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION 6: RESERVATION & VISIT INFORMATION -->
+<section id="reservations" class="py-24 sm:py-32 bg-[#12141A] border-t border-white/5 relative">
+  <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+      
+      <!-- Left Column: Visiting Information -->
+      <div class="lg:col-span-5 space-y-8">
+        <div>
+          <span class="text-[11px] uppercase tracking-[0.3em] text-gold font-sans block mb-3">
+            Visiting & Service · ご案内
+          </span>
+          <h2 class="font-serif text-3xl sm:text-5xl uppercase tracking-[0.1em] text-[#F5F5F0] font-light">
+            Book Your Table
+          </h2>
+        </div>
+
+        <p class="font-serif italic text-sand-muted text-base leading-relaxed">
+          Due to the delicate nature of raw ocean sourcing, all counter seatings are reserved 30 days in advance. Private dining chambers are available upon request.
+        </p>
+
+        <div class="space-y-6 pt-4 border-t border-white/10 text-xs tracking-[0.2em] uppercase text-sand-muted">
+          <div>
+            <span class="text-gold block mb-1">Hours of Service</span>
+            <p class="text-sand">Tuesday – Sunday</p>
+            <p>Lunch: 12:00 — 15:00 · Dinner: 18:00 — 23:00</p>
+          </div>
+
+          <div>
+            <span class="text-gold block mb-1">Address & Sanctuary</span>
+            <p class="text-sand">Ginza 6-Chome, Chuo City, Tokyo</p>
+            <p>Private Valet Available at Main Portico</p>
+          </div>
+
+          <div>
+            <span class="text-gold block mb-1">Direct Inquiries</span>
+            <p class="text-sand">+81 3 5555 0192 · concierge@murakamisushi.com</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Booking Widget -->
+      <div class="lg:col-span-7 bg-[#0B0C10] border border-white/10 p-8 sm:p-12 shadow-2xl">
+        <form onsubmit="event.preventDefault(); showToast('Your reservation request has been received. Our concierge will contact you.', 'success'); this.reset();" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-[10px] uppercase tracking-[0.22em] text-sand-muted">Full Name</label>
+              <input type="text" required placeholder="Lord / Lady Surname" class="w-full bg-[#181A22] border border-white/10 px-4 py-3 text-xs tracking-wider text-sand focus:border-gold focus:outline-none transition-colors" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] uppercase tracking-[0.22em] text-sand-muted">Email Address</label>
+              <input type="email" required placeholder="contact@example.com" class="w-full bg-[#181A22] border border-white/10 px-4 py-3 text-xs tracking-wider text-sand focus:border-gold focus:outline-none transition-colors" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <label class="text-[10px] uppercase tracking-[0.22em] text-sand-muted">Preferred Date</label>
+              <input type="date" required class="w-full bg-[#181A22] border border-white/10 px-4 py-3 text-xs tracking-wider text-sand focus:border-gold focus:outline-none transition-colors" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] uppercase tracking-[0.22em] text-sand-muted">Time Seating</label>
+              <select class="w-full bg-[#181A22] border border-white/10 px-4 py-3 text-xs tracking-wider text-sand focus:border-gold focus:outline-none transition-colors">
+                <option>18:00 First Counter</option>
+                <option>20:30 Second Counter</option>
+                <option>12:30 Lunch Flight</option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] uppercase tracking-[0.22em] text-sand-muted">Guests</label>
+              <select class="w-full bg-[#181A22] border border-white/10 px-4 py-3 text-xs tracking-wider text-sand focus:border-gold focus:outline-none transition-colors">
+                <option>2 Guests</option>
+                <option>4 Guests</option>
+                <option>6 Guests (Private Table)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[10px] uppercase tracking-[0.22em] text-sand-muted">Dietary Requirements or Notes</label>
+            <textarea rows="3" placeholder="Inform us of seafood allergies or culinary preferences..." class="w-full bg-[#181A22] border border-white/10 px-4 py-3 text-xs tracking-wider text-sand focus:border-gold focus:outline-none transition-colors"></textarea>
+          </div>
+
+          <button type="submit" class="btn-haute-solid w-full">
+            <span>Confirm Reservation Request</span>
+            <i class="fa-solid fa-calendar-check text-[10px] ml-2"></i>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FINE DINING DISH DETAIL MODAL (SLIDING OVERLAY) -->
+<div id="dish-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+  <div class="relative w-full max-w-2xl bg-[#12141A] border border-white/10 shadow-2xl overflow-hidden animate-modal-up">
+    
+    <!-- Close Button -->
+    <button onclick="closeDishModal()" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/60 border border-white/15 text-sand hover:text-gold hover:border-gold flex items-center justify-center transition-colors">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2">
+      <!-- Modal Dish Photo -->
+      <div class="relative aspect-square sm:aspect-auto w-full bg-black">
+        <img id="modal-dish-img" src="" alt="" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#12141A] via-transparent to-transparent"></div>
+      </div>
+
+      <!-- Modal Info & Bag Adding -->
+      <div class="p-6 sm:p-8 flex flex-col justify-between">
+        <div>
+          <span id="modal-dish-category" class="text-[10px] tracking-[0.26em] uppercase text-gold font-sans block mb-2">Category</span>
+          <h3 id="modal-dish-title" class="font-serif text-2xl uppercase tracking-[0.08em] text-white mb-2">Dish Name</h3>
+          <p id="modal-dish-price" class="font-serif text-2xl text-gold font-light mb-4">$0.00</p>
+          <p id="modal-dish-desc" class="font-serif italic text-sand-muted text-sm leading-relaxed mb-6">Description</p>
+        </div>
+
+        <div class="space-y-4 pt-4 border-t border-white/5">
+          <button id="modal-add-btn" onclick="" class="btn-haute-solid w-full">
+            <span>Add To Bag</span>
+            <i class="fa-solid fa-bag-shopping text-[10px] ml-2"></i>
+          </button>
+          <button onclick="closeDishModal()" class="text-[10px] uppercase tracking-[0.2em] text-sand-muted hover:text-sand w-full text-center block">
+            Return to Menu
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
-  // 1. GSAP ANIMATIONS
-  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-  let mm = gsap.matchMedia();
-
-  const cards = document.querySelectorAll(".feature-card");
-  if (cards.length > 0) {
-    const isMobile = window.innerWidth < 1024;
-
-    // Solid opaque cards layered on top of each other
-    cards.forEach((card, i) => {
-      gsap.set(card, {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "#000000",
-        opacity: 1,
-        zIndex: (i + 1) * 10,
-        yPercent: i === 0 ? 0 : 100
-      });
+  // CATEGORY FILTERING SCRIPT
+  function filterEditorialCategory(cat, element) {
+    const buttons = document.querySelectorAll('.cat-tab-btn');
+    buttons.forEach(btn => {
+      btn.classList.remove('text-gold', 'font-semibold');
+      btn.classList.add('text-sand-muted');
+      const dot = btn.querySelector('.cat-indicator');
+      if (dot) dot.classList.replace('bg-gold', 'bg-transparent');
     });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#feature-scroll-section",
-        pin: true,
-        start: "top top",
-        end: "+=400%", // 3 slides + 1 zoom-out showcase stage
-        scrub: 1,
-        snap: {
-          snapTo: 1 / 4, // 4 discrete stages: Section 1 -> 2 -> 3 -> 4 -> Zoom to Cards!
-          duration: { min: 0.3, max: 0.6 },
-          ease: "power1.inOut"
-        }
+    element.classList.add('text-gold', 'font-semibold');
+    element.classList.remove('text-sand-muted');
+    const activeDot = element.querySelector('.cat-indicator');
+    if (activeDot) activeDot.classList.replace('bg-transparent', 'bg-gold');
+
+    const cards = document.querySelectorAll('.dish-card');
+    cards.forEach(card => {
+      const cardCat = card.getAttribute('data-category');
+      if (cat === 'all' || cardCat.includes(cat)) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
       }
     });
+  }
 
-    // Stage 1: Card 2 slides fully over Card 1
-    tl.to(cards[1], { yPercent: 0, ease: "none", duration: 1 })
-    // Stage 2: Card 3 slides fully over Card 2
-      .to(cards[2], { yPercent: 0, ease: "none", duration: 1 })
-    // Stage 3: Card 4 slides fully over Card 3
-      .to(cards[3], { yPercent: 0, ease: "none", duration: 1 });
+  // DISH DETAIL MODAL SCRIPT
+  function openDishModal(card) {
+    const modal = document.getElementById('dish-modal');
+    document.getElementById('modal-dish-img').src = card.getAttribute('data-dish-image');
+    document.getElementById('modal-dish-title').textContent = card.getAttribute('data-dish-name');
+    document.getElementById('modal-dish-category').textContent = card.getAttribute('data-dish-category');
+    document.getElementById('modal-dish-price').textContent = '$' + card.getAttribute('data-dish-price');
+    document.getElementById('modal-dish-desc').textContent = card.getAttribute('data-dish-desc');
 
-    // Stage 4: ZOOM OUT TO SHOWCASE CARDS (Exact laptop animation!)
-    tl.add("zoomStart");
+    const dishId = card.getAttribute('data-dish-id');
+    const dishName = card.getAttribute('data-dish-name');
+    document.getElementById('modal-add-btn').onclick = function() {
+      quickAddToBag(dishId, dishName);
+      closeDishModal();
+    };
 
-    if (isMobile) {
-      // On phone: zoom out into 2x2 grid showcase
-      const cardW = window.innerWidth * 0.44;
-      const cardH = window.innerHeight * 0.32;
-      const gap = 12;
-      const cX = window.innerWidth / 2;
-      const cY = window.innerHeight / 2;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
 
-      const commonProps = {
-        width: `${cardW}px`,
-        height: `${cardH}px`,
-        borderRadius: "1.25rem",
-        boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15)",
-        ease: "power2.inOut",
-        duration: 1
-      };
+  function closeDishModal() {
+    const modal = document.getElementById('dish-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
 
-      tl.to(".feature-card h3", { fontSize: "0.85rem", duration: 1 }, "zoomStart")
-        .to(".icon-container", { width: "2.5rem", height: "2.5rem", marginBottom: "0.4rem", duration: 1 }, "zoomStart")
-        .to(".icon-container svg", { width: "1.25rem", height: "1.25rem", duration: 1 }, "zoomStart");
-
-      tl.to(cards[0], { ...commonProps, left: cX - cardW - (gap / 2), top: cY - cardH - (gap / 2), x: 0, y: 0 }, "zoomStart")
-        .to(cards[1], { ...commonProps, left: cX + (gap / 2), top: cY - cardH - (gap / 2), x: 0, y: 0 }, "zoomStart")
-        .to(cards[2], { ...commonProps, left: cX - cardW - (gap / 2), top: cY + (gap / 2), x: 0, y: 0 }, "zoomStart")
-        .to(cards[3], { ...commonProps, left: cX + (gap / 2), top: cY + (gap / 2), x: 0, y: 0 }, "zoomStart");
-    } else {
-      // On laptop: zoom out into 4 horizontal cards side-by-side
-      const cardW = 280;
-      const cardH = 400;
-      const gap = 24;
-      const commonProps = {
-        width: `${cardW}px`,
-        height: `${cardH}px`,
-        borderRadius: "1.75rem",
-        boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15)",
-        top: "50%",
-        y: "-50%",
-        ease: "power2.inOut",
-        duration: 1
-      };
-
-      tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
-        .to(".icon-container", { width: "3.5rem", height: "3.5rem", marginBottom: "1rem", duration: 1 }, "zoomStart")
-        .to(".icon-container svg", { width: "2rem", height: "2rem", duration: 1 }, "zoomStart");
-
-      tl.to(cards[0], { ...commonProps, left: `calc(50% - ${cardW * 2 + gap * 1.5}px)` }, "zoomStart")
-        .to(cards[1], { ...commonProps, left: `calc(50% - ${cardW * 1 + gap * 0.5}px)` }, "zoomStart")
-        .to(cards[2], { ...commonProps, left: `calc(50% + ${gap * 0.5}px)` }, "zoomStart")
-        .to(cards[3], { ...commonProps, left: `calc(50% + ${cardW * 1 + gap * 1.5}px)` }, "zoomStart");
+  // QUICK ADD TO BAG FUNCTION
+  async function quickAddToBag(productId, name) {
+    try {
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: productId })
+      });
+      if (res.status === 401) {
+        showToast('Please sign in to order dishes.', 'error');
+        setTimeout(() => window.location.href = '/login', 1500);
+        return;
+      }
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`${name} added to your dining bag.`, 'success');
+        updateBagBadge();
+      } else {
+        showToast(data.error || 'Unable to add dish', 'error');
+      }
+    } catch (err) {
+      showToast('Network error adding to bag', 'error');
     }
   }
 
-  // 2. SCROLL REVEAL OBSERVER
-  document.addEventListener("DOMContentLoaded", function () {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("reveal-active");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 } 
-    );
-
-    document.querySelectorAll(".scroll-hidden").forEach((el) => {
-      const delay = el.getAttribute("data-delay");
-      if (delay) el.style.transitionDelay = delay;
-      observer.observe(el);
-    });
-  });
-
-  // 3. SEARCH FUNCTION
-  function filterMenu() {
-    const searchInput = document.getElementById("menu-search").value.toLowerCase();
-    const productCards = document.querySelectorAll(".product-card");
-
-    productCards.forEach((card) => {
-      const productName = card.querySelector(".product-name").innerText.toLowerCase();
-      // Logic to handle different layout structures (grid vs flex)
-      const wrapper = card.closest('.group'); 
-      if(productName.includes(searchInput)) {
-          if(wrapper) wrapper.style.display = '';
-          else card.style.display = '';
-      } else {
-          if(wrapper) wrapper.style.display = 'none';
-          else card.style.display = 'none';
+  async function updateBagBadge() {
+    try {
+      const res = await fetch('/api/cart');
+      if (res.ok) {
+        const items = await res.json();
+        const countBadge = document.getElementById('cart-item-count');
+        if (countBadge) {
+          const totalCount = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+          countBadge.textContent = totalCount;
+        }
       }
-    });
+    } catch (err) {}
   }
+  document.addEventListener('DOMContentLoaded', updateBagBadge);
 </script>

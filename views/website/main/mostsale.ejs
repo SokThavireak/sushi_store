@@ -1,80 +1,130 @@
-<section class="py-8 lg:py-16 bg-white dark:bg-gray-900">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-end mb-6 lg:mb-8 scroll-hidden">
-      <h2 class="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white">🔥 Most Sales</h2>
-      <a href="/menu" class="text-orange-500 font-semibold hover:underline text-sm lg:text-base">View All &rarr;</a>
+<!-- SECTION 3: LA SIGNATURE / LES PLATS (CULINARY SHOWCASE GALLERY) -->
+<section id="culinary-showcase" class="py-24 sm:py-32 bg-[#0B0C10] relative">
+  
+  <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+    
+    <!-- Section Header with Editorial Serif & Gold Hairline -->
+    <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+      <span class="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-gold font-sans block mb-3">
+        La Signature · 厳選料理
+      </span>
+      <h2 class="font-serif text-3xl sm:text-5xl lg:text-6xl uppercase tracking-[0.12em] text-[#F5F5F0] font-light gold-hairline">
+        Les Créations Du Chef
+      </h2>
+      <p class="font-serif italic text-sand-muted text-base sm:text-lg mt-8 leading-relaxed">
+        Rare oceanic treasures, seasoned with 10-year aged soy, fresh mountain wasabi, and citrus yuzu kosho.
+      </p>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
-      <% const bestSellers=(typeof products !=='undefined' ) ? products.filter(p=> p.is_best_seller === true) : [];
-        const displayItems = bestSellers.slice(0, 4);
+    <!-- Category Filter Tabs with Gold Dot Indicator -->
+    <div class="flex items-center justify-center gap-3 sm:gap-6 flex-wrap mb-14 border-b border-white/10 pb-6">
+      <button 
+        onclick="filterEditorialCategory('all', this)"
+        class="cat-tab-btn px-4 py-2 text-xs uppercase tracking-[0.24em] transition-all flex items-center gap-2 text-gold font-semibold"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-gold cat-indicator"></span>
+        <span>Tout / All</span>
+      </button>
+
+      <% 
+        const uniqueCategories = (typeof products !== 'undefined' && products.length) 
+          ? [...new Set(products.map(p => p.category).filter(Boolean))] 
+          : ['Roll', 'Nigiri', 'Sashimi', 'Set', 'Ramen'];
       %>
 
-        <% if (displayItems.length> 0) { %>
-          <% displayItems.forEach((product, index)=> { %>
+      <% uniqueCategories.forEach(cat => { %>
+        <button 
+          onclick="filterEditorialCategory('<%= cat.toLowerCase() %>', this)"
+          class="cat-tab-btn px-4 py-2 text-xs uppercase tracking-[0.24em] text-sand-muted hover:text-sand transition-all flex items-center gap-2"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-transparent cat-indicator"></span>
+          <span><%= cat %></span>
+        </button>
+      <% }) %>
+    </div>
 
-            <div
-              class="group relative h-64 lg:h-[450px] w-full rounded-2xl lg:rounded-[2rem] overflow-hidden shadow-md lg:shadow-xl transition-all duration-300 hover:shadow-2xl border border-gray-100 dark:border-gray-800 scroll-hidden"
-              data-delay="<%= index * 0.1 %>s">
-             
-              <div class="absolute inset-0 w-full h-full">
-                <% if (product.image_url) { %>
-                  <img src="<%= product.image_url %>" alt="<%= product.name %>"
-                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <% } else { %>
-                  <div class="w-full h-full bg-gray-800 flex items-center justify-center text-4xl lg:text-6xl">
-                      🍣
-                    </div>
-                    <% } %>
-                      <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity duration-300">
-                      </div>
-              </div>
+    <!-- Fine-Dining Culinary Editorial Grid -->
+    <div id="dishes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+      <% if (typeof products !== 'undefined' && products.length > 0) { %>
+        <% products.forEach((dish, idx) => { %>
+          <div 
+            class="dish-card group relative bg-[#12141A] border border-white/5 hover:border-gold/30 transition-all duration-700 flex flex-col justify-between"
+            data-category="<%= (dish.category || '').toLowerCase() %>"
+            data-dish-id="<%= dish.id %>"
+            data-dish-name="<%= dish.name %>"
+            data-dish-price="<%= parseFloat(dish.price).toFixed(2) %>"
+            data-dish-category="<%= dish.category || 'Chef Selection' %>"
+            data-dish-image="<%= dish.image_url || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=800' %>"
+            data-dish-desc="<%= dish.description || 'Pristine coastal catch, seasoned akasu sushi rice, house-brewed nikiri glaze, and micro-herbs.' %>"
+          >
+            <!-- Image Frame with Slow Fluid Hover Zoom & Gradient Scrim -->
+            <div class="dish-image-frame relative aspect-[4/3] w-full overflow-hidden bg-black/60">
+              <img 
+                src="<%= dish.image_url || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=800' %>" 
+                alt="<%= dish.name %>"
+                loading="lazy"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#12141A] via-transparent to-black/30"></div>
 
-              <div
-                class="absolute top-3 left-3 lg:top-5 lg:left-5 bg-yellow-400 text-black text-[10px] lg:text-xs font-bold px-2 py-1 lg:px-3 lg:py-1.5 rounded-full shadow-lg z-20 flex items-center gap-1">
-                <i class="fa-solid fa-fire"></i> TOP HIT
-              </div>
+              <!-- Kanji Watermark Badge -->
+              <span class="absolute top-4 right-4 text-xs font-serif tracking-[0.2em] text-white/40 uppercase bg-black/40 px-2.5 py-1 backdrop-blur-md border border-white/10">
+                <%= (dish.category || '寿司').toUpperCase() %>
+              </span>
 
-              <div
-                class="absolute bottom-0 left-0 w-full p-3 lg:p-6 z-20 flex flex-col gap-0.5 lg:gap-2 translate-y-1 lg:translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-
-                <span class="text-orange-400 text-[10px] lg:text-xs font-bold uppercase tracking-wider mb-0 lg:mb-1">
-                  <%= product.category %> Favorite
+              <% if (dish.is_best_seller) { %>
+                <span class="absolute top-4 left-4 text-[10px] font-sans tracking-[0.2em] text-gold uppercase bg-gold/15 px-2.5 py-1 backdrop-blur-md border border-gold/40">
+                  Signature
                 </span>
+              <% } %>
+            </div>
 
-                <h3
-                  class="text-white text-sm lg:text-2xl font-bold leading-tight shadow-black drop-shadow-md line-clamp-2">
-                  <%= product.name %>
-                </h3>
-
-                <p
-                  class="hidden lg:block text-gray-300 text-sm line-clamp-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75">
-                  Delicious fresh ingredients prepared daily for maximum flavor.
-                </p>
-
-                <div class="flex items-center justify-between mt-1 lg:mt-2 pt-2 lg:pt-4 border-t border-white/20">
-                  <div class="flex flex-col">
-                    <span class="text-gray-400 text-[10px] lg:text-xs uppercase">Price</span>
-                    <span class="text-white text-lg lg:text-2xl font-extrabold">
-                      <%= product.price %> $
-                    </span>
-                  </div>
-
-                  <button onclick="addToCart('<%= product.id %>')"
-                    class="w-8 h-8 lg:w-16 lg:h-16 bg-white dark:bg-gray-800 dark:text-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 hover:text-white transition-all transform active:scale-95">
-                    <i class="fa-solid fa-basket-shopping text-xs lg:text-xl"></i>
-                  </button>
+            <!-- Culinary Details & Tasting Notes -->
+            <div class="p-6 sm:p-8 flex flex-col flex-1 justify-between gap-6">
+              <div class="space-y-3">
+                <div class="flex items-baseline justify-between gap-4">
+                  <h3 class="font-serif text-2xl tracking-[0.05em] uppercase text-[#F5F5F0] group-hover:text-gold transition-colors">
+                    <%= dish.name %>
+                  </h3>
+                  <span class="font-serif text-xl text-gold font-light shrink-0">
+                    $<%= parseFloat(dish.price).toFixed(2) %>
+                  </span>
                 </div>
+
+                <p class="font-serif italic text-sand-muted text-sm sm:text-base leading-relaxed line-clamp-2">
+                  <%= dish.description || 'Pristine ocean fish, seasoned sushi-meshi, brushed with master nikiri soy & yuzu essence.' %>
+                </p>
+              </div>
+
+              <!-- Action Link / Ghost Button Triggering Modal -->
+              <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+                <button 
+                  onclick="openDishModal(this.closest('.dish-card'))"
+                  class="text-[11px] font-sans uppercase tracking-[0.24em] text-sand hover:text-gold transition-colors flex items-center gap-2"
+                >
+                  <span>Voir L'Assiette</span>
+                  <i class="fa-solid fa-arrow-right text-[9px] transition-transform group-hover:translate-x-1"></i>
+                </button>
+
+                <button 
+                  onclick="quickAddToBag(<%= dish.id %>, '<%= dish.name %>')"
+                  title="Ajouter au panier"
+                  class="w-9 h-9 border border-white/10 hover:border-gold hover:bg-gold hover:text-[#0B0C10] text-gold transition-all flex items-center justify-center text-xs"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                </button>
               </div>
             </div>
 
-            <% }) %>
-              <% } else { %>
-                <p class="text-gray-500 dark:text-gray-400 col-span-2 lg:col-span-4 text-center py-10 scroll-hidden">
-                  No best sellers available yet.
-                </p>
-                <% } %>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="col-span-full py-16 text-center text-sand-muted font-serif text-lg">
+          No courses currently listed. Please check back shortly.
+        </div>
+      <% } %>
     </div>
+
   </div>
+
 </section>
