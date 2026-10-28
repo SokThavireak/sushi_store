@@ -108,9 +108,9 @@ app.use((req, res, next) => {
 // Admin layout removed as it's now handled by React
 
 app.post(
-  "/api/staff/checkout/:id", 
-  checkAuthenticated, 
-  checkRole(["manager", "admin", "store_manager", "staff", "cashier"]), 
+  "/api/staff/checkout/:id",
+  checkAuthenticated,
+  checkRole(["manager", "admin", "store_manager", "staff", "cashier"]),
   processStaffCheckout
 );
 
@@ -140,7 +140,7 @@ app.post("/payment/confirm/:id", checkAuthenticated, paymentRateLimiter, async (
 
     // Mark order as completed and payment method as QR
     await pool.query("UPDATE orders SET status = 'Completed', payment_method = 'QR' WHERE id = $1", [orderId]);
-    
+
     await logAuditEvent(pool, {
       userId: req.user.id,
       role: req.user.role,
@@ -180,6 +180,8 @@ app.get("/{*splat}", (req, res, next) => {
 
 // Start Server
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}

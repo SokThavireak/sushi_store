@@ -20,8 +20,9 @@
     </button>
   </div>
 
-  <div class="p-6">
-    <div class="overflow-x-auto">
+  <div class="p-4 sm:p-6">
+    <!-- Desktop / Tablet Table View (hidden on small phone screens) -->
+    <div class="hidden sm:block overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="text-gray-500 dark:text-gray-400 text-sm border-b border-gray-100 dark:border-gray-700">
@@ -51,6 +52,53 @@
           <% }) %>
         </tbody>
       </table>
+    </div>
+
+    <!-- Phone Size Card View: 1 Item per Card -->
+    <div class="sm:hidden space-y-3.5">
+      <% if (locations && locations.length > 0) { %>
+        <% locations.forEach(loc => { %>
+          <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/60 shadow-sm flex flex-col justify-between gap-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h4 class="font-bold text-gray-900 dark:text-white text-base"><%= loc.name %></h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                  <i class="fa-solid fa-location-dot text-orange-500 mr-1"></i><%= loc.address %>
+                </p>
+              </div>
+              <div>
+                <% if(loc.status === 'Open') { %>
+                  <span class="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-full text-[11px] font-bold">Open</span>
+                <% } else { %>
+                  <span class="bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-[11px] font-bold">Closed</span>
+                <% } %>
+              </div>
+            </div>
+
+            <% if (loc.hours_mon_fri || loc.hours_sat_sun) { %>
+              <div class="text-[11px] text-gray-400 border-t border-gray-200/50 dark:border-gray-700/50 pt-2 flex flex-col gap-0.5">
+                <% if (loc.hours_mon_fri) { %>
+                  <span>Mon-Fri: <%= loc.hours_mon_fri %></span>
+                <% } %>
+                <% if (loc.hours_sat_sun) { %>
+                  <span>Sat-Sun: <%= loc.hours_sat_sun %></span>
+                <% } %>
+              </div>
+            <% } %>
+
+            <div class="border-t border-gray-200/60 dark:border-gray-700/60 pt-2.5 flex items-center justify-end gap-3">
+              <button onclick="openEditModal(<%= JSON.stringify(loc) %>)" class="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-100 transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i>Edit
+              </button>
+              <button onclick="deleteLocation(<%= loc.id %>)" class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 transition">
+                <i class="fa-solid fa-trash mr-1"></i>Delete
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="text-sm text-center text-gray-400 py-6">No locations found.</p>
+      <% } %>
     </div>
   </div>
 </div>

@@ -47,70 +47,101 @@
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   let mm = gsap.matchMedia();
 
-  mm.add("(min-width: 1024px)", () => {
+  const cards = document.querySelectorAll(".feature-card");
+  if (cards.length > 0) {
+    const isMobile = window.innerWidth < 1024;
+
+    // Solid opaque cards layered on top of each other
+    cards.forEach((card, i) => {
+      gsap.set(card, {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#000000",
+        opacity: 1,
+        zIndex: (i + 1) * 10,
+        yPercent: i === 0 ? 0 : 100
+      });
+    });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: "#feature-scroll-section",
+        pin: true,
         start: "top top",
-        end: "bottom bottom",
+        end: "+=400%", // 3 slides + 1 zoom-out showcase stage
         scrub: 1,
         snap: {
-          snapTo: 1 / 4,
+          snapTo: 1 / 4, // 4 discrete stages: Section 1 -> 2 -> 3 -> 4 -> Zoom to Cards!
           duration: { min: 0.3, max: 0.6 },
-          delay: 0,
-          ease: "power1.inOut",
-        },
-      },
+          ease: "power1.inOut"
+        }
+      }
     });
 
-    const cards = document.querySelectorAll(".feature-card");
+    // Stage 1: Card 2 slides fully over Card 1
+    tl.to(cards[1], { yPercent: 0, ease: "none", duration: 1 })
+    // Stage 2: Card 3 slides fully over Card 2
+      .to(cards[2], { yPercent: 0, ease: "none", duration: 1 })
+    // Stage 3: Card 4 slides fully over Card 3
+      .to(cards[3], { yPercent: 0, ease: "none", duration: 1 });
 
-    if(cards.length > 0) {
-        tl.to(cards[1], { y: 0, duration: 1, ease: "none" })
-          .to(cards[2], { y: 0, duration: 1, ease: "none" })
-          .to(cards[3], { y: 0, duration: 1, ease: "none" });
+    // Stage 4: ZOOM OUT TO SHOWCASE CARDS (Exact laptop animation!)
+    tl.add("zoomStart");
 
-        tl.add("zoomStart");
-        const gridWidth = 280;
-        const gridHeight = 400;
-        const gap = 24;
-        const commonGridProps = {
-          width: `${gridWidth}px`,
-          height: `${gridHeight}px`,
-          borderRadius: "1rem",
-          top: "50%",
-          y: "-50%",
-          ease: "power2.inOut",
-          duration: 1,
-        };
-        
-        tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
-          .to(".icon-container", { width: "3.5rem", height: "3.5rem", marginBottom: "1rem", duration: 1 }, "zoomStart")
-          .to(".icon-container svg", { width: "2rem", height: "2rem", duration: 1 }, "zoomStart");
-          
-        tl.to(cards[0], { ...commonGridProps, left: `calc(50% - ${gridWidth * 2 + gap * 1.5}px)` }, "zoomStart")
-          .to(cards[1], { ...commonGridProps, left: `calc(50% - ${gridWidth * 1 + gap * 0.5}px)` }, "zoomStart")
-          .to(cards[2], { ...commonGridProps, left: `calc(50% + ${gap * 0.5}px)` }, "zoomStart")
-          .to(cards[3], { ...commonGridProps, left: `calc(50% + ${gridWidth * 1 + gap * 1.5}px)` }, "zoomStart");
+    if (isMobile) {
+      // On phone: zoom out into 2x2 grid showcase
+      const cardW = window.innerWidth * 0.44;
+      const cardH = window.innerHeight * 0.32;
+      const gap = 12;
+      const cX = window.innerWidth / 2;
+      const cY = window.innerHeight / 2;
+
+      const commonProps = {
+        width: `${cardW}px`,
+        height: `${cardH}px`,
+        borderRadius: "1.25rem",
+        boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15)",
+        ease: "power2.inOut",
+        duration: 1
+      };
+
+      tl.to(".feature-card h3", { fontSize: "0.85rem", duration: 1 }, "zoomStart")
+        .to(".icon-container", { width: "2.5rem", height: "2.5rem", marginBottom: "0.4rem", duration: 1 }, "zoomStart")
+        .to(".icon-container svg", { width: "1.25rem", height: "1.25rem", duration: 1 }, "zoomStart");
+
+      tl.to(cards[0], { ...commonProps, left: cX - cardW - (gap / 2), top: cY - cardH - (gap / 2), x: 0, y: 0 }, "zoomStart")
+        .to(cards[1], { ...commonProps, left: cX + (gap / 2), top: cY - cardH - (gap / 2), x: 0, y: 0 }, "zoomStart")
+        .to(cards[2], { ...commonProps, left: cX - cardW - (gap / 2), top: cY + (gap / 2), x: 0, y: 0 }, "zoomStart")
+        .to(cards[3], { ...commonProps, left: cX + (gap / 2), top: cY + (gap / 2), x: 0, y: 0 }, "zoomStart");
+    } else {
+      // On laptop: zoom out into 4 horizontal cards side-by-side
+      const cardW = 280;
+      const cardH = 400;
+      const gap = 24;
+      const commonProps = {
+        width: `${cardW}px`,
+        height: `${cardH}px`,
+        borderRadius: "1.75rem",
+        boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15)",
+        top: "50%",
+        y: "-50%",
+        ease: "power2.inOut",
+        duration: 1
+      };
+
+      tl.to(".feature-card h3", { fontSize: "1.25rem", duration: 1 }, "zoomStart")
+        .to(".icon-container", { width: "3.5rem", height: "3.5rem", marginBottom: "1rem", duration: 1 }, "zoomStart")
+        .to(".icon-container svg", { width: "2rem", height: "2rem", duration: 1 }, "zoomStart");
+
+      tl.to(cards[0], { ...commonProps, left: `calc(50% - ${cardW * 2 + gap * 1.5}px)` }, "zoomStart")
+        .to(cards[1], { ...commonProps, left: `calc(50% - ${cardW * 1 + gap * 0.5}px)` }, "zoomStart")
+        .to(cards[2], { ...commonProps, left: `calc(50% + ${gap * 0.5}px)` }, "zoomStart")
+        .to(cards[3], { ...commonProps, left: `calc(50% + ${cardW * 1 + gap * 1.5}px)` }, "zoomStart");
     }
-  });
-
-  mm.add("(max-width: 1023px)", () => {
-    gsap.set(".feature-card", {
-      position: "relative",
-      transform: "none",
-      height: "400px",
-      width: "100%",
-      marginBottom: "1rem",
-      borderRadius: "1rem",
-    });
-    gsap.set("#feature-scroll-section > div", { height: "auto" });
-    gsap.set("#feature-scroll-section .sticky", {
-      position: "relative",
-      height: "auto",
-      padding: "1rem",
-    });
-  });
+  }
 
   // 2. SCROLL REVEAL OBSERVER
   document.addEventListener("DOMContentLoaded", function () {

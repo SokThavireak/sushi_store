@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import pool from "../config/db.js";
 import { checkAuthenticated, checkRole } from "../middleware/auth.js";
-import upload from "../config/cloudinary.js"; // Import upload from your config folder
+import upload, { getCompressedImageUrl } from "../config/cloudinary.js";
 import { logAuditEvent } from "../middleware/security.js";
 
 const app = express.Router();
@@ -213,7 +213,7 @@ app.get("/admin/stock/menu", checkAuthenticated, checkRole(["manager", "admin"])
 
 app.post("/admin/stock/menu/add", checkAuthenticated, checkRole(["manager", "admin"]), upload.single("image"), async (req, res) => {
   try {
-    await pool.query("INSERT INTO stocks (name, category, unit, image_url, quantity) VALUES ($1, $2, $3, $4, 0)", [req.body.name, req.body.category, req.body.unit, req.file ? req.file.path : ""]);
+    await pool.query("INSERT INTO stocks (name, category, unit, image_url, quantity) VALUES ($1, $2, $3, $4, 0)", [req.body.name, req.body.category, req.body.unit, req.file ? getCompressedImageUrl(req.file.path, { width: 800, quality: "auto" }) : ""]);
     res.redirect("/admin/stock/menu");
   } catch (err) { res.send(`<script>alert('Error adding item'); window.location.href='/admin/stock/menu';</script>`); }
 });
@@ -338,7 +338,7 @@ app.post("/admin/inventory/add", checkAuthenticated, checkRole(["manager", "admi
     const catCheck = await pool.query("SELECT * FROM categories WHERE name = $1", [req.body.category]);
     if (catCheck.rows.length === 0) await pool.query("INSERT INTO categories (name) VALUES ($1)", [req.body.category]);
 
-    await pool.query("INSERT INTO products (name, category, price, image_url, is_best_seller, discount_type, discount_value) VALUES ($1, $2, $3, $4, $5, $6, $7)", [req.body.name, req.body.category, req.body.price, req.file ? req.file.path : "https://via.placeholder.com/150", req.body.is_best_seller === "true", req.body.discount_type || "none", req.body.discount_value || 0]);
+    await pool.query("INSERT INTO products (name, category, price, image_url, is_best_seller, discount_type, discount_value) VALUES ($1, $2, $3, $4, $5, $6, $7)", [req.body.name, req.body.category, req.body.price, req.file ? getCompressedImageUrl(req.file.path, { width: 800, quality: "auto" }) : "https://via.placeholder.com/150", req.body.is_best_seller === "true", req.body.discount_type || "none", req.body.discount_value || 0]);
     res.redirect("/admin/inventory");
   } catch (err) { res.status(500).send("Error adding item"); }
 });

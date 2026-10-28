@@ -52,12 +52,12 @@
                                 </h2>
 
                                 <div
-                                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4">
+                                    class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4">
                                     <% categoryProducts.forEach(product=> { %>
                                         <div
-                                            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all overflow-hidden product-card group flex flex-row sm:flex-col h-24 sm:h-auto">
+                                            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all overflow-hidden product-card group flex flex-col h-auto">
 
-                                            <div class="w-24 sm:w-full h-full sm:h-36 relative flex-shrink-0">
+                                            <div class="w-full h-28 sm:h-36 relative flex-shrink-0">
                                                 <img src="<%= product.image_url || 'https://via.placeholder.com/150' %>"
                                                     class="w-full h-full object-cover" loading="lazy" />
                                                 <button onclick="addToCart('<%= product.id %>')"

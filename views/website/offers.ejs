@@ -66,7 +66,7 @@
                 Hot Deals & Discounts</h2>
 
             <% if (products && products.length> 0) { %>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-10">
                     <% products.forEach((product, index)=> { %>
                         <% let finalPrice=Number(product.price); let discountLabel="" ; if
                             (product.discount_type==='percentage' ) { finalPrice=product.price - (product.price *
@@ -75,7 +75,7 @@
                             discountLabel=`SAVE $${product.discount_value}`; } finalPrice=Math.round(finalPrice * 100) /
                             100; %>
 
-                            <div class="group relative h-[450px] w-full rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-500 hover:shadow-2xl product-card border border-gray-100/50 dark:border-gray-800 scroll-hidden"
+                            <div class="group relative h-[310px] sm:h-[450px] w-full rounded-2xl sm:rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-500 hover:shadow-2xl product-card border border-gray-100/50 dark:border-gray-800 scroll-hidden"
                                 data-delay="<%= (index % 3) * 0.1 %>s">
                                 <div class="absolute inset-0 w-full h-full">
                                     <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>"
@@ -87,17 +87,17 @@
                                 </div>
 
                                 <div
-                                    class="absolute top-6 left-6 bg-red-600 text-white text-[12px] font-bold px-3 py-1.5 rounded-full shadow-md z-20 tracking-wide uppercase animate-pulse">
+                                    class="absolute top-3 left-3 sm:top-6 sm:left-6 bg-red-600 text-white text-[10px] sm:text-[12px] font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md z-20 tracking-wide uppercase animate-pulse">
                                     <%= discountLabel %> OFF
                                 </div>
 
-                                <div class="absolute bottom-0 left-0 w-full p-8 z-20 flex items-end justify-between">
+                                <div class="absolute bottom-0 left-0 w-full p-3.5 sm:p-8 z-20 flex flex-col justify-end">
                                     <div class="flex flex-col gap-1 w-3/4">
                                         <span
                                             class="text-orange-500 text-xs font-extrabold uppercase tracking-widest mb-1">Limited
                                             Time Offer</span>
                                         <h3
-                                            class="text-white text-3xl font-bold leading-tight shadow-black drop-shadow-md product-name mb-3">
+                                            class="text-white text-sm sm:text-3xl font-bold leading-tight shadow-black drop-shadow-md product-name mb-1 line-clamp-2">
                                             <%= product.name %>
                                         </h3>
                                         <div class="flex flex-col">
@@ -116,9 +116,9 @@
                                         </div>
                                     </div>
                                     <button onclick="addToCart('<%= product.id %>')"
-                                        class="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden">
+                                        class="w-9 h-9 sm:w-16 sm:h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden">
                                         <img src="https://img.icons8.com/3d-fluency/94/shopping-basket.png" alt="Add"
-                                            class="w-9 h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6" />
+                                            class="w-5 h-5 sm:w-9 sm:h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6" />
                                     </button>
                                 </div>
                             </div>

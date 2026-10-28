@@ -143,3 +143,21 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+# Environment and sensitive keys
+.env
+.env.*
+!.env.example
+Get .env.txt
+
+# Vercel
+.vercel/
+
+# Uploads & local image cache
+public/uploads/
+public/uploads/cache/
+
+# OS specific files
+.DS_Store
+Thumbs.db

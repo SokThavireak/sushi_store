@@ -8,7 +8,11 @@ env.config();
 const __dirname = path.resolve();
 
 // Construct database connection URL for pg_restore
-const dbUrl = process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
+const dbName = process.env.DB_DATABASE || process.env.DB_NAME || "neondb";
+const rawDbUrl = process.env.DATABASE_URL
+  ? process.env.DATABASE_URL.replace(/^jdbc:/, "")
+  : `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${dbName}`;
+const dbUrl = rawDbUrl;
 
 async function runPgRestore(filePath) {
   console.log(`Starting pg_restore on ${path.basename(filePath)}...`);

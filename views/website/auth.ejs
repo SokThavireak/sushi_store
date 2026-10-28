@@ -165,13 +165,24 @@
             display: none;
         }
 
-        /* MOBILE RESPONSIVENESS */
+        /* 3D BOOK FLIP ANIMATION FOR MOBILE & CARD TRANSITIONS */
+        .auth-perspective-wrap {
+            perspective: 1200px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
         @media (max-width: 768px) {
             .container-box {
-                width: 90%;
-                min-height: 550px;
-                border-radius: 20px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                width: 100%;
+                max-width: 400px;
+                min-height: 530px;
+                margin-top: 1rem;
+                border-radius: 24px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                transform-style: preserve-3d;
+                transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
             }
 
             .overlay-container {
@@ -183,40 +194,44 @@
                 position: absolute;
                 top: 0;
                 left: 0;
+                height: 100%;
                 padding: 0;
+                border-radius: 24px;
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+                transform-style: preserve-3d;
+                transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1), opacity 0.5s ease;
             }
 
+            /* Book Cover - Front: Sign In */
             .sign-in-container {
-                width: 100%;
-                transition: all 0.4s ease-in-out;
-                opacity: 1;
+                transform: rotateY(0deg);
                 z-index: 5;
+                opacity: 1;
                 pointer-events: all;
             }
 
+            /* Book Inside Page - Back: Sign Up (Rotated 180deg) */
             .sign-up-container {
-                width: 100%;
-                transition: all 0.4s ease-in-out;
-                opacity: 0;
+                transform: rotateY(180deg);
                 z-index: 1;
+                opacity: 0;
                 pointer-events: none;
-                transform: none;
             }
 
-            /* Mobile Active States */
+            /* When user clicks Sign Up -> Flip Open like a Book */
             .container-box.right-panel-active .sign-in-container {
-                transform: none;
-                opacity: 0;
+                transform: rotateY(-180deg);
                 z-index: 1;
+                opacity: 0;
                 pointer-events: none;
             }
 
             .container-box.right-panel-active .sign-up-container {
-                transform: none;
-                opacity: 1;
+                transform: rotateY(0deg);
                 z-index: 5;
+                opacity: 1;
                 pointer-events: all;
-                animation: none;
             }
 
             .mobile-toggle {
@@ -227,26 +242,33 @@
             }
 
             .mobile-toggle a {
-                color: #f97316;
-                font-weight: bold;
+                color: #ea580c;
+                font-weight: 700;
                 cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .mobile-toggle a:hover {
+                color: #c2410c;
+                text-decoration: underline;
             }
         }
     </style>
 </head>
 
-<body class="bg-gray-900 flex justify-center items-center flex-col font-sans h-screen px-4 relative overflow-hidden">
+<body class="bg-gray-900 flex justify-center items-center flex-col font-sans min-h-screen pt-16 pb-8 px-4 relative overflow-y-auto sm:overflow-hidden">
     
     <!-- Three.js Background Canvas -->
     <canvas id="shader-canvas" class="absolute inset-0 w-full h-full z-0"></canvas>
 
     <!-- Back to Home Button -->
-    <a href="/" class="absolute top-6 left-6 z-20 flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full hover:bg-white/25 transition duration-300 shadow-lg font-semibold text-sm">
+    <a href="/" class="fixed top-4 left-4 sm:top-6 sm:left-6 z-30 flex items-center gap-2 px-3.5 py-1.5 sm:px-5 sm:py-2.5 bg-slate-900/70 sm:bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full hover:bg-white/25 transition duration-300 shadow-xl font-medium text-xs sm:text-sm">
         <i class="fa-solid fa-arrow-left"></i> Back to Home
     </a>
 
     <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
+    <div class="auth-perspective-wrap">
     <div class="container-box bg-white rounded-[20px] shadow-2xl relative z-10 <%= (typeof action !== 'undefined' && action === 'register') ? 'right-panel-active' : '' %>"
         id="container">
 
@@ -275,7 +297,7 @@
                 </button>
 
                 <p class="mobile-toggle">
-                    Already have an account? <a id="mobileSignIn">Sign In</a>
+                    Already have an account? <a id="mobileSignIn" class="text-orange-500 font-bold hover:text-orange-600 transition">Sign In</a>
                 </p>
             </form>
         </div>
@@ -308,7 +330,7 @@
                 </button>
 
                 <p class="mobile-toggle">
-                    Don't have an account? <a id="mobileSignUp">Sign Up</a>
+                    Don't have an account? <a id="mobileSignUp" class="text-orange-500 font-bold hover:text-orange-600 transition">Sign Up</a>
                 </p>
             </form>
         </div>
@@ -335,6 +357,7 @@
             </div>
         </div>
     </div>
+  </div>
 
     <script>
         /* ========================

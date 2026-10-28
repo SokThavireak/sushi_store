@@ -16,17 +16,17 @@ if (isDemoMode) {
 } else {
   const connectionConfig = process.env.DATABASE_URL
     ? {
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false },
-      }
+      connectionString: process.env.DATABASE_URL.replace(/^jdbc:/, ""),
+      ssl: { rejectUnauthorized: false },
+    }
     : {
-        user: process.env.DB_USER,
-        host: process.env.DB_HOST,
-        database: process.env.DB_DATABASE,
-        password: process.env.DB_PASSWORD,
-        port: process.env.DB_PORT,
-        ssl: (isProduction || isRemoteHost) ? { rejectUnauthorized: false } : false,
-      };
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_DATABASE || process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT,
+      ssl: (isProduction || isRemoteHost) ? { rejectUnauthorized: false } : false,
+    };
 
   const realPool = new Pool(connectionConfig);
   let mockPool = null;
