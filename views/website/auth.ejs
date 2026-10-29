@@ -1,368 +1,369 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Portal · Murakami Atelier</title>
+
+    <!-- Google Fonts: Cormorant Garamond & Cinzel & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <title>Welcome to Opulent POS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              canvas: {
+                DEFAULT: "#0B0C10",
+                card: "#12141A",
+                surface: "#181A22",
+                elevated: "#1E212B",
+              },
+              gold: {
+                DEFAULT: "#C5A880",
+                light: "#E3CCA8",
+                dark: "#8C714E",
+              },
+              sand: {
+                DEFAULT: "#F5F5F0",
+                muted: "#9E9EA7",
+              },
+              crimson: {
+                DEFAULT: "#8B2635",
+              }
+            },
+            fontFamily: {
+              serif: ['"Cormorant Garamond"', 'serif'],
+              cinzel: ['"Cinzel"', 'serif'],
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            }
+          }
+        }
+      };
+    </script>
+
     <style>
-        /* TOAST ANIMATIONS */
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
+      body {
+        background-color: #0B0C10;
+        color: #F5F5F0;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
 
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+      /* Container Slide Transitions */
+      .auth-card-wrap {
+        position: relative;
+        overflow: hidden;
+        width: 860px;
+        max-width: 100%;
+        min-height: 560px;
+      }
+
+      .form-container {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .sign-in-container {
+        left: 0;
+        width: 50%;
+        z-index: 2;
+      }
+
+      .sign-up-container {
+        left: 0;
+        width: 50%;
+        opacity: 0;
+        z-index: 1;
+      }
+
+      .auth-card-wrap.right-panel-active .sign-in-container {
+        transform: translateX(100%);
+      }
+
+      .auth-card-wrap.right-panel-active .sign-up-container {
+        transform: translateX(100%);
+        opacity: 1;
+        z-index: 5;
+        animation: show 0.6s;
+      }
+
+      @keyframes show {
+        0%, 49.99% { opacity: 0; z-index: 1; }
+        50%, 100% { opacity: 1; z-index: 5; }
+      }
+
+      .overlay-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 100;
+      }
+
+      .auth-card-wrap.right-panel-active .overlay-container {
+        transform: translateX(-100%);
+      }
+
+      .overlay {
+        background: #141720;
+        color: #F5F5F0;
+        position: relative;
+        left: -100%;
+        height: 100%;
+        width: 200%;
+        transform: translateX(0);
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .auth-card-wrap.right-panel-active .overlay {
+        transform: translateX(50%);
+      }
+
+      .overlay-panel {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 44px;
+        text-align: center;
+        top: 0;
+        height: 100%;
+        width: 50%;
+        transform: translateX(0);
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .overlay-left {
+        transform: translateX(-20%);
+      }
+
+      .auth-card-wrap.right-panel-active .overlay-left {
+        transform: translateX(0);
+      }
+
+      .overlay-right {
+        right: 0;
+        transform: translateX(0);
+      }
+
+      .auth-card-wrap.right-panel-active .overlay-right {
+        transform: translateX(20%);
+      }
+
+      /* Mobile 3D Book Flip Responsive */
+      @media (max-width: 768px) {
+        .auth-card-wrap {
+          width: 100%;
+          max-width: 420px;
+          min-height: 560px;
+          perspective: 1200px;
         }
 
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        /* BASE STYLES */
-        .container-box {
-            position: relative;
-            overflow: hidden;
-            width: 768px;
-            max-width: 100%;
-            min-height: 480px;
+        .overlay-container {
+          display: none;
         }
 
         .form-container {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            transition: all 0.6s ease-in-out;
+          width: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          padding: 0;
+          backface-visibility: hidden;
+          transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
         }
 
-        /* Sign In Form */
         .sign-in-container {
-            left: 0;
-            width: 50%;
-            z-index: 2;
+          transform: rotateY(0deg);
+          z-index: 5;
+          opacity: 1;
+          pointer-events: all;
         }
 
-        /* Sign Up Form */
         .sign-up-container {
-            left: 0;
-            width: 50%;
-            opacity: 0;
-            z-index: 1;
+          transform: rotateY(180deg);
+          z-index: 1;
+          opacity: 0;
+          pointer-events: none;
         }
 
-        /* ANIMATIONS */
-        .container-box.right-panel-active .sign-in-container {
-            transform: translateX(100%);
+        .auth-card-wrap.right-panel-active .sign-in-container {
+          transform: rotateY(-180deg);
+          z-index: 1;
+          opacity: 0;
+          pointer-events: none;
         }
 
-        .container-box.right-panel-active .sign-up-container {
-            transform: translateX(100%);
-            opacity: 1;
-            z-index: 5;
-            animation: show 0.6s;
+        .auth-card-wrap.right-panel-active .sign-up-container {
+          transform: rotateY(0deg);
+          z-index: 5;
+          opacity: 1;
+          pointer-events: all;
         }
 
-        @keyframes show {
-
-            0%,
-            49.99% {
-                opacity: 0;
-                z-index: 1;
-            }
-
-            50%,
-            100% {
-                opacity: 1;
-                z-index: 5;
-            }
-        }
-
-        /* OVERLAY */
-        .overlay-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
-            z-index: 100;
-        }
-
-        .container-box.right-panel-active .overlay-container {
-            transform: translateX(-100%);
-        }
-
-        .overlay {
-            background: #f97316;
-            background: -webkit-linear-gradient(to right, #ea580c, #f97316);
-            background: linear-gradient(to right, #ea580c, #f97316);
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: 0 0;
-            color: #ffffff;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .container-box.right-panel-active .overlay {
-            transform: translateX(50%);
-        }
-
-        .overlay-panel {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
-        }
-
-        .overlay-left {
-            transform: translateX(-20%);
-        }
-
-        .container-box.right-panel-active .overlay-left {
-            transform: translateX(0);
-        }
-
-        .overlay-right {
-            right: 0;
-            transform: translateX(0);
-        }
-
-        .container-box.right-panel-active .overlay-right {
-            transform: translateX(20%);
-        }
-
-        /* MOBILE TOGGLE LINKS */
         .mobile-toggle {
-            display: none;
+          display: block !important;
         }
+      }
 
-        /* 3D BOOK FLIP ANIMATION FOR MOBILE & CARD TRANSITIONS */
-        .auth-perspective-wrap {
-            perspective: 1200px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        @media (max-width: 768px) {
-            .container-box {
-                width: 100%;
-                max-width: 400px;
-                min-height: 530px;
-                margin-top: 1rem;
-                border-radius: 24px;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-                transform-style: preserve-3d;
-                transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
-            }
-
-            .overlay-container {
-                display: none;
-            }
-
-            .form-container {
-                width: 100%;
-                position: absolute;
-                top: 0;
-                left: 0;
-                height: 100%;
-                padding: 0;
-                border-radius: 24px;
-                backface-visibility: hidden;
-                -webkit-backface-visibility: hidden;
-                transform-style: preserve-3d;
-                transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1), opacity 0.5s ease;
-            }
-
-            /* Book Cover - Front: Sign In */
-            .sign-in-container {
-                transform: rotateY(0deg);
-                z-index: 5;
-                opacity: 1;
-                pointer-events: all;
-            }
-
-            /* Book Inside Page - Back: Sign Up (Rotated 180deg) */
-            .sign-up-container {
-                transform: rotateY(180deg);
-                z-index: 1;
-                opacity: 0;
-                pointer-events: none;
-            }
-
-            /* When user clicks Sign Up -> Flip Open like a Book */
-            .container-box.right-panel-active .sign-in-container {
-                transform: rotateY(-180deg);
-                z-index: 1;
-                opacity: 0;
-                pointer-events: none;
-            }
-
-            .container-box.right-panel-active .sign-up-container {
-                transform: rotateY(0deg);
-                z-index: 5;
-                opacity: 1;
-                pointer-events: all;
-            }
-
-            .mobile-toggle {
-                display: block;
-                margin-top: 20px;
-                font-size: 14px;
-                color: #6b7280;
-            }
-
-            .mobile-toggle a {
-                color: #ea580c;
-                font-weight: 700;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-
-            .mobile-toggle a:hover {
-                color: #c2410c;
-                text-decoration: underline;
-            }
-        }
+      .mobile-toggle {
+        display: none;
+      }
     </style>
 </head>
 
-<body class="bg-gray-900 flex justify-center items-center flex-col font-sans min-h-screen pt-16 pb-8 px-4 relative overflow-y-auto sm:overflow-hidden">
+<body class="bg-[#0B0C10] flex flex-col justify-center items-center min-h-screen p-4 sm:p-6 relative overflow-hidden select-none">
     
-    <!-- Three.js Background Canvas -->
-    <canvas id="shader-canvas" class="absolute inset-0 w-full h-full z-0"></canvas>
+    <!-- Background Vignette & Ambient Glow -->
+    <div class="absolute inset-0 bg-radial pointer-events-none opacity-60"></div>
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Back to Home Button -->
-    <a href="/" class="fixed top-4 left-4 sm:top-6 sm:left-6 z-30 flex items-center gap-2 px-3.5 py-1.5 sm:px-5 sm:py-2.5 bg-slate-900/70 sm:bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full hover:bg-white/25 transition duration-300 shadow-xl font-medium text-xs sm:text-sm">
-        <i class="fa-solid fa-arrow-left"></i> Back to Home
+    <!-- Return to Website Home Link -->
+    <a href="/" class="absolute top-6 left-6 sm:top-8 sm:left-10 z-30 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-sand-muted hover:text-gold transition-colors font-sans">
+      <i class="fa-solid fa-arrow-left text-[10px]"></i>
+      <span>Return to Atelier</span>
     </a>
 
-    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+    <!-- Top Monogram -->
+    <div class="text-center mb-8 z-10">
+      <span class="font-cinzel text-xl sm:text-2xl tracking-[0.3em] text-[#F5F5F0] block">
+        MURAKAMI
+      </span>
+      <span class="text-[10px] uppercase tracking-[0.3em] text-gold font-sans block mt-1">
+        Private Guest & Staff Portal · 会員入口
+      </span>
+    </div>
 
-    <div class="auth-perspective-wrap">
-    <div class="container-box bg-white rounded-[20px] shadow-2xl relative z-10 <%= (typeof action !== 'undefined' && action === 'register') ? 'right-panel-active' : '' %>"
-        id="container">
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-8 right-6 z-[120] flex flex-col gap-3 pointer-events-none"></div>
 
+    <!-- AUTHENTICATION CARD WRAPPER -->
+    <div class="auth-card-wrap bg-[#12141A] border border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative z-20" id="container">
+
+        <!-- 1. SIGN UP (REGISTER) FORM -->
         <div class="form-container sign-up-container">
-            <form onsubmit="handleAuth(event, '/register')"
-                class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
-                <h1 class="font-bold text-3xl mb-4">Create Account</h1>
+            <form onsubmit="handleAuth(event, '/register')" class="bg-[#12141A] flex flex-col items-center justify-center h-full px-8 sm:px-12 text-center text-sand">
+                <span class="text-[10px] uppercase tracking-[0.28em] text-gold font-sans block mb-1">Privilege Access</span>
+                <h2 class="font-serif text-3xl uppercase tracking-[0.08em] text-white mb-2">Create Account</h2>
+                <p class="font-serif italic text-sand-muted text-xs mb-6">Join our private dining registry for bespoke allocations.</p>
 
-                <div class="flex gap-4 mb-4">
-                    <a href="/auth/google"
-                        class="border border-gray-200 rounded-full w-10 h-10 flex justify-center items-center hover:bg-orange-50 hover:border-orange-500 hover:text-orange-500 transition duration-300">
-                        <i class="fab fa-google text-sm"></i>
-                    </a>
+                <!-- Google OAuth -->
+                <a href="/auth/google" class="border border-white/10 w-full py-2.5 mb-4 flex justify-center items-center gap-3 text-xs uppercase tracking-[0.18em] text-sand hover:border-gold/60 hover:text-gold transition-colors bg-white/5">
+                    <i class="fab fa-google text-xs text-gold"></i>
+                    <span>Register with Google</span>
+                </a>
+
+                <div class="flex items-center gap-3 w-full my-3">
+                  <span class="flex-1 h-[1px] bg-white/10"></span>
+                  <span class="text-[10px] uppercase tracking-[0.2em] text-sand-muted">or register credentials</span>
+                  <span class="flex-1 h-[1px] bg-white/10"></span>
                 </div>
 
-                <span class="text-xs text-gray-500 mb-4">or use your email for registration</span>
+                <div class="w-full space-y-3 mb-6">
+                  <input type="email" name="username" placeholder="EMAIL ADDRESS" required
+                      class="bg-[#181A22] border border-white/10 px-4 py-3 w-full text-xs tracking-[0.16em] uppercase text-sand focus:outline-none focus:border-gold transition-colors placeholder:text-sand-muted/50" />
+                  <input type="password" name="password" placeholder="PASSWORD (MIN 6 CHARS)" required
+                      class="bg-[#181A22] border border-white/10 px-4 py-3 w-full text-xs tracking-[0.16em] uppercase text-sand focus:outline-none focus:border-gold transition-colors placeholder:text-sand-muted/50" />
+                </div>
 
-                <input type="email" name="username" placeholder="Email" required
-                    class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
-                <input type="password" name="password" placeholder="Password" required
-                    class="bg-gray-100 border-none px-4 py-3 mb-4 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
-
-                <button type="submit"
-                    class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
-                    Sign Up
+                <button type="submit" class="w-full py-3.5 bg-gold text-[#0B0C10] text-xs font-semibold uppercase tracking-[0.22em] border border-gold hover:bg-transparent hover:text-gold transition-all duration-300">
+                    Register Privilege
                 </button>
 
-                <p class="mobile-toggle">
-                    Already have an account? <a id="mobileSignIn" class="text-orange-500 font-bold hover:text-orange-600 transition">Sign In</a>
+                <p class="mobile-toggle text-xs text-sand-muted tracking-wider mt-6">
+                    Already a member? <button type="button" id="mobileSignIn" class="text-gold uppercase tracking-widest font-semibold ml-1">Sign In</button>
                 </p>
             </form>
         </div>
 
+        <!-- 2. SIGN IN (LOGIN) FORM -->
         <div class="form-container sign-in-container">
-            <form onsubmit="handleAuth(event, '/login')"
-                class="bg-white flex flex-col items-center justify-center h-full px-8 md:px-12 text-center">
-                <h1 class="font-bold text-3xl mb-4">Sign in</h1>
+            <form onsubmit="handleAuth(event, '/login')" class="bg-[#12141A] flex flex-col items-center justify-center h-full px-8 sm:px-12 text-center text-sand">
+                <span class="text-[10px] uppercase tracking-[0.28em] text-gold font-sans block mb-1">Maison Murakami</span>
+                <h2 class="font-serif text-3xl uppercase tracking-[0.08em] text-white mb-2">Member Sign In</h2>
+                <p class="font-serif italic text-sand-muted text-xs mb-6">Enter your guest or staff credentials.</p>
 
-                <div class="flex gap-4 mb-4">
-                    <a href="/auth/google"
-                        class="border border-gray-200 rounded-full w-10 h-10 flex justify-center items-center hover:bg-orange-50 hover:border-orange-500 hover:text-orange-500 transition duration-300">
-                        <i class="fab fa-google text-sm"></i>
-                    </a>
+                <!-- Google OAuth -->
+                <a href="/auth/google" class="border border-white/10 w-full py-2.5 mb-4 flex justify-center items-center gap-3 text-xs uppercase tracking-[0.18em] text-sand hover:border-gold/60 hover:text-gold transition-colors bg-white/5">
+                    <i class="fab fa-google text-xs text-gold"></i>
+                    <span>Sign In with Google</span>
+                </a>
+
+                <div class="flex items-center gap-3 w-full my-3">
+                  <span class="flex-1 h-[1px] bg-white/10"></span>
+                  <span class="text-[10px] uppercase tracking-[0.2em] text-sand-muted">or continue with email</span>
+                  <span class="flex-1 h-[1px] bg-white/10"></span>
                 </div>
 
-                <span class="text-xs text-gray-500 mb-4">or use your account</span>
+                <div class="w-full space-y-3 mb-4">
+                  <input type="email" name="username" placeholder="EMAIL ADDRESS" required
+                      class="bg-[#181A22] border border-white/10 px-4 py-3 w-full text-xs tracking-[0.16em] uppercase text-sand focus:outline-none focus:border-gold transition-colors placeholder:text-sand-muted/50" />
+                  <input type="password" name="password" placeholder="PASSWORD" required
+                      class="bg-[#181A22] border border-white/10 px-4 py-3 w-full text-xs tracking-[0.16em] uppercase text-sand focus:outline-none focus:border-gold transition-colors placeholder:text-sand-muted/50" />
+                </div>
 
-                <input type="email" name="username" placeholder="Email" required
-                    class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
-                <input type="password" name="password" placeholder="Password" required
-                    class="bg-gray-100 border-none px-4 py-3 mb-2 w-full rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                <a href="#" onclick="showNotification('Please contact the concierge desk at concierge@murakamisushi.com to reset your credentials.', 'info')" class="text-[10px] uppercase tracking-[0.2em] text-sand-muted hover:text-gold transition-colors mb-6 self-end">
+                  Forgot Password?
+                </a>
 
-                <a href="#" class="text-xs text-gray-400 mb-4 hover:text-orange-500 transition">Forgot your
-                    password?</a>
-
-                <button type="submit"
-                    class="rounded-full border border-orange-500 bg-orange-500 text-white text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-orange-600 hover:scale-105 active:scale-95 focus:outline-none">
-                    Sign In
+                <button type="submit" class="w-full py-3.5 bg-gold text-[#0B0C10] text-xs font-semibold uppercase tracking-[0.22em] border border-gold hover:bg-transparent hover:text-gold transition-all duration-300">
+                    Authenticate
                 </button>
 
-                <p class="mobile-toggle">
-                    Don't have an account? <a id="mobileSignUp" class="text-orange-500 font-bold hover:text-orange-600 transition">Sign Up</a>
+                <p class="mobile-toggle text-xs text-sand-muted tracking-wider mt-6">
+                    New guest? <button type="button" id="mobileSignUp" class="text-gold uppercase tracking-widest font-semibold ml-1">Create Account</button>
                 </p>
             </form>
         </div>
 
+        <!-- 3. SLIDING OVERLAY (DESKTOP) -->
         <div class="overlay-container">
             <div class="overlay">
-                <div class="overlay-panel overlay-left">
-                    <h1 class="font-bold text-3xl mb-4">Welcome Back!</h1>
-                    <p class="text-sm font-thin leading-5 mb-8">To keep connected with us please login with your
-                        personal info</p>
-                    <button
-                        class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none"
-                        id="signIn">Sign In</button>
+                <!-- Left Overlay Panel (shows when right panel active) -->
+                <div class="overlay-panel overlay-left bg-[#181A22] border-r border-white/10">
+                    <span class="text-[10px] uppercase tracking-[0.3em] text-gold font-sans block mb-2">Welcome Back</span>
+                    <h3 class="font-serif text-3xl uppercase tracking-[0.1em] text-white mb-4">Already Registered?</h3>
+                    <p class="font-serif italic text-sand-muted text-sm leading-relaxed mb-8 max-w-xs">
+                        Access your table reservations, order archives, and private cellar selections.
+                    </p>
+                    <button id="signIn" class="px-8 py-3 border border-gold/60 text-gold text-xs uppercase tracking-[0.22em] hover:bg-gold hover:text-[#0B0C10] transition-colors">
+                        Sign In Instead
+                    </button>
                 </div>
 
-                <div class="overlay-panel overlay-right">
-                    <h1 class="font-bold text-3xl mb-4">Hello, Friend!</h1>
-                    <p class="text-sm font-thin leading-5 mb-8">Enter your personal details and start your journey with
-                        Us</p>
-                    <button
-                        class="bg-transparent border border-white text-white rounded-full text-xs font-bold py-3 px-10 uppercase tracking-wider transition transform hover:bg-white hover:text-black focus:outline-none"
-                        id="signUp">Sign Up</button>
+                <!-- Right Overlay Panel (shows by default) -->
+                <div class="overlay-panel overlay-right bg-[#181A22] border-l border-white/10">
+                    <span class="text-[10px] uppercase tracking-[0.3em] text-gold font-sans block mb-2">Exclusive Lineage</span>
+                    <h3 class="font-serif text-3xl uppercase tracking-[0.1em] text-white mb-4">A New Guest?</h3>
+                    <p class="font-serif italic text-sand-muted text-sm leading-relaxed mb-8 max-w-xs">
+                        Create an account to track your orders, book omakase counters, and receive seasonal releases.
+                    </p>
+                    <button id="signUp" class="px-8 py-3 border border-gold/60 text-gold text-xs uppercase tracking-[0.22em] hover:bg-gold hover:text-[#0B0C10] transition-colors">
+                        Create Account
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
-  </div>
 
+    </div>
+
+    <!-- SCRIPT LOGIC -->
     <script>
-        /* ========================
-           1. UI LOGIC (SLIDER) 
-           ======================== */
         const signUpButton = document.getElementById('signUp');
         const signInButton = document.getElementById('signIn');
         const mobileSignUp = document.getElementById('mobileSignUp');
@@ -372,53 +373,58 @@
         function activateSignUp() { container.classList.add("right-panel-active"); }
         function activateSignIn() { container.classList.remove("right-panel-active"); }
 
-        signUpButton.addEventListener('click', activateSignUp);
-        signInButton.addEventListener('click', activateSignIn);
+        if (signUpButton) signUpButton.addEventListener('click', activateSignUp);
+        if (signInButton) signInButton.addEventListener('click', activateSignIn);
         if (mobileSignUp) mobileSignUp.addEventListener('click', activateSignUp);
         if (mobileSignIn) mobileSignIn.addEventListener('click', activateSignIn);
 
-        /* ========================
-           2. NOTIFICATION SYSTEM 
-           ======================== */
+        // NOTIFICATION TOAST
         function showNotification(message, type = 'success') {
-            const container = document.getElementById('toast-container');
+            const toastContainer = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const isError = type === 'error';
 
-            const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
-            const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+            let bgClass, icon;
+            if (type === 'error') {
+                bgClass = 'bg-[#8B2635] border border-white/20';
+                icon = '<i class="fa-solid fa-circle-exclamation text-white"></i>';
+            } else if (type === 'info') {
+                bgClass = 'bg-[#181A22] border border-gold/50';
+                icon = '<i class="fa-solid fa-circle-info text-gold"></i>';
+            } else {
+                bgClass = 'bg-[#12141A] border border-gold/60';
+                icon = '<i class="fa-solid fa-circle-check text-gold"></i>';
+            }
 
-            toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform pointer-events-auto min-w-[320px] border-2 border-white/20`;
-            toast.style.animation = 'slideIn 0.5s forwards';
-
+            toast.className = `${bgClass} text-[#F5F5F0] px-6 py-4 shadow-2xl flex items-center gap-3 transform translate-x-full transition-all duration-500 opacity-0 min-w-[320px] pointer-events-auto backdrop-blur-md`;
             toast.innerHTML = `
-                <div class="text-2xl">${icon}</div>
+                <div class="text-base">${icon}</div>
                 <div class="flex flex-col">
-                    <span class="font-bold text-sm uppercase tracking-wide opacity-80">${isError ? 'Error' : 'Success'}</span>
-                    <span class="font-bold text-base">${message}</span>
+                    <span class="font-sans text-[10px] uppercase tracking-[0.2em] text-sand-muted">${type}</span>
+                    <span class="font-sans text-xs tracking-wider text-sand">${message}</span>
                 </div>
             `;
 
-            container.appendChild(toast);
+            toastContainer.appendChild(toast);
 
             setTimeout(() => {
-                toast.style.animation = 'slideOut 0.5s forwards';
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
                 setTimeout(() => toast.remove(), 500);
-            }, 3000);
+            }, 3500);
         }
 
-        /* ========================
-           3. AUTH AJAX HANDLER 
-           ======================== */
+        // AUTH HANDLER
         async function handleAuth(event, endpoint) {
-            event.preventDefault(); // Stop page reload
+            event.preventDefault();
 
             const form = event.target;
-            const btn = form.querySelector('button');
+            const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.innerText;
 
-            // 1. Loading State
-            btn.innerText = "Processing...";
+            btn.innerText = "AUTHENTICATING...";
             btn.disabled = true;
             btn.classList.add('opacity-70', 'cursor-not-allowed');
 
@@ -426,7 +432,6 @@
             const data = Object.fromEntries(formData.entries());
 
             try {
-                // 2. Send Request
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -435,142 +440,37 @@
 
                 const result = await response.json().catch(() => ({}));
 
-                // Find this section inside handleAuth function:
                 if (response.ok) {
-                    // SUCCESS
-                    showNotification(result.message || 'Authentication Successful!', 'success');
+                    showNotification(result.message || 'Authentication Successful.', 'success');
 
-                    // --- REPLACE THE OLD REDIRECT LOGIC WITH THIS ---
-
-                    // 1. Check if the server sent a specific URL
                     let targetUrl = result.targetUrl;
-
-                    // 2. Fallback logic (just in case)
                     if (!targetUrl) {
                         const role = result.role || (result.user && result.user.role);
-                        if (role === 'staff') targetUrl = '/staff/menu';
-                        else if (['admin', 'manager', 'store_manager'].includes(role)) targetUrl = '/admin/dashboard';
-                        else targetUrl = '/';
+                        if (['admin', 'manager', 'store_manager', 'cashier'].includes(role)) {
+                            targetUrl = '/admin/dashboard';
+                        } else if (role === 'staff') {
+                            targetUrl = '/staff/menu';
+                        } else {
+                            targetUrl = '/';
+                        }
                     }
 
-                    // 3. Go to the page
                     setTimeout(() => {
                         window.location.href = targetUrl;
                     }, 1000);
-
-                    // --- END OF REPLACEMENT ---
-
                 } else {
-                    // ERROR
-                    showNotification(result.error || 'Invalid credentials', 'error');
+                    showNotification(result.error || 'Authentication Failed', 'error');
                     btn.innerText = originalText;
                     btn.disabled = false;
                     btn.classList.remove('opacity-70', 'cursor-not-allowed');
                 }
-
-            } catch (error) {
-                console.error(error);
-                showNotification('Connection error. Please try again.', 'error');
+            } catch (err) {
+                showNotification('Network connection error', 'error');
                 btn.innerText = originalText;
                 btn.disabled = false;
                 btn.classList.remove('opacity-70', 'cursor-not-allowed');
             }
         }
-    </script>
-    
-    <!-- Three.js Shader Background Implementation -->
-    <script>
-        const canvas = document.getElementById('shader-canvas');
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-        const vertexShader = `
-          uniform float time;
-          uniform float intensity;
-          varying vec2 vUv;
-          varying vec3 vPosition;
-          
-          void main() {
-            vUv = uv;
-            vPosition = position;
-            
-            vec3 pos = position;
-            pos.y += sin(pos.x * 10.0 + time) * 0.1 * intensity;
-            pos.x += cos(pos.y * 8.0 + time * 1.5) * 0.05 * intensity;
-            
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-          }
-        `;
-
-        const fragmentShader = `
-          uniform float time;
-          uniform float intensity;
-          uniform vec3 color1;
-          uniform vec3 color2;
-          varying vec2 vUv;
-          varying vec3 vPosition;
-          
-          void main() {
-            vec2 uv = vUv;
-            
-            // Create animated noise pattern
-            float noise = sin(uv.x * 20.0 + time) * cos(uv.y * 15.0 + time * 0.8);
-            noise += sin(uv.x * 35.0 - time * 2.0) * cos(uv.y * 25.0 + time * 1.2) * 0.5;
-            
-            // Mix colors based on noise and position
-            vec3 color = mix(color1, color2, noise * 0.5 + 0.5);
-            // Mix with a bright white highlight to make white and orange stand out
-            color = mix(color, vec3(1.0, 1.0, 1.0), pow(abs(noise), 2.0) * intensity * 0.7);
-            
-            // Add glow effect
-            float glow = 1.0 - length(uv - 0.5) * 1.5; // expanded glow radius
-            glow = clamp(glow, 0.0, 1.0);
-            glow = pow(glow, 1.5);
-            
-            // Output color with higher alpha
-            gl_FragColor = vec4(color * glow, glow);
-          }
-        `;
-
-        // Background animation colors: White and Orange
-        const uniforms = {
-            time: { value: 0 },
-            intensity: { value: 1.0 },
-            color1: { value: new THREE.Color("#ffffff") }, // Pure White
-            color2: { value: new THREE.Color("#f97316") }  // Vibrant Orange
-        };
-
-        const material = new THREE.ShaderMaterial({
-            vertexShader,
-            fragmentShader,
-            uniforms,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-
-        const geometry = new THREE.PlaneGeometry(2, 2, 32, 32);
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
-            uniforms.time.value = elapsedTime;
-            uniforms.intensity.value = 1.0 + Math.sin(elapsedTime * 2) * 0.3;
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 
