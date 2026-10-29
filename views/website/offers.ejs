@@ -1,228 +1,157 @@
-<style>
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px);
-        }
+<!-- OFFERS PAGE: HAUTE CUISINE MICHELIN EDITORIAL STYLING -->
+<div class="pt-32 pb-24 bg-[#0B0C10] min-h-screen text-sand">
+  <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+    
+    <!-- Editorial Header -->
+    <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+      <span class="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-gold font-sans block mb-3">
+        Seasonal Privilege · 季節の特選
+      </span>
+      <h1 class="font-serif text-4xl sm:text-6xl uppercase tracking-[0.12em] text-[#F5F5F0] font-light gold-hairline">
+        Exclusive Seasonal Flights
+      </h1>
+      <p class="font-serif italic text-sand-muted text-base sm:text-lg mt-8 leading-relaxed">
+        Curated tasting boxes and chef's pairings offered in limited daily batches for our culinary connoisseurs.
+      </p>
+    </div>
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    <!-- Editorial Featured Banner Card -->
+    <div class="relative w-full aspect-[21/9] min-h-[300px] max-h-[460px] overflow-hidden border border-white/10 mb-16 shadow-2xl bg-[#12141A]">
+      <img 
+        src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070&auto=format&fit=crop" 
+        alt="Seasonal Omakase Box" 
+        class="w-full h-full object-cover brightness-75 hover:scale-105 transition-transform duration-1000"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-[#0B0C10] via-black/40 to-transparent"></div>
+      
+      <div class="absolute bottom-6 left-6 sm:bottom-12 sm:left-12 max-w-xl space-y-3">
+        <span class="text-[10px] uppercase tracking-[0.25em] text-gold font-sans block">
+          Seasonal Privilege · 15% Reduction
+        </span>
+        <h2 class="font-serif text-2xl sm:text-4xl uppercase tracking-[0.08em] text-white">
+          The Autumn Truffle & Otoro Flight
+        </h2>
+        <p class="font-serif italic text-sand-muted text-sm sm:text-base hidden sm:block">
+          Hand-torched bluefin belly with Perigord black truffle butter and 25-year aged balsamic nikiri glaze.
+        </p>
+      </div>
+    </div>
 
-    .scroll-hidden {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        will-change: opacity, transform;
-    }
-
-    .animate-fade-up {
-        animation: fadeInUp 0.8s ease-out forwards;
-    }
-
-    .delay-100 {
-        animation-delay: 0.1s;
-    }
-
-    .delay-200 {
-        animation-delay: 0.2s;
-    }
-</style>
-
-<div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
-
-<div class="max-w-7xl mx-auto px-6 mt-36">
-    <section id="page-locations" class="mb-6 md:mb-10">
-
-        <div class="text-center mb-10 scroll-hidden">
-            <span
-                class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Deals
-                of the Week</span>
-            <h1 class="text-4xl font-extrabold mt-4 mb-2 text-gray-900 dark:text-white">Exclusive Offers</h1>
-            <p class="text-gray-500 dark:text-gray-400">Save on your favorite sets. Offers valid until Sunday.</p>
-        </div>
-
-        <div
-            class="relative w-full h-64 md:h-80 rounded-3xl overflow-hidden mb-12 group shadow-xl scroll-hidden delay-100">
-            <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=2070"
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                alt="Sushi Platter" />
-            <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8 md:px-16">
-                <div class="text-white max-w-lg">
-                    <h2 class="text-3xl md:text-5xl font-bold mb-4">50% OFF Second Set</h2>
-                    <p class="mb-6 opacity-90">Order any Dragon Set and get the second one half price. Perfect for
-                        sharing.</p>
-                    <a href="#deals"
-                        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-bold transition-all transform hover:translate-y-[-2px] inline-block">Order
-                        Now</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="mb-10" id="deals">
-            <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-8 flex items-center gap-2 scroll-hidden">🔥
-                Hot Deals & Discounts</h2>
-
-            <% if (products && products.length> 0) { %>
-                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-10">
-                    <% products.forEach((product, index)=> { %>
-                        <% let finalPrice=Number(product.price); let discountLabel="" ; if
-                            (product.discount_type==='percentage' ) { finalPrice=product.price - (product.price *
-                            (product.discount_value / 100)); discountLabel=`-${product.discount_value}%`; } else if
-                            (product.discount_type==='subtract' ) { finalPrice=product.price - product.discount_value;
-                            discountLabel=`SAVE $${product.discount_value}`; } finalPrice=Math.round(finalPrice * 100) /
-                            100; %>
-
-                            <div class="group relative h-[310px] sm:h-[450px] w-full rounded-2xl sm:rounded-[2.5rem] overflow-hidden shadow-xl transition-all duration-500 hover:shadow-2xl product-card border border-gray-100/50 dark:border-gray-800 scroll-hidden"
-                                data-delay="<%= (index % 3) * 0.1 %>s">
-                                <div class="absolute inset-0 w-full h-full">
-                                    <img src="<%= product.image_url || 'https://via.placeholder.com/300' %>"
-                                        alt="<%= product.name %>"
-                                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                    <div
-                                        class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="absolute top-3 left-3 sm:top-6 sm:left-6 bg-red-600 text-white text-[10px] sm:text-[12px] font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md z-20 tracking-wide uppercase animate-pulse">
-                                    <%= discountLabel %> OFF
-                                </div>
-
-                                <div class="absolute bottom-0 left-0 w-full p-3.5 sm:p-8 z-20 flex flex-col justify-end">
-                                    <div class="flex flex-col gap-1 w-3/4">
-                                        <span
-                                            class="text-orange-500 text-xs font-extrabold uppercase tracking-widest mb-1">Limited
-                                            Time Offer</span>
-                                        <h3
-                                            class="text-white text-sm sm:text-3xl font-bold leading-tight shadow-black drop-shadow-md product-name mb-1 line-clamp-2">
-                                            <%= product.name %>
-                                        </h3>
-                                        <div class="flex flex-col">
-                                            <span
-                                                class="text-gray-400 text-xs font-bold uppercase tracking-wide">Special
-                                                Price</span>
-                                            <div class="flex items-center gap-3">
-                                                <span class="text-white text-3xl font-bold">
-                                                    <%= finalPrice %> $
-                                                </span>
-                                                <span
-                                                    class="text-gray-400 text-lg line-through decoration-red-500 decoration-2">
-                                                    <%= product.price %> $
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button onclick="addToCart('<%= product.id %>')"
-                                        class="w-9 h-9 sm:w-16 sm:h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg hover:bg-orange-500 transition-all duration-300 transform group-hover:scale-105 active:scale-95 group/btn relative overflow-hidden">
-                                        <img src="https://img.icons8.com/3d-fluency/94/shopping-basket.png" alt="Add"
-                                            class="w-5 h-5 sm:w-9 sm:h-9 object-contain drop-shadow-sm transition-transform duration-300 group-hover/btn:scale-110 group-hover/btn:-rotate-6" />
-                                    </button>
-                                </div>
-                            </div>
-                            <% }) %>
-                </div>
-                <% } else { %>
-                    <div
-                        class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700 scroll-hidden">
-                        <p class="text-gray-500 dark:text-gray-400 text-lg">No special product discounts at the moment.
-                        </p>
-                        <p class="text-gray-400 dark:text-gray-500 text-sm">Check out our <a href="/menu"
-                                class="text-orange-500 font-bold hover:underline">Full Menu</a> instead!</p>
-                    </div>
-                    <% } %>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-            <div
-                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between scroll-hidden delay-100">
-                <div>
-                    <h3 class="font-bold text-lg text-gray-900 dark:text-white">Free Miso Soup</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">On orders over $25</p>
-                    <div class="inline-block bg-gray-100 dark:bg-gray-700 border border-dashed border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                        onclick="copyCode('MISO25')">MISO25</div>
-                </div>
-                <div
-                    class="h-20 w-20 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-xl">
-                    Free</div>
+    <!-- Discounted / Promotional Products Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <% if (typeof products !== 'undefined' && products.length > 0) { %>
+        <% products.forEach(product => { %>
+          <div 
+            class="dish-card group relative bg-[#12141A] border border-white/5 hover:border-gold/40 transition-all duration-700 flex flex-col justify-between"
+            data-dish-id="<%= product.id %>"
+            data-dish-name="<%= product.name %>"
+            data-dish-price="<%= parseFloat(product.price).toFixed(2) %>"
+          >
+            <!-- Dish Image -->
+            <div class="dish-image-frame relative aspect-[4/3] w-full overflow-hidden bg-black/60">
+              <img 
+                src="<%= product.image_url || 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=800' %>" 
+                alt="<%= product.name %>" 
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#12141A] via-transparent to-transparent"></div>
+              
+              <!-- Privilege Badge -->
+              <span class="absolute top-4 left-4 text-[10px] font-sans tracking-[0.2em] text-[#0B0C10] font-bold uppercase bg-gold px-2.5 py-1">
+                Seasonal Privilege
+              </span>
             </div>
 
-            <div
-                class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between scroll-hidden delay-200">
-                <div>
-                    <h3 class="font-bold text-lg text-gray-900 dark:text-white">20% Off Lunch</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">11:00 AM - 2:00 PM</p>
-                    <div class="inline-block bg-gray-100 dark:bg-gray-700 border border-dashed border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 px-3 py-1 rounded font-mono text-sm tracking-widest cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                        onclick="copyCode('LUNCH20')">LUNCH20</div>
+            <!-- Details -->
+            <div class="p-6 sm:p-8 flex flex-col flex-1 justify-between gap-6">
+              <div class="space-y-3">
+                <div class="flex items-baseline justify-between gap-4">
+                  <h3 class="font-serif text-xl sm:text-2xl uppercase tracking-[0.05em] text-[#F5F5F0] group-hover:text-gold transition-colors">
+                    <%= product.name %>
+                  </h3>
+                  <div class="text-right">
+                    <span class="font-serif text-xl text-gold font-light block">
+                      $<%= parseFloat(product.price).toFixed(2) %>
+                    </span>
+                  </div>
                 </div>
-                <div
-                    class="h-20 w-20 bg-orange-50 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-500 dark:text-orange-400 font-bold text-xl">
-                    -20%</div>
-            </div>
-        </div>
 
-    </section>
+                <p class="font-serif italic text-sand-muted text-sm leading-relaxed line-clamp-2">
+                  <%= product.description || 'Rare oceanic cuts prepared in strictly limited allocations for this week.' %>
+                </p>
+              </div>
+
+              <!-- Action Link -->
+              <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+                <span class="text-[10px] uppercase tracking-[0.2em] text-sand-muted font-sans">
+                  Limited Daily Counter
+                </span>
+
+                <button 
+                  onclick="quickAddToBag(this)"
+                  title="Claim Privilege"
+                  class="px-4 py-2 border border-gold/50 text-gold hover:bg-gold hover:text-[#0B0C10] transition-all text-xs uppercase tracking-[0.2em] flex items-center gap-2"
+                >
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>Order</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="col-span-full py-20 text-center text-sand-muted font-serif text-xl">
+          Seasonal flights are currently fully booked. Please check back for the new moon menu.
+        </div>
+      <% } %>
+    </div>
+
+  </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-up');
-                    entry.target.classList.remove('scroll-hidden');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.scroll-hidden').forEach((el) => {
-            const delay = el.getAttribute('data-delay');
-            if (delay) el.style.animationDelay = delay;
-            observer.observe(el);
-        });
-    });
+  async function quickAddToBag(btn) {
+    const card = btn.closest('.dish-card');
+    if (!card) return;
+    const productId = card.getAttribute('data-dish-id');
+    const name = card.getAttribute('data-dish-name');
 
-    function showNotification(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        const isError = type === 'error';
-        const bgClass = isError ? 'bg-red-500' : 'bg-green-500';
-        const icon = isError ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-check"></i>';
-
-        toast.className = `${bgClass} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 pointer-events-auto min-w-[300px] border-2 border-white/20`;
-        toast.innerHTML = `<div class="text-2xl">${icon}</div><div class="font-bold">${message}</div>`;
-
-        container.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
-        setTimeout(() => {
-            toast.classList.add('translate-x-full', 'opacity-0');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+    try {
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: productId })
+      });
+      if (res.status === 401) {
+        showToast('Please sign in to order dishes.', 'error');
+        setTimeout(() => window.location.href = '/login', 1500);
+        return;
+      }
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`${name} added to your dining bag.`, 'success');
+        updateBagBadge();
+      } else {
+        showToast(data.error || 'Unable to add dish', 'error');
+      }
+    } catch (err) {
+      showToast('Network error adding to bag', 'error');
     }
+  }
 
-    function copyCode(code) {
-        navigator.clipboard.writeText(code);
-        showNotification(`Code ${code} Copied!`, 'success');
-    }
-
-    async function addToCart(productId) {
-        try {
-            const response = await fetch('/api/cart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId: productId })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                showNotification('Added to Cart! 🛒', 'success');
-            } else {
-                showNotification('Error adding to cart', 'error');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('Connection Error', 'error');
+  async function updateBagBadge() {
+    try {
+      const res = await fetch('/api/cart');
+      if (res.ok) {
+        const items = await res.json();
+        const countBadge = document.getElementById('cart-item-count');
+        if (countBadge) {
+          const totalCount = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+          countBadge.textContent = totalCount;
         }
-    }
+      }
+    } catch (err) {}
+  }
+  document.addEventListener('DOMContentLoaded', updateBagBadge);
 </script>

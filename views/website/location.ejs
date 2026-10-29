@@ -1,100 +1,98 @@
-<style>
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(40px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .scroll-hidden { 
-        opacity: 0; transform: translateY(40px); 
-    }
-    /* CRITICAL FIX: Force visibility on mobile */
-    @media (max-width: 640px) {
-        .scroll-hidden { opacity: 1 !important; transform: translateY(0) !important; }
-    }
-    .animate-fade-up { animation: fadeInUp 0.8s ease-out forwards; }
-    .delay-100 { animation-delay: 0.1s; }
-    .delay-200 { animation-delay: 0.2s; }
-</style>
+<!-- LOCATIONS PAGE: HAUTE CUISINE MICHELIN EDITORIAL STYLING -->
+<div class="pt-32 pb-24 bg-[#0B0C10] min-h-screen text-sand">
+  <div class="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+    
+    <!-- Editorial Header -->
+    <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+      <span class="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-gold font-sans block mb-3">
+        Sanctuaries & Ateliers · 店舗情報
+      </span>
+      <h1 class="font-serif text-4xl sm:text-6xl uppercase tracking-[0.12em] text-[#F5F5F0] font-light gold-hairline">
+        Our Dining Ateliers
+      </h1>
+      <p class="font-serif italic text-sand-muted text-base sm:text-lg mt-8 leading-relaxed">
+        Intimate dining counters crafted from 300-year-old Yoshino cypress wood. Reservations honored daily.
+      </p>
+    </div>
 
-<div class="max-w-7xl mx-auto px-6 mt-36">
-    <section id="page-locations" class="mb-6 md:mb-10">
-      
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 scroll-hidden">
-        <div>
-          <h1 class="text-4xl font-extrabold mb-2 text-gray-900 dark:text-white">Our Locations</h1>
-          <p class="text-gray-500 dark:text-gray-400">Find the nearest Murakami kitchen.</p>
-        </div>
-        <a href="https://www.google.com/maps/search/Murakami+Kitchen" target="_blank" class="mt-4 md:mt-0 flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600">
-          <i class="fa-solid fa-map-location-dot text-lg"></i>
-          View All on Map
-        </a>
-      </div>
+    <!-- Atelier Locations Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+        <% locations.forEach((loc, index) => { %>
+          <div class="bg-[#12141A] border border-white/5 hover:border-gold/40 transition-all duration-500 p-8 sm:p-10 flex flex-col justify-between">
+            <div class="space-y-6">
+              
+              <!-- Location Header & Open/Closed Status -->
+              <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                <span class="text-[10px] tracking-[0.25em] text-gold uppercase font-sans">
+                  Atelier <%= index + 1 %>
+                </span>
+                <% if (loc.status === 'Open') { %>
+                  <span class="inline-flex items-center gap-2 text-[10px] font-sans tracking-[0.2em] text-emerald-400 uppercase bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Service Active
+                  </span>
+                <% } else { %>
+                  <span class="text-[10px] font-sans tracking-[0.2em] text-sand-muted uppercase bg-white/5 border border-white/10 px-2.5 py-0.5">
+                    Resting
+                  </span>
+                <% } %>
+              </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 items-stretch mt-6">
-        
-        <% if (locations && locations.length > 0) { %>
-            <% locations.forEach((loc, index) => { %>
-                <div class="bg-white dark:bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow h-full flex flex-col justify-between scroll-hidden" style="animation-delay: <%= index * 0.1 %>s">
-                  <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                      <i class="fa-solid fa-store text-gray-900 dark:text-white text-sm sm:text-xl"></i>
-                    </div>
-                    <% if (loc.status === 'Open') { %>
-                        <span class="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 sm:py-1 rounded-full">
-                           <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Open
-                        </span>
-                    <% } else { %>
-                        <span class="flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-full">Closed</span>
-                    <% } %>
-                  </div>
+              <!-- Name & Address -->
+              <div class="space-y-3">
+                <h2 class="font-serif text-2xl uppercase tracking-[0.08em] text-white">
+                  <%= loc.name %>
+                </h2>
+                <p class="font-serif italic text-sand-muted text-sm leading-relaxed">
+                  <%= loc.address || 'Tokyo Ginza District, Chuo-ku, Honshu, Japan' %>
+                </p>
+              </div>
 
-                  <div>
-                      <h3 class="text-sm sm:text-xl font-bold text-gray-900 dark:text-white mb-1 line-clamp-1"><%= loc.name %></h3>
-                      <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-3 sm:mb-6 line-clamp-2"><%= loc.address %></p>
-                      
-                      <div class="space-y-1.5 sm:space-y-3 mb-3 sm:mb-6 text-xs sm:text-sm">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">Mon-Fri</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200"><%= loc.hours_mon_fri || 'Closed' %></span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">Sat-Sun</span>
-                            <span class="font-medium text-gray-800 dark:text-gray-200"><%= loc.hours_sat_sun || 'Closed' %></span>
-                        </div>
-                      </div>
-                  </div>
-
-                  <% 
-                    let mapLink = loc.google_map_url;
-                    if (!mapLink || mapLink.trim() === '') {
-                        mapLink = `http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(loc.address)}`;
-                    }
-                  %>
-                  <a href="<%= mapLink %>" target="_blank" class="block w-full text-center py-1.5 sm:py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl font-semibold text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors mt-auto">
-                    Get Directions
-                  </a>
+              <!-- Details & Timings -->
+              <div class="space-y-2 pt-2 text-xs font-sans tracking-[0.15em] text-sand-muted">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-clock text-gold/70 text-[11px]"></i>
+                  <span>Lunch: 12:00–15:00 · Dinner: 18:00–23:00</span>
                 </div>
-            <% }) %>
-        <% } else { %>
-            <div class="col-span-3 text-center py-10 text-gray-400 scroll-hidden">
-                No locations found. Please add them from the Admin Panel.
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-chair text-gold/70 text-[11px]"></i>
+                  <span>Counter Seating: 12 Guests Maximum</span>
+                </div>
+              </div>
+
             </div>
-        <% } %>
 
-      </div>
-    </section>
+            <!-- Booking / Directions Trigger -->
+            <div class="pt-8 border-t border-white/5 mt-8 flex items-center justify-between">
+              <a 
+                href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(loc.name + ' ' + (loc.address || '')) %>" 
+                target="_blank"
+                class="text-[11px] uppercase tracking-[0.2em] text-sand hover:text-gold transition-colors flex items-center gap-2"
+              >
+                <i class="fa-solid fa-location-dot text-gold text-[10px]"></i>
+                <span>Google Map</span>
+              </a>
+
+              <a href="/#reservations" class="btn-haute py-2 px-4 text-[10px]">
+                <span>Reserve</span>
+              </a>
+            </div>
+
+          </div>
+        <% }) %>
+      <% } else { %>
+        <!-- Default Ginza Atelier Fallback if no DB rows -->
+        <div class="col-span-full max-w-xl mx-auto bg-[#12141A] border border-white/10 p-10 text-center space-y-6">
+          <span class="text-[10px] uppercase tracking-[0.25em] text-gold font-sans block">Primary Sanctuary</span>
+          <h2 class="font-serif text-3xl uppercase tracking-[0.1em] text-white">Ginza Atelier · Tokyo</h2>
+          <p class="font-serif italic text-sand-muted text-sm">Ginza 6-Chome, Chuo City, Tokyo, Japan</p>
+          <a href="/#reservations" class="btn-haute-solid inline-block">
+            <span>Book Table Experience</span>
+          </a>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.remove('scroll-hidden');
-                    entry.target.classList.add('animate-fade-up');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.scroll-hidden').forEach((el) => observer.observe(el));
-    });
-</script>

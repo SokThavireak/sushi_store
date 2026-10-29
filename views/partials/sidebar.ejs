@@ -7,7 +7,7 @@
   <div class="p-8 sm:p-10 border-b border-white/10 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <span class="font-cinzel text-lg tracking-[0.25em] text-[#F5F5F0]">MURAKAMI</span>
-      <span class="text-[9px] tracking-[0.25em] uppercase px-2 py-0.5 border border-gold/40 text-gold font-sans">Sidebar</span>
+      <span class="text-[9px] tracking-[0.25em] uppercase px-2 py-0.5 border border-gold/40 text-gold font-sans">Atelier</span>
     </div>
     
     <button onclick="closeHauteSidebar()" class="w-10 h-10 rounded-full border border-white/10 text-sand hover:text-gold hover:border-gold/60 flex items-center justify-center transition-colors focus:outline-none">
@@ -15,39 +15,34 @@
     </button>
   </div>
 
-  <!-- Editorial Navigation Links -->
+  <!-- Multi-Page Editorial Navigation Links -->
   <div class="p-8 sm:p-10 flex-1 flex flex-col justify-center space-y-6">
     <div class="space-y-1">
-      <span class="text-[10px] uppercase tracking-[0.3em] text-gold font-sans block mb-2">Navigation Atelier</span>
+      <span class="text-[10px] uppercase tracking-[0.3em] text-gold font-sans block mb-2">Maison & Pages</span>
       <nav class="flex flex-col space-y-4">
-        <a href="/" onclick="closeHauteSidebar()" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
-          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">01. The Concept</span>
-          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">哲学</span>
+        <a href="/" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
+          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">01. Home</span>
+          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">ホーム</span>
         </a>
 
-        <a href="#culinary-showcase" onclick="closeHauteSidebar()" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
-          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">02. Omakase & Menu</span>
-          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">厳選</span>
+        <a href="/menu" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
+          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">02. Menu & Omakase</span>
+          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">お品書き</span>
         </a>
 
-        <a href="#chef-philosophy" onclick="closeHauteSidebar()" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
-          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">03. Chef's Table</span>
-          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">職人</span>
+        <a href="/about" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
+          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">03. About The Atelier</span>
+          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">当店について</span>
         </a>
 
-        <a href="#omakase-sets" onclick="closeHauteSidebar()" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
-          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">04. Tasting Sets</span>
-          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">おまかせ</span>
+        <a href="/offers" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
+          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">04. Seasonal Offers</span>
+          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">季節の特選</span>
         </a>
 
-        <a href="#reservations" onclick="closeHauteSidebar()" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
-          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">05. Reservations</span>
-          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">予約</span>
-        </a>
-
-        <a href="/location" onclick="closeHauteSidebar()" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
-          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">06. Ateliers</span>
-          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">銀座</span>
+        <a href="/location" class="group flex items-baseline justify-between py-2 border-b border-white/5 hover:border-gold/40 transition-colors">
+          <span class="font-serif text-2xl sm:text-3xl uppercase tracking-[0.08em] text-[#F5F5F0] group-hover:text-gold group-hover:translate-x-2 transition-all">05. Locations</span>
+          <span class="text-xs font-serif italic text-sand-muted group-hover:text-gold transition-colors">店舗情報</span>
         </a>
       </nav>
     </div>
@@ -122,9 +117,7 @@
     document.body.style.overflow = '';
   }
 
-  // Sync ESC key to close sidebar
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeHauteSidebar();
   });
 </script>
-
